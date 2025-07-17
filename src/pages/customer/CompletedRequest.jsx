@@ -152,7 +152,7 @@ const CompletedRequest = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <InfoCard icon={FiUser} title="Engineer" value={order.engineer} />
                   <InfoCard icon={FiUser} title="Engineer Contact No." value={order.engineercontactno} />
-                  <InfoCard icon={FiCalendar} title="Inspection" value={`${order.date} • ${order.time}`} />
+                  <InfoCard icon={FiCalendar} title="Inspection" value={`${order.date} ${order.time}`} />
                   <InfoCard icon={FiDollarSign} title="Payment Amount" value={`${order.amount}`} />
                   <InfoCard icon={FiCreditCard} title="Payment Mode" value={`${order.paymentMode}`} />
                 </div>

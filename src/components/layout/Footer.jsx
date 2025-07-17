@@ -10,7 +10,7 @@ import {
   FaCalendarAlt,
   FaCopyright,
 } from "react-icons/fa";
-import logo from "../../assets/logos/logob.png";
+import logo from "../../assets/logos/drivesta2.png";
 import { motion } from "framer-motion";
 
 export default function Footer() {
