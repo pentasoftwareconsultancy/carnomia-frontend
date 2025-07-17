@@ -2,53 +2,52 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const services = [
-  {
-    title: "New Car PDI",
-    path: "/book/new-pdi",
-    image:
-      "https://stimg.cardekho.com/images/carexteriorimages/630x420/Hyundai/Creta/8667/1744607863052/front-left-side-47.jpg?tr=w-664",
-  },
-  {
-    title: "Used Car PDI",
-    path: "/book/used-pdi",
-    image:
-      "https://stimg.cardekho.com/images/car-images/large/Honda/Honda-City-2011-2013/2754/front-left-side-47.jpg?tr=w-300",
-  },
+{
+title: "New Car PDI",
+path: "/request",
+image:
+"https://cdn.cars24.com/prod/auto-news24-cms/CARS24-Blog-Images/2025/06/20/1d46bb81-c4c1-453d-b591-d68537c85718-pdi-revamped-.jpg",
+},
+{
+title: "Used Car PDI",
+path: "/request",
+image:
+"https://d2hucwwplm5rxi.cloudfront.net/wp-content/uploads/2023/11/28065423/car-inspection-_-Body-1-28-11-23-1024x640.jpg",
+},
 ];
 
 export default function ServicesCard() {
-  return (
-    <div className="grid gap-6 md:grid-cols-2 max-w-6xl mx-auto px-4 py-10">
+return (
+<div className="bg-[#F1FFE0] py-16 px-4 sm:px-6 lg:px-8">
+<div className="max-w-7xl mx-auto">
+
+<h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
+Our Services
+</h2>
+
+    {/* Services Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {services.map((service, index) => (
         <div
           key={index}
-          role="article"
-          className="bg-black text-white rounded-2xl overflow-hidden shadow-md flex flex-col transition-transform hover:scale-[1.02]"
+          className="relative rounded-lg overflow-hidden shadow-md hover:shadow-lg transition duration-300 h-80 bg-cover bg-center"
+          style={{ backgroundImage: `url(${service.image})` }}
         >
-          {/* Image */}
-          <div className="h-48 w-full md:h-56">
-            <img
-              src={service.image}
-              alt={service.title || "PDI Service"}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Title + Button */}
-          <div className="flex flex-col flex-grow items-center justify-between p-6">
-            <h3 className="text-xl md:text-2xl font-semibold mb-4 text-center">
-              {service.title}
-            </h3>
+          <div className="absolute inset-0 bg-black/50 p-8 flex flex-col justify-end text-white">
+            <h3 className="text-2xl font-semibold mb-4">{service.title}</h3>
             <Link
               to={service.path}
-              className="mt-auto inline-block bg-gradient-to-r from-green-300 to-green-600 text-black font-semibold px-6 py-2 rounded-full text-sm shadow hover:from-green-200 hover:to-green-200 transition-all duration-300"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md w-fit text-sm font-medium transition"
               aria-label={`Book ${service.title}`}
             >
-              BOOK NOW
+              Book Your PDI Now
             </Link>
           </div>
         </div>
       ))}
     </div>
-  );
+  </div>
+</div>
+);
 }
+

@@ -1,22 +1,23 @@
 import React from "react";
 
-const cities = [
-"Pune", "Kothrud", "Hadapsar", "Viman Nagar",
-"Baner", "Wakad", "Hinjewadi", "Pimple Saudagar",
-"Kharadi", "Magarpatta", "Aundh", "Deccan", "Swargate",
+const locations = [
+  "Pune", "Kothrud", "Hadapsar", "Viman Nagar",
+  "Baner", "Wakad", "Hinjewadi", "Pimple Saudagar",
+  "Kharadi", "Magarpatta", "Aundh", "Deccan", "Swargate"
 ];
 
 export default function LocationTicker() {
-const allCities = [...cities, ...cities]; // repeat for smooth loop
+  const allLocations = [...locations, ...locations]; // repeat for loop effect
 
-return (
-<div className="bg-[#F1FFE0] overflow-hidden">
-<div className="marquee flex space-x-8 text-sm text-gray-800 font-medium w-max">
-{allCities.map((city, index) => (
-<span key={index}>{city}</span>
-))}
-</div>
-</div>
-);
+  return (
+    <div className="w-full bg-[#F1FFE0] overflow-hidden text-sm text-black py-2">
+      <div className="location-marquee whitespace-nowrap flex space-x-6 px-6">
+        {allLocations.map((loc, index) => (
+          <span key={index} className="inline-block px-2">
+            {loc}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
-
