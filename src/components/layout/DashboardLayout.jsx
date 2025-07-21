@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
@@ -10,17 +10,25 @@ const DashboardLayout = ({ role }) => {
   const currentRole = role || user?.role || "customer";
   const links = sidebarLinks[currentRole] || [];
 
-  console.log("DashboardLayout rendering for role:", currentRole, "Links:", links);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen">
       {/* Top Navbar */}
-      <Navbar />
-      {/* Sidebar + Main content */}
-      <div className="flex flex-1">
-        {/* Sidebar with dynamic role-based links */}
-        <Sidebar role={currentRole} links={links} />
-        <main className="flex-1 p-4 overflow-y-auto bg-[#F1FFE0]">
+      <Navbar
+        onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+      />
+
+      {/* Sidebar + Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar (shown always on large screens, toggle on mobile) */}
+        <Sidebar
+          role={currentRole}
+          links={links}
+          mobileOpen={mobileSidebarOpen}
+          onCloseMobile={() => setMobileSidebarOpen(false)}
+        />
+        <main className="flex-1 overflow-y-auto p-4 bg-[#F1FFE0]">
           <Outlet />
         </main>
       </div>

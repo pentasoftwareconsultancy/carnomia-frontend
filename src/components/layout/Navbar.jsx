@@ -54,7 +54,7 @@ const locations = [
   "Yerawada",
 ];
 
-export default function Navbar() {
+export default function Navbar({ onToggleSidebar }) {
   const { isLoggedIn, user, login, logout } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -162,7 +162,6 @@ export default function Navbar() {
   const handleGoToDashboard = () => {
     if (!user) return;
     const currentPath = location.pathname;
-
     if (user.role === "admin" && currentPath.startsWith("/admin")) return;
     if (user.role === "superadmin" && currentPath.startsWith("/superadmin")) return;
     if (user.role === "engineer" && currentPath.startsWith("/engineer")) return;
@@ -171,7 +170,7 @@ export default function Navbar() {
     if (user.role === "admin") navigate("/admin/dashboard");
     else if (user.role === "superadmin") navigate("/superadmin/dashboard");
     else if (user.role === "engineer") navigate("/engineer/dashboard");
-    else navigate("/customer/dashboard");
+    else navigate("/");
 
     setShowProfile(false);
   };
@@ -189,6 +188,25 @@ export default function Navbar() {
 
   return (
     <header className="w-full z-50 bg-[#F1FFE0] py-2 shadow-md">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 gap-3">
+        {/* Left: Hamburger on mobile */}
+        <button
+          onClick={onToggleSidebar}
+          className="text-green-700 lg:hidden p-2"
+          aria-label="Toggle sidebar"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 gap-3">
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center sm:justify-start">
