@@ -9,23 +9,23 @@ const container = {
     opacity: 1,
     transition: {
       staggerChildren: 0.2,
-      delayChildren: 0.3
-    }
-  }
+      delayChildren: 0.3,
+    },
+  },
 };
 
 const item = {
   hidden: { opacity: 0, y: 30 },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     y: 0,
     transition: {
       type: "spring",
       stiffness: 100,
       damping: 10,
-      duration: 0.8
-    }
-  }
+      duration: 0.8,
+    },
+  },
 };
 
 const imageAnim = {
@@ -38,24 +38,27 @@ const imageAnim = {
       type: "spring",
       stiffness: 60,
       damping: 10,
-      delay: 0.5
-    }
+      delay: 0.5,
+    },
   },
   hover: {
     scale: 1.05,
     rotate: -2,
     transition: {
       type: "spring",
-      stiffness: 300
-    }
-  }
+      stiffness: 300,
+    },
+  },
 };
 
 export default function AboutUs() {
   return (
     <div className="bg-[#F1FFE0] py-10">
+      <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
+        About Us
+      </h2>
       <div className="mx-4 sm:mx-6 md:mx-12 lg:mx-16">
-        <motion.section 
+        <motion.section
           className="bg-black rounded-2xl w-full px-4 sm:px-6 md:px-12 lg:px-16 py-16"
           initial="hidden"
           whileInView="show"
@@ -63,25 +66,28 @@ export default function AboutUs() {
           variants={container}
         >
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <motion.div className="text-center md:text-left" variants={container}>
-              <motion.h2 
+            <motion.div
+              className="text-center md:text-left"
+              variants={container}
+            >
+              <motion.h2
                 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-green-400 mb-6 leading-tight"
                 variants={item}
               >
                 Who We Are
               </motion.h2>
-              
-              <motion.p 
+
+              <motion.p
                 className="text-gray-300 text-base sm:text-lg leading-relaxed mb-4"
                 variants={item}
               >
-                <span className="font-semibold text-green-400">Drivesta</span> is
-                India's most trusted Pre‑Delivery Inspection (PDI) platform. We
-                ensure that your new or used car is mechanically and
+                <span className="font-semibold text-green-400">Drivesta</span>{" "}
+                is India's most trusted Pre‑Delivery Inspection (PDI) platform.
+                We ensure that your new or used car is mechanically and
                 aesthetically flawless before it reaches you.
               </motion.p>
-              
-              <motion.p 
+
+              <motion.p
                 className="text-gray-300 text-base sm:text-lg leading-relaxed mb-4"
                 variants={item}
               >
@@ -89,18 +95,18 @@ export default function AboutUs() {
                 comprehensive reports backed with real‑time photo and video
                 evidence—giving buyers complete confidence.
               </motion.p>
-              
-              <motion.p 
+
+              <motion.p
                 className="text-gray-300 text-base sm:text-lg leading-relaxed"
                 variants={item}
               >
-                We operate across multiple cities and dealerships, offering fast,
-                affordable, and professional PDI services to protect your
+                We operate across multiple cities and dealerships, offering
+                fast, affordable, and professional PDI services to protect your
                 investment and peace of mind.
               </motion.p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="flex justify-center md:justify-end"
               variants={imageAnim}
               whileHover="hover"

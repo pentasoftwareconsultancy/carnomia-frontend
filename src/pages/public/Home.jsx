@@ -16,22 +16,11 @@ export default function Home() {
       <KeyFeaturesCard />
 
       <TestimonialCard />
+      
+      <AboutUs />
 
-      <section className="py-16 px-4 bg-[#F1FFE0]">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
-            About Us
-          </h2>
-          <AboutUs />
-        </div>
-      </section>
+      <CarLogoSlider />
 
-      {/* 🚘 Car Brand Logos */}
-      <section className="py-12 px-4 bg-[#F1FFE0]">
-        <div className="max-w-7xl mx-auto">
-          <CarLogoSlider />
-        </div>
-      </section>
     </main>
   );
 }
