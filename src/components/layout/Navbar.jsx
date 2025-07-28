@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { FiMapPin, FiEdit2, FiGrid, FiLogOut } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import drivesta from "../../assets/logos/drivesta.png";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../core/contexts/AuthContext"; // Updated import path
+import StorageService from "../../core/services/storage.service";
 
 const locations = [
   "Aundh",
@@ -65,9 +66,10 @@ export default function Navbar({ onToggleSidebar }) {
 
   // Sync with local storage only on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser && !user) {
-      login(JSON.parse(storedUser)); // Only login if user is not set
+    const storedUser = StorageService.getData("user");
+    const token = StorageService.getData("token");
+    if (storedUser && token && !user) {
+      login({user: storedUser,token}); // Only login if user is not set
     }
   }, []); // Empty dependency array to run only on mount
 

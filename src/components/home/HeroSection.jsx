@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import herovideo from "../../assets/banners/herovideo1.mp4";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../core/contexts/AuthContext";
 import { toast } from "react-toastify";
 
 export default function HeroSection() {

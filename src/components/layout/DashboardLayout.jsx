@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../core/contexts/AuthContext";
 import { sidebarLinks } from "../constants/sidebarLinks";
 
 const DashboardLayout = ({ role }) => {

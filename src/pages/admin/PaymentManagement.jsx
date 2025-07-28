@@ -1,215 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
-import { 
-  Box, Typography, Card, CardContent, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Button, Chip,
-  TextField, InputAdornment, Tabs, Tab, Badge, Avatar, IconButton,
-  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, useTheme, Fade, Grow
-} from '@mui/material';
-import {
-  Search, CheckCircle, Pending, Download, Visibility, Refresh,
-  CreditCard, AccountBalanceWallet, FilterList, Money, Phone
-} from '@mui/icons-material';
-import { styled, keyframes } from '@mui/system';
 
-// Animation
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-`;
-
-// Updated payment data with mobile numbers and SR.No
 const paymentsData = [
   {
-    id: 'PAY001',
-    bookingId: 'PUN21050001',
-    customer: 'Onkar Patil',
-    mobile: '9876543210',
-    amount: 3500,
-    date: '2023-07-15',
-    status: 'paid',
-    method: 'UPI',
-    items: [
-      { name: 'Full Car Service', price: 2500 },
-      { name: 'AC Gas Refill', price: 1000 }
-    ],
-    tax: 350,
-    discount: 0
+    id: 'PAY001', bookingId: 'BK001', customer: 'Onkar Patil', mobile: '9876543210',
+    amount: 3500, date: '2023-07-15', status: 'paid', method: 'UPI',
+    items: [{ name: 'Full Car Service', price: 2500 }, { name: 'AC Gas Refill', price: 1000 }],
+    tax: 350, discount: 0
   },
   {
-    id: 'PAY002',
-    bookingId: 'PUN21050002',
-    customer: 'Priya Sharma',
-    mobile: '8765432109',
-    amount: 2800,
-    date: '2023-07-16',
-    status: 'unpaid',
-    method: 'Credit Card',
-    items: [
-      { name: 'Basic Inspection', price: 1500 },
-      { name: 'Oil Change', price: 800 },
-      { name: 'Wheel Alignment', price: 500 }
-    ],
-    tax: 280,
-    discount: 0
-  },
-  {
-    id: 'PAY003',
-    bookingId: 'PUN21050003',
-    customer: 'Rahul Gupta',
-    mobile: '7654321098',
-    amount: 4200,
-    date: '2023-07-17',
-    status: 'paid',
-    method: 'Cash',
-    items: [
-      { name: 'Denting & Painting', price: 3000 },
-      { name: 'Brake Repair', price: 1200 }
-    ],
-    tax: 420,
-    discount: 0
-  },
-  {
-    id: 'PAY004',
-    bookingId: 'PUN21050004',
-    customer: 'Aarti Singh',
-    mobile: '6543210987',
-    amount: 1500,
-    date: '2023-07-18',
-    status: 'unpaid',
-    method: 'UPI',
-    items: [
-      { name: 'Basic Inspection', price: 1500 }
-    ],
-    tax: 150,
-    discount: 0
-  },
-  {
-    id: 'PAY005',
-    bookingId: 'PUN21050005',
-    customer: 'Vikram Joshi',
-    mobile: '5432109876',
-    amount: 5200,
-    date: '2023-07-19',
-    status: 'paid',
-    method: 'Credit Card',
-    items: [
-      { name: 'Full Car Service', price: 2500 },
-      { name: 'Battery Replacement', price: 2700 }
-    ],
-    tax: 520,
-    discount: 0
+    id: 'PAY002', bookingId: 'BK002', customer: 'Priya Sharma', mobile: '8765432109',
+    amount: 2800, date: '2023-07-16', status: 'unpaid', method: 'Credit Card',
+    items: [{ name: 'Basic Inspection', price: 1500 }, { name: 'Oil Change', price: 800 }],
+    tax: 280, discount: 0
   }
 ];
 
-// Styled components
-const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: '16px',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
-  }
-}));
-
-const StatusBadge = styled(Chip)(({ status }) => ({
-  fontWeight: 700,
-  borderRadius: '12px',
-  backgroundColor: status === 'paid' ? 'rgba(46, 204, 113, 0.2)' : 'rgba(241, 196, 15, 0.2)',
-  color: status === 'paid' ? '#2ecc71' : '#f1c40f',
-  animation: status === 'unpaid' ? `${pulse} 2s infinite` : 'none',
-  '& .MuiChip-icon': {
-    color: status === 'paid' ? '#2ecc71' : '#f1c40f'
-  }
-}));
-
-const PaymentMethodIcon = ({ method }) => {
-  const icons = {
-    'Credit Card': <CreditCard fontSize="small" />,
-    'UPI': <AccountBalanceWallet fontSize="small" />,
-    'Cash': <Money fontSize="small" />
-  };
-  return icons[method] || <Money fontSize="small" />;
-};
-
 const generateInvoicePdf = (payment) => {
   const doc = new jsPDF();
-  
-  // Header
-  doc.setFontSize(20);
-  doc.setTextColor(40, 53, 147);
-  doc.text('AutoCare Services', 105, 20, { align: 'center' });
-  doc.setFontSize(14);
-  doc.text('Professional Vehicle Maintenance', 105, 28, { align: 'center' });
-  
-  // Invoice title
-  doc.setFontSize(18);
-  doc.setTextColor(0, 0, 0);
-  doc.text('INVOICE', 105, 40, { align: 'center' });
-  
-  // Invoice details
-  doc.setFontSize(12);
-  doc.text(`Invoice #: ${payment.id}`, 20, 50);
-  doc.text(`Date: ${new Date(payment.date).toLocaleDateString()}`, 20, 58);
-  doc.text(`Booking ID: ${payment.bookingId}`, 20, 66);
-  
-  // Customer details
-  doc.text(`Customer: ${payment.customer}`, 140, 50);
-  doc.text(`Mobile: ${payment.mobile}`, 140, 58);
-  doc.text(`Payment Method: ${payment.method}`, 140, 66);
-  
-  // Line separator
-  doc.setDrawColor(200, 200, 200);
-  doc.line(15, 72, 195, 72);
-  
-  // Items table
-  doc.setFillColor(237, 231, 246);
-  doc.rect(15, 78, 180, 10, 'F');
-  doc.setTextColor(0, 0, 0);
-  doc.setFont(undefined, 'bold');
-  doc.text('Description', 20, 85);
-  doc.text('Amount', 170, 85, { align: 'right' });
-  
-  // Items list
-  let y = 95;
-  payment.items.forEach((item, index) => {
-    doc.setFont(undefined, 'normal');
-    doc.text(item.name, 20, y);
-    doc.text(`₹${item.price.toLocaleString()}`, 170, y, { align: 'right' });
-    y += 8;
-  });
-  
-  // Totals
-  doc.setFont(undefined, 'bold');
-  doc.text('Subtotal:', 150, y + 10);
-  doc.text(`₹${(payment.amount - payment.tax + payment.discount).toLocaleString()}`, 170, y + 10, { align: 'right' });
-  
-  if (payment.discount > 0) {
-    doc.text('Discount:', 150, y + 20);
-    doc.text(`-₹${payment.discount.toLocaleString()}`, 170, y + 20, { align: 'right' });
-  }
-  
-  doc.text('Tax:', 150, y + 30);
-  doc.text(`₹${payment.tax.toLocaleString()}`, 170, y + 30, { align: 'right' });
-  
-  doc.setFontSize(14);
-  doc.text('Total:', 150, y + 45);
-  doc.text(`₹${payment.amount.toLocaleString()}`, 170, y + 45, { align: 'right' });
-  
-  // Footer
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text('Thank you for your business!', 105, 280, { align: 'center' });
-  doc.text('AutoCare Services - Quality you can trust', 105, 285, { align: 'center' });
-  
-  // Save PDF
+  doc.setFontSize(18).text('INVOICE', 105, 20, { align: 'center' });
+  doc.setFontSize(12)
+    .text(`Booking ID: ${payment.bookingId}`, 20, 40)
+    .text(`Customer: ${payment.customer}`, 20, 50)
+    .text(`Amount: ₹${payment.amount}`, 20, 60);
   doc.save(`invoice_${payment.id}.pdf`);
 };
 
-const AdminPayment = () => {
-  const theme = useTheme();
+const PaymentManagement = () => {
   const [payments, setPayments] = useState(paymentsData);
   const [filteredPayments, setFilteredPayments] = useState(paymentsData);
   const [searchTerm, setSearchTerm] = useState('');
@@ -219,398 +36,222 @@ const AdminPayment = () => {
 
   useEffect(() => {
     let results = payments;
-    
-    if (tabValue !== 'all') {
-      results = results.filter(payment => payment.status === tabValue);
-    }
-    
+    if (tabValue !== 'all') results = results.filter(p => p.status === tabValue);
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      results = results.filter(payment =>
-        payment.id.toLowerCase().includes(term) ||
-        payment.bookingId.toLowerCase().includes(term) ||
-        payment.customer.toLowerCase().includes(term) ||
-        payment.mobile.includes(term) ||
-        payment.method.toLowerCase().includes(term)
+      results = results.filter(p =>
+        p.id.toLowerCase().includes(term) ||
+        p.customer.toLowerCase().includes(term) ||
+        p.mobile.includes(term)
       );
     }
-    
     setFilteredPayments(results);
   }, [searchTerm, tabValue, payments]);
 
   const updatePaymentStatus = (id, status) => {
-    setPayments(prevPayments =>
-      prevPayments.map(payment =>
-        payment.id === id ? { ...payment, status } : payment
-      )
-    );
-  };
-
-  const handleViewDetails = (payment) => {
-    setSelectedPayment(payment);
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const getPaymentCount = (status) => {
-    return payments.filter(payment => payment.status === status).length;
+    setPayments(payments.map(p => p.id === id ? { ...p, status } : p));
   };
 
   return (
-    <Fade in timeout={500}>
-      <Box sx={{ p: 4, background: '#f1ffe0', minHeight: '100vh' }}>
-        <Box sx={{ maxWidth: '1400px', mx: 'auto' }}>
-          {/* Header */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 4,
-            p: 3,
-            background: 'white',
-            borderRadius: '16px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
-          }}>
-            <Typography variant="h4" sx={{ 
-              fontWeight: 800, 
-              background: 'linear-gradient(90deg, #2e7d32, #4caf50)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              Payment Management
-            </Typography>
-            <Button 
-              variant="contained" 
-              startIcon={<Refresh />} 
-              onClick={() => setPayments([...paymentsData])}
-              sx={{
-                background: 'linear-gradient(45deg, #2e7d32, #4caf50)',
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(46, 125, 50, 0.3)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #1b5e20, #2e7d32)'
-                }
-              }}
+    <div className="min-h-screen bg-[#F1FFE0] p-4 sm:p-6 md:p-8">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-800 mb-6">
+        Payment Management
+      </h1>
+
+      <div className="bg-white rounded-lg shadow-lg mb-6">
+        <div className="flex flex-col sm:flex-row items-center p-4 gap-4">
+          <div className="relative w-full sm:flex-1">
+            <input
+              type="text"
+              placeholder="Search payments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              Refresh
-            </Button>
-          </Box>
-
-          {/* Search and Filter */}
-          <Grow in timeout={600}>
-            <StyledCard sx={{ mb: 4 }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Search by name, mobile, booking ID..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Search color="primary" />
-                        </InputAdornment>
-                      ),
-                      sx: { borderRadius: '12px' }
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': { borderColor: '#e0e0e0' },
-                        '&:hover fieldset': { borderColor: theme.palette.primary.main },
-                      }
-                    }}
-                  />
-                  <Tooltip title="Filters">
-                    <IconButton>
-                      <FilterList />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-
-                {/* Status Tabs */}
-                <Tabs
-                  value={tabValue}
-                  onChange={(e, newValue) => setTabValue(newValue)}
-                  sx={{ mt: 2 }}
-                  indicatorColor="primary"
-                  textColor="primary"
-                  variant="scrollable"
-                  scrollButtons="auto"
-                >
-                  <Tab 
-                    label={
-                      <Badge badgeContent={payments.length} color="default">
-                        All
-                      </Badge>
-                    } 
-                    value="all" 
-                    sx={{ borderRadius: '12px', mx: 0.5 }}
-                  />
-                  <Tab 
-                    label={
-                      <Badge badgeContent={getPaymentCount('paid')} color="success">
-                        Paid
-                      </Badge>
-                    } 
-                    value="paid" 
-                    icon={<CheckCircle fontSize="small" />}
-                    iconPosition="start"
-                    sx={{ borderRadius: '12px', mx: 0.5 }}
-                  />
-                  <Tab 
-                    label={
-                      <Badge badgeContent={getPaymentCount('unpaid')} color="warning">
-                        Unpaid
-                      </Badge>
-                    } 
-                    value="unpaid" 
-                    icon={<Pending fontSize="small" />}
-                    iconPosition="start"
-                    sx={{ borderRadius: '12px', mx: 0.5 }}
-                  />
-                </Tabs>
-              </CardContent>
-            </StyledCard>
-          </Grow>
-
-          {/* Payments Table */}
-          <Grow in timeout={800}>
-            <StyledCard>
-              <TableContainer component={Paper} sx={{ borderRadius: '16px', overflow: 'hidden' }}>
-                <Table>
-                  <TableHead sx={{ 
-                    background: 'linear-gradient(90deg, #2e7d32, #4caf50)',
-                    '& th': { color: 'white', fontWeight: 600 }
-                  }}>
-                    <TableRow>
-                      {['SR.No', 'Customer Name', 'Mobile', 'Booking ID', 'Payment Mode', 'Amount', 'Status', 'Actions'].map(h => (
-                        <TableCell key={h} align={h === 'Actions' ? 'center' : 'left'}>{h}</TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredPayments.map((payment, index) => (
-                      <Grow in timeout={100 * index} key={payment.id}>
-                        <TableRow hover sx={{ '&:last-child td': { border: 0 } }}>
-                          <TableCell>{index + 1}</TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Avatar sx={{ 
-                                bgcolor: theme.palette.primary.main, 
-                                color: 'white',
-                                width: 36, 
-                                height: 36,
-                                boxShadow: '0 2px 8px rgba(46, 125, 50, 0.3)'
-                              }}>
-                                {payment.customer.charAt(0)}
-                              </Avatar>
-                              <Typography>{payment.customer}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Phone fontSize="small" color="primary" />
-                              <Typography>{payment.mobile}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>{payment.bookingId}</TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <PaymentMethodIcon method={payment.method} />
-                              <Typography>{payment.method}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 700 }}>₹{payment.amount.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <StatusBadge 
-                              label={payment.status} 
-                              status={payment.status} 
-                              icon={payment.status === 'paid' ? <CheckCircle fontSize="small" /> : <Pending fontSize="small" />}
-                            />
-                          </TableCell>
-                          <TableCell align="center">
-                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                              <Tooltip title="View Details">
-                                <IconButton
-                                  onClick={() => handleViewDetails(payment)}
-                                  sx={{ 
-                                    bgcolor: 'rgba(46, 125, 50, 0.1)',
-                                    '&:hover': { bgcolor: 'rgba(46, 125, 50, 0.2)' }
-                                  }}
-                                >
-                                  <Visibility color="primary" />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Download Invoice">
-                                <IconButton
-                                  onClick={() => generateInvoicePdf(payment)}
-                                  sx={{ 
-                                    bgcolor: 'rgba(76, 175, 80, 0.1)',
-                                    '&:hover': { bgcolor: 'rgba(76, 175, 80, 0.2)' }
-                                  }}
-                                >
-                                  <Download color="success" />
-                                </IconButton>
-                              </Tooltip>
-                              {payment.status === 'unpaid' && (
-                                <Tooltip title="Mark as Paid">
-                                  <IconButton
-                                    onClick={() => updatePaymentStatus(payment.id, 'paid')}
-                                    sx={{ 
-                                      bgcolor: 'rgba(255, 193, 7, 0.1)',
-                                      '&:hover': { bgcolor: 'rgba(255, 193, 7, 0.2)' }
-                                    }}
-                                  >
-                                    <CheckCircle color="warning" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      </Grow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </StyledCard>
-          </Grow>
-
-          {/* Payment Details Dialog */}
-          <Dialog 
-            open={openDialog} 
-            onClose={handleCloseDialog} 
-            maxWidth="sm" 
-            fullWidth
-            PaperProps={{ sx: { borderRadius: '16px' } }}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <button
+            onClick={() => setPayments([...paymentsData])}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
           >
-            <DialogTitle sx={{ 
-              background: 'linear-gradient(90deg, #2e7d32, #4caf50)',
-              color: 'white',
-              fontWeight: 600
-            }}>
-              Payment Details: {selectedPayment?.id}
-            </DialogTitle>
-            <DialogContent dividers sx={{ p: 3 }}>
-              {selectedPayment && (
-                <Box>
-                  <Box sx={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr', 
-                    gap: 3, 
-                    mb: 3,
-                    '& > div': { p: 2, borderRadius: '12px', bgcolor: '#f9f9f9' }
-                  }}>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Booking ID</Typography>
-                      <Typography fontWeight={600}>{selectedPayment.bookingId}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Date</Typography>
-                      <Typography fontWeight={600}>{selectedPayment.date}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Customer</Typography>
-                      <Typography fontWeight={600}>{selectedPayment.customer}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Mobile</Typography>
-                      <Typography fontWeight={600}>{selectedPayment.mobile}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Method</Typography>
-                      <Typography fontWeight={600}>{selectedPayment.method}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">Status</Typography>
-                      <Typography fontWeight={600}>
-                        <StatusBadge 
-                          label={selectedPayment.status} 
-                          status={selectedPayment.status} 
-                          size="small"
-                        />
-                      </Typography>
-                    </Box>
-                  </Box>
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5m6 0h5v-5m-5 5v5h-5" />
+            </svg>
+            Refresh
+          </button>
+        </div>
 
-                  <Box sx={{ 
-                    bgcolor: 'rgba(46, 125, 50, 0.1)',
-                    p: 3, 
-                    borderRadius: '16px',
-                    mb: 3,
-                    border: '1px solid rgba(46, 125, 50, 0.2)'
-                  }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800, textAlign: 'center' }}>
-                      ₹{selectedPayment.amount.toLocaleString()}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" textAlign="center">
-                      Total Amount
-                    </Typography>
-                  </Box>
+        <div className="flex border-b border-gray-200">
+          {['all', 'paid', 'unpaid'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setTabValue(tab)}
+              className={`flex-1 py-3 text-center text-sm sm:text-base font-medium ${
+                tabValue === tab ? 'bg-green-50 text-green-800 border-b-2 border-green-600' : 'text-gray-600'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              <span className={`ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full ${
+                tab === 'paid' ? 'bg-green-100 text-green-800' : tab === 'unpaid' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+              }`}>
+                {payments.filter(p => tab === 'all' || p.status === tab).length}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={() => generateInvoicePdf(selectedPayment)}
-                    startIcon={<Download />}
-                    sx={{
-                      mb: 2,
-                      py: 1.5,
-                      borderRadius: '12px',
-                      background: 'linear-gradient(45deg, #2e7d32, #4caf50)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #1b5e20, #2e7d32)'
-                      }
-                    }}
+      <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+        <table className="w-full text-left text-sm sm:text-base">
+          <thead className="bg-green-50">
+            <tr>
+              <th className="p-3 sm:p-4">Customer</th>
+              <th className="p-3 sm:p-4">Booking ID</th>
+              <th className="p-3 sm:p-4">Amount</th>
+              <th className="p-3 sm:p-4">Status</th>
+              <th className="p-3 sm:p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPayments.map((payment) => (
+              <tr key={payment.id} className="border-b hover:bg-gray-50">
+                <td className="p-3 sm:p-4">
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-600 text-white rounded-full flex items-center justify-center mr-3">
+                      {payment.customer.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{payment.customer}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">{payment.mobile}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-3 sm:p-4">{payment.bookingId}</td>
+                <td className="p-3 sm:p-4">₹{payment.amount}</td>
+                <td className="p-3 sm:p-4">
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                      payment.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}
                   >
-                    Download Invoice (PDF)
-                  </Button>
-
-                  {selectedPayment.status === 'unpaid' && (
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      color="success"
-                      startIcon={<CheckCircle />}
+                    {payment.status === 'paid' ? (
+                      <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01" />
+                      </svg>
+                    )}
+                    {payment.status}
+                  </span>
+                </td>
+                <td className="p-3 sm:p-4">
+                  <div className="flex space-x-2">
+                    <button
                       onClick={() => {
-                        updatePaymentStatus(selectedPayment.id, 'paid');
-                        handleCloseDialog();
+                        setSelectedPayment(payment);
+                        setOpenDialog(true);
                       }}
-                      sx={{
-                        py: 1.5,
-                        borderRadius: '12px',
-                        borderWidth: '2px',
-                        '&:hover': { borderWidth: '2px' }
-                      }}
+                      className="text-blue-600 hover:text-blue-800"
                     >
-                      Mark as Paid
-                    </Button>
-                  )}
-                </Box>
-              )}
-            </DialogContent>
-            <DialogActions sx={{ p: 2 }}>
-              <Button 
-                onClick={handleCloseDialog}
-                sx={{ 
-                  borderRadius: '12px',
-                  px: 3,
-                  py: 1
-                }}
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => generateInvoicePdf(payment)}
+                      className="text-gray-600 hover:text-gray-800"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </button>
+                    {payment.status === 'unpaid' && (
+                      <button
+                        onClick={() => updatePaymentStatus(payment.id, 'paid')}
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedPayment && openDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="bg-green-800 text-white p-4 rounded-t-lg">
+              <h2 className="text-lg sm:text-xl font-bold">Payment Details</h2>
+            </div>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-3">
+                {selectedPayment.customer} - {selectedPayment.bookingId}
+              </h3>
+              <p className="text-gray-700 mb-2">Amount: ₹{selectedPayment.amount}</p>
+              <p className="text-gray-700 flex items-center">
+                Status:
+                <span
+                  className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${
+                    selectedPayment.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  }`}
+                >
+                  {selectedPayment.status}
+                </span>
+              </p>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => generateInvoicePdf(selectedPayment)}
+                  className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Invoice
+                </button>
+                {selectedPayment.status === 'unpaid' && (
+                  <button
+                    onClick={() => {
+                      updatePaymentStatus(selectedPayment.id, 'paid');
+                      setOpenDialog(false);
+                    }}
+                    className="flex items-center justify-center px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50 transition"
+                  >
+                    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Mark as Paid
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="p-4 border-t">
+              <button
+                onClick={() => setOpenDialog(false)}
+                className="w-full px-4 py-2 text-gray-600 rounded-md hover:bg-gray-100 transition"
               >
                 Close
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
-      </Box>
-    </Fade>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-export default AdminPayment;
+export default PaymentManagement;

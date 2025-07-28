@@ -7,12 +7,12 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthRedirect from "./AuthRedirect";
 import ScrollToTop from "../pages/ScrollToTop";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../core/contexts/AuthContext";
 
 // Public Pages
 import Home from "../pages/public/Home";
 import About from "../pages/public/About";
-import Career from "../pages/public/Career";
+import Career from "../pages/public/Career"; 
 import Blog from "../pages/public/Blog";
 import Contact from "../pages/public/Contact";
 import PrivacyPolicy from "../pages/public/PrivacyPolicy";
@@ -75,34 +75,34 @@ const AppRoutes = () => {
           <Route path="/terms" element={<Terms />} />
           <Route path="/faq" element={<FreqeuntlyAsked />} />
         {/* Protected Form Routes */}
-        {/* <Route element={<ProtectedRoute isAllowed={isLoggedIn} />}> */}
+        <Route element={<ProtectedRoute isAllowed={isLoggedIn} />}>
           <Route path="/request" element={<RequestForm />} />
           <Route path="/success" element={<RequestSuccess />} />
         </Route>
-        {/* </Route> */}
+        </Route>
 
         {/* Auth Layout */}
         {/* <Route
           element={
             <AuthRedirect
               isAllowed={isLoggedIn}
-              redirectTo={`/${user?.role || "customer"}/dashboard`}
+              redirectTo={`/${user?.role || "customer"}/`}
             />
           }
         > */}
-          {/* <Route element={<AuthLayout />}> */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-          {/* </Route>  */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/" replace />} />
+            <Route path="/signup" element={!isLoggedIn ? <Signup /> : <Navigate to="/" replace/>} />
+          </Route> 
         {/* </Route> */}
 
         {/* Customer Dashboard Layout */}
         <Route
           path="/customer/dashboard"
           element={
-            // <ProtectedRoute isAllowed={isLoggedIn && user?.role === "customer"}>
+            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "customer"}>
               <DashboardLayout role="customer" />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="recent-request" replace />} />
@@ -115,9 +115,9 @@ const AppRoutes = () => {
         <Route
           path="/engineer/dashboard"
           element={
-            // <ProtectedRoute isAllowed={isLoggedIn && user?.role === "engineer"}>
+            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "engineer"}>
               <DashboardLayout role="engineer" />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="assigned" replace />} />
@@ -132,9 +132,9 @@ const AppRoutes = () => {
         <Route
           path="/admin/dashboard"
           element={
-            // <ProtectedRoute isAllowed={isLoggedIn && user?.role === "admin"}>
+            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "admin"}>
               <DashboardLayout role="admin" />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />
@@ -148,9 +148,9 @@ const AppRoutes = () => {
         <Route
           path="/superadmin/dashboard"
           element={
-            // <ProtectedRoute isAllowed={isLoggedIn && user?.role === "superadmin"}>
+            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "superadmin"}>
               <DashboardLayout role="superadmin" />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" replace />} />

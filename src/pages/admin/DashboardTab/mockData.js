@@ -1,0 +1,136 @@
+export const mockEngineers = [
+  { id: 1, name: "Engineer A", location: "Pune", phone: "9090909090", active: true },
+  { id: 2, name: "Engineer B", location: "PCMC", phone: "8888888888", active: true },
+  { id: 3, name: "Engineer C", location: "PCMC", phone: "7777777777", active: false },
+];
+
+export const mockRequests = [
+  {
+    id: 1,
+    bookingId: "DSS001",
+    customerName: "Onkar Basawane",
+    location: "PCMC",
+    dealerAddress: "Nashik Phata",
+    brand: "Hyundai",
+    model: "i20",
+    variant: "Sportz",
+    phone: "9876543210",
+    date: "2025-07-01",
+    time: "11:30 AM",
+    status: "new",
+    slot: null
+  },
+  {
+    id: 2,
+    bookingId: "DSS002",
+    customerName: "Amit Sharma",
+    location: "Pune",
+    dealerAddress: "Baner Showroom",
+    brand: "Maruti",
+    model: "Swift",
+    variant: "VXI",
+    phone: "9123456780",
+    date: "2025-07-02",
+    time: "01:00 PM",
+    status: "assigned",
+    assignedEngineer: "Engineer A",
+    slot: "1:00 PM - 4:00 PM"
+  },
+  {
+    id: 3,
+    bookingId: "DSS003",
+    customerName: "Sneha Patil",
+    location: "PCMC",
+    dealerAddress: "Akurdi Hub",
+    brand: "Tata",
+    model: "Punch",
+    variant: "XZ",
+    phone: "9988776655",
+    date: "2025-07-01",
+    time: "10:00 AM",
+    status: "completed",
+    assignedEngineer: "Engineer B",
+    slot: "9:00 AM - 12:00 PM"
+  },
+  {
+    id: 4,
+    bookingId: "DSS004",
+    customerName: "Pratik Patil",
+    location: "PCMC",
+    dealerAddress: "Chinchwad",
+    brand: "Hyundai",
+    model: "Venue",
+    variant: "Sportz",
+    phone: "9876543777",
+    date: "2025-07-01",
+    time: "11:30 AM",
+    status: "new",
+    slot: null
+  },
+  {
+    id: 5,
+    bookingId: "DSS005",
+    customerName: "Pratik Patil",
+    location: "PCMC",
+    dealerAddress: "Chinchwad",
+    brand: "Hyundai",
+    model: "Venue",
+    variant: "Sportz",
+    phone: "9876543777",
+    date: "2025-07-01",
+    time: "11:30 AM",
+    status: "new",
+    slot: null
+  },
+  {
+    id: 6,
+    bookingId: "DSS006",
+    customerName: "Pratik Patil",
+    location: "PCMC",
+    dealerAddress: "Chinchwad",
+    brand: "Hyundai",
+    model: "Venue",
+    variant: "Sportz",
+    phone: "9876543777",
+    date: "2025-07-01",
+    time: "11:30 AM",
+    status: "new",
+    slot: null
+  },
+  {
+    id: 7,
+    bookingId: "DSS007",
+    customerName: "Pratik Patil",
+    location: "PCMC",
+    dealerAddress: "Chinchwad",
+    brand: "Hyundai",
+    model: "Venue",
+    variant: "Sportz",
+    phone: "9876543777",
+    date: "2025-07-01",
+    time: "11:30 AM",
+    status: "new",
+    slot: null
+  },
+  {
+    id: 8,
+    bookingId: "DSS008",
+    customerName: "Pratik Patil",
+    location: "PCMC",
+    dealerAddress: "Chinchwad",
+    brand: "Hyundai",
+    model: "Venue",
+    variant: "Sportz",
+    phone: "9876543777",
+    date: "2025-07-01",
+    time: "11:30 AM",
+    status: "new",
+    slot: null
+  }
+];
+
+export const timeSlots = [
+  "9:00 AM - 12:00 PM",
+  "1:00 PM - 4:00 PM",
+  "4:00 PM - 7:00 PM"
+];

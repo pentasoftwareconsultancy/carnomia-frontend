@@ -1,146 +1,84 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import { FaDownload, FaChevronDown } from "react-icons/fa";
 import jeepImage from "../../assets/honda_elevate.png";
-import { useAuth } from "../../context/AuthContext"; // Added to check authentication
-
-const carData = [
-  {
-    brand: "Honda",
-    models: [
-      {
-        name: "Elevate",
-        image: "https://ackodrive-assets.ackodrive.com/media/test_LEtPtQM.png",
-        variants: [
-          { name: "Base", transmission: "Manual", fuel: "Petrol" },
-          { name: "Top", transmission: "Automatic", fuel: "Petrol" },
-        ],
-      },
-      {
-        name: "City",
-        image:
-          "https://www.pngplay.com/wp-content/uploads/13/Honda-City-Transparent-Background.png",
-        variants: [
-          { name: "VX", transmission: "Manual", fuel: "Diesel" },
-          { name: "ZX", transmission: "Automatic", fuel: "Petrol" },
-        ],
-      },
-    ],
-  },
-  {
-    brand: "Toyota",
-    models: [
-      {
-        name: "Fortuner",
-        image:
-          "https://www.freepnglogos.com/uploads/fortuner-png/fortuner-10.png",
-        variants: [
-          { name: "Standard", transmission: "Manual", fuel: "Diesel" },
-          { name: "Legender", transmission: "Automatic", fuel: "Diesel" },
-        ],
-      },
-      {
-        name: "Innova",
-        image:
-          "https://wallpapers.com/images/hd/toyota-innova-crysta-minivan-nrh9rqvaj1lkdzbh.jpg",
-        variants: [
-          { name: "GX", transmission: "Manual", fuel: "Diesel" },
-          { name: "ZX", transmission: "Automatic", fuel: "Diesel" },
-        ],
-      },
-    ],
-  },
-  {
-    brand: "Mahindra",
-    models: [
-      {
-        name: "Thar",
-        image:
-          "https://images.hindustantimes.com/auto/img/2024/05/21/600x338/Mahindra_Thar_Green_1716261507027_1716261515527.webp",
-        variants: [
-          { name: "AX", transmission: "Manual", fuel: "Diesel" },
-          { name: "LX", transmission: "Automatic", fuel: "Petrol" },
-        ],
-      },
-      {
-        name: "XUV700",
-        image:
-          "https://meetassociates.com/uploads/models/model1634122517xuv700redrage.png",
-        variants: [
-          { name: "MX", transmission: "Manual", fuel: "Diesel" },
-          { name: "AX7", transmission: "Automatic", fuel: "Petrol" },
-        ],
-      },
-    ],
-  },
-  {
-    brand: "Maruti Suzuki",
-    models: [
-      {
-        name: "Ertiga",
-        image:
-          "https://sgcarrent.com/wp-content/uploads/2025/01/MUV_-_MARUTI_ERTIGA-removebg-preview.png",
-        variants: [
-          { name: "VXI", transmission: "Manual", fuel: "Petrol+CNG" },
-          { name: "ZXI+", transmission: "Automatic", fuel: "Petrol" },
-        ],
-      },
-      {
-        name: "Brezza",
-        image:
-          "https://toppng.com/uploads/thumbnail/maruti-suzuki-india-cars-bhilai-dealer-local-vitara-brezza-price-in-delhi-1156298297405phb8jbcy.png",
-        variants: [
-          { name: "VXI", transmission: "Manual", fuel: "Petrol" },
-          { name: "ZXI+", transmission: "Automatic", fuel: "Petrol" },
-        ],
-      },
-    ],
-  },
-];
+import ApiService from "../../core/services/api.service";
+import ServerUrl from "../../core/constants/serverUrl.constant";
 
 const carStatusOptions = [
   { value: "new", label: "New Car" },
   { value: "used", label: "Used Car" },
 ];
 
-const RequestForm = () => {
+const Request = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuth(); // Added to ensure authenticated context
 
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedModel, setSelectedModel] = useState("");
-  const [selectedVariant, setSelectedVariant] = useState("");
-  const [selectedImage, setSelectedImage] = useState(jeepImage);
-  const [transmission, setTransmission] = useState("");
-  const [fuel, setFuel] = useState("");
-  const [carStatus, setCarStatus] = useState("");
-  const [pdiDate, setpdiDate] = useState("");
-  const [address, setAddress] = useState("");
-  const [dealer, setDealer] = useState("");
+  // form state
+const [selectedBrand, setSelectedBrand] = useState("");
+const [selectedModel, setSelectedModel] = useState("");
+const [selectedVariant, setSelectedVariant] = useState("");
+const [transmission, setTransmission] = useState("");
+const [fuel, setFuel] = useState("");
+const [carStatus, setCarStatus] = useState("");
+const [vehicles, setVehicles] = useState([])
+const [brands, setBrands] = useState([])
+const [models, setModels] = useState([])
+const [variants, setVariants] = useState([])
+const [pdiDate, setPdiDate] = useState("");
+const [address, setAddress] = useState("");
+const [dealer, setDealer] = useState("");
+const [selectedImage, setSelectedImage] = useState(jeepImage);
+const [errorMessage, setErrorMessage] = useState(""); // For error handling
 
+useEffect(() => {
+  const fetchVehicles = async () => {
+    try {
+      const response = await new ApiService().apiget(ServerUrl.API_GET_VEHICLES);
+      if (response?.data?.data) {
+        const uniqueBrands = Object.values(
+          response.data.data.reduce((acc, curr) => {
+            if (!acc[curr.brand]) {
+              acc[curr.brand] = curr; // store the first occurrence of each brand
+            }
+            return acc;
+          }, {})
+        );
+        setBrands(uniqueBrands);
+        setVehicles(response.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch vehicles", err);
+    }
+  };
+
+  fetchVehicles();
+}, []);
+
+  // dropdown arrows
   const [open, setOpen] = useState({
     brand: false,
     model: false,
     variant: false,
     status: false,
   });
+
   const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }));
 
-  const brandObj = carData.find((b) => b.brand === selectedBrand);
-  const modelObj = brandObj?.models.find((m) => m.name === selectedModel);
-  const models = brandObj?.models || [];
-  const variants = modelObj?.variants || [];
+  // derived lists
+  // const brandObj = vehicles.find((b) => b.brand === selectedBrand);
+  // const modelObj = brandObj?.models.find((m) => m.name === selectedModel);
+  // const models =  [];
+  // const variants =  [];
 
+  // today for min date
   const today = new Date().toISOString().split("T")[0];
 
-  // Debug log to check context and state
-  React.useEffect(() => {
-    console.log("RequestForm mounted", { isLoggedIn, user, selectedBrand, selectedModel, selectedVariant });
-  }, [isLoggedIn, user, selectedBrand, selectedModel, selectedVariant]);
-
+  // handlers
   const handleBrandChange = (e) => {
     setSelectedBrand(e.target.value);
+    setModels(vehicles.filter((v) => v.brand === e.target.value).map((v) => ({ name: v.model, image: v.imageUrl })));
     setSelectedModel("");
     setSelectedVariant("");
     setSelectedImage(jeepImage);
@@ -151,57 +89,84 @@ const RequestForm = () => {
   const handleModelChange = (e) => {
     const m = e.target.value;
     setSelectedModel(m);
+    setVariants(vehicles.filter((x) => x.model === m).map((v) => ({ name: v.variant })));
     setSelectedVariant("");
-    const img = brandObj?.models.find((x) => x.name === m)?.image || jeepImage;
+    const img = vehicles.find((x) => x.model === m)?.imageUrl || jeepImage;
     setSelectedImage(img);
+    
+    setSelectedVariant("");
+    setTransmission("");
+    setFuel("");
   };
 
   const handleVariantChange = (e) => {
     const v = e.target.value;
     setSelectedVariant(v);
-    const vObj = variants.find((x) => x.name === v);
-    if (vObj) {
-      setTransmission(vObj.transmission);
-      setFuel(vObj.fuel);
-    }
+    setTransmission(vehicles.find((x) => x.variant === v)?.transmissionType || "");
+    setFuel(vehicles.find((x) => x.variant === v)?.fuelType || "");
+    // const vObj = variants.find((x) => x.name === v);
+    // if (vObj) {
+    //   setTransmission(vObj.transmission);
+    //   setFuel(vObj.fuel);
+    // }
+    // setTransmission("");
+    // setFuel("");
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!isLoggedIn || !user) {
-      console.error("User not authenticated or user data missing");
-      return; // Prevent submission if not authenticated
-    }
-    localStorage.setItem(
-      "recentRequest",
-      JSON.stringify({
-        brand: selectedBrand,
-        model: selectedModel,
-        variant: selectedVariant,
-        transmission,
-        fuel,
-        image: selectedImage,
-        userId: user.id || "anonymous", // Optional: Add user context
-      })
-    );
-    navigate("/success"); // Changed to lowercase to match route
-  };
+  // submit
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  // Fallback if not authenticated or data is missing
-  if (!isLoggedIn) {
-    return <div className="p-4 text-red-500">Please log in to request an inspection.</div>;
+  if (!selectedBrand || !selectedModel || !selectedVariant || !carStatus) {
+    alert("Please fill all required fields.");
+    return;
   }
 
+  const payload = {
+    brand: selectedBrand,
+    model: selectedModel,
+    variant: selectedVariant,
+    transmission,
+    fuel,
+    imageUrl:selectedImage,
+    status: carStatus,
+  };
+
+  try {
+    const response = await new ApiService().apipost(ServerUrl.API_PDI_CREATE, payload);
+    toast.success("Vehicle PDI Created successfully!");
+    setTimeout(() => {
+      navigate("/success");
+    }, 1000);
+
+    setSelectedBrand("");
+    setSelectedModel("");
+    setSelectedVariant("");
+    setTransmission("");
+    setFuel("");
+    setCarStatus("");
+    setSelectedImage("");
+    setPdiDate("");
+    setAddress("");
+    setDealer("");
+
+  } catch (error) {
+    console.error("Error creating PDI:", error);
+    setErrorMessage("Failed to create PDI. Please try again later.");
+  }
+};
+
+
   return (
-    <div className="min-h-screen bg-[#F1FFE0] px-6 md:px-20 py-10 font-sans">
-      <div className="mt-20 flex flex-col md:flex-row justify-between items-start gap-10">
+    <div className="min-h-screen bg-[#F1FFE0] px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-8 sm:py-10 font-sans">
+      <div className="mt-12 sm:mt-16 md:mt-20 flex flex-col md:flex-row justify-center items-center md:items-start gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-7xl mx-auto">
         {/* Left side (title & image) */}
-        <div className="md:w-1/2 flex flex-col items-center text-center md:text-left">
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center text-center">
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-2xl md:text-5xl font-bold mb-2"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8"
           >
             Request Vehicle Inspection
           </motion.h2>
@@ -211,15 +176,19 @@ const RequestForm = () => {
             src={selectedImage}
             alt="Vehicle"
             initial={{ scale: 0.8, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }}
-            className="w-70 md:w-106 mt-10 drop-shadow-md"
-            onError={(e) => { e.target.src = jeepImage; }} // Fallback if image fails
+            animate={{
+              scale: 1,
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.8, ease: "easeOut" },
+            }}
+            className="w-full max-w-[300px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[530px] mt-4 sm:mt-6 md:mt-8 object-contain drop-shadow-lg"
           />
 
           <motion.a
             whileHover={{ scale: 1.05 }}
             href="#"
-            className="text-blue-600 text-sm mt-60 ml-100 font-semibold flex items-center gap-1 hover:underline"
+            className="text-blue-600 text-sm sm:text-base md:text-lg mt-6 sm:mt-8 md:mt-10 font-semibold flex items-center gap-2 hover:underline"
           >
             Download Sample Report <FaDownload />
           </motion.a>
@@ -230,17 +199,22 @@ const RequestForm = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
-          className="md:w-1/3 w-full bg-white p-5 rounded-2xl shadow-xl shadow-gray-300/60"
+          className="w-full max-w-[360px] sm:max-w-[400px] md:max-w-[450px] md:w-1/2 bg-white p-4 sm:p-5 md:p-6 lg:p-8 rounded-2xl shadow-xl shadow-gray-300/60"
         >
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Vehicle Details</h3>
+          <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 md:mb-4 text-gray-800">
+            Vehicle Details
+          </h3>
 
-          <form className="space-y-3" onSubmit={handleSubmit}>
+          {/* Error Message */}
+          {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+
+          <form className="space-y-3 md:space-y-4" onSubmit={handleSubmit}>
             <SelectField
               label="Select Brand"
               required
               value={selectedBrand}
               onChange={handleBrandChange}
-              options={carData.map((b) => ({ label: b.brand, value: b.brand }))}
+              options={brands.map((b) => ({ label: b.brand, value: b.brand }))}
               open={open.brand}
               toggle={() => toggle("brand")}
             />
@@ -267,20 +241,20 @@ const RequestForm = () => {
               toggle={() => toggle("variant")}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
               <input
                 type="text"
                 readOnly
                 value={transmission}
                 placeholder="Transmission"
-                className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50"
+                className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 bg-gray-50 text-sm sm:text-base"
               />
               <input
                 type="text"
                 readOnly
                 value={fuel}
                 placeholder="Fuel Type"
-                className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50"
+                className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 bg-gray-50 text-sm sm:text-base"
               />
             </div>
 
@@ -290,15 +264,16 @@ const RequestForm = () => {
               required
               value={dealer}
               onChange={(e) => setDealer(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
             />
+
             <input
               type="text"
               placeholder="Address"
               required
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
             />
 
             <SelectField
@@ -316,21 +291,21 @@ const RequestForm = () => {
               required
               min={today}
               value={pdiDate}
-              onChange={(e) => e.target.value >= today && setpdiDate(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+              onChange={(e) => e.target.value >= today && setPdiDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
             />
 
             <textarea
               placeholder="Notes (optional)"
               rows={2}
-              className="w-full border border-gray-300 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
             />
 
-            <label className="flex items-start gap-2 text-sm text-gray-700">
+            <label className="flex items-start gap-2 text-xs sm:text-sm md:text-base text-gray-700">
               <input
                 type="checkbox"
                 required
-                className="mt-1 h-4 w-4 text-green-600 rounded focus:ring-green-500"
+                className="mt-0.5 h-4 w-4 text-green-600 rounded focus:ring-green-500"
               />
               I confirm the above information is accurate.
             </label>
@@ -339,7 +314,7 @@ const RequestForm = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-green-600 text-white py-3 text-base font-bold rounded-xl hover:bg-green-700 transition shadow-md"
+              className="w-full bg-green-600 text-white py-2 sm:py-2.5 md:py-3 text-sm sm:text-base md:text-lg font-bold rounded-xl hover:bg-green-700 transition shadow-md"
             >
               Book PDI Now
             </motion.button>
@@ -350,7 +325,6 @@ const RequestForm = () => {
   );
 };
 
-/* reusable select */
 const SelectField = ({
   label,
   value,
@@ -370,7 +344,7 @@ const SelectField = ({
         onChange={onChange}
         onFocus={toggle}
         onBlur={() => setTimeout(toggle, 200)}
-        className={`w-full border border-gray-300 rounded-xl p-3 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 transition ${
+        className={`w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 transition ${
           disabled ? "bg-gray-50 cursor-not-allowed" : "cursor-pointer"
         }`}
       >
@@ -384,12 +358,12 @@ const SelectField = ({
       <motion.div
         animate={{ rotate: open ? 180 : 0 }}
         transition={{ duration: 0.2 }}
-        className="absolute right-3 top-4 text-gray-400 pointer-events-none"
+        className="absolute right-2 sm:right-3 top-2.5 sm:top-3 md:top-3.5 text-gray-400 pointer-events-none"
       >
-        <FaChevronDown />
+        <FaChevronDown className="h-4 w-4" />
       </motion.div>
     </motion.div>
   </div>
 );
 
-export default RequestForm;
+export default Request;

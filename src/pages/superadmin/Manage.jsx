@@ -14,10 +14,16 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import MaterialTable from "../../components/constants/MaterialTable";
+import ApiService from "../../core/services/api.service";
+import  ServerUrl  from "../../core/constants/serverUrl.constant";
+import { toast } from "react-toastify";
 
 const Manage = () => {
   const [activeTab, setActiveTab] = useState("admin");
   const [openDialog, setOpenDialog] = useState(false);
+
+  const [admins, setAdmins] = useState([]);
+  const [engineers, setEngineers] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -30,49 +36,115 @@ const Manage = () => {
 
   const [editId, setEditId] = useState(null);
 
-  const [admins, setAdmins] = useState(() => {
-    const stored = localStorage.getItem("admins");
-    return stored ? JSON.parse(stored) : [];
-  });
 
-  const [engineers, setEngineers] = useState(() => {
-    const stored = localStorage.getItem("engineers");
-    return stored ? JSON.parse(stored) : [];
-  });
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const response = await new ApiService().apipost(
+        `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}?roles=admin,engineer`
+      );
+      const users = response?.data?.users || [];
 
-  useEffect(() => {
-    localStorage.setItem("admins", JSON.stringify(admins));
-  }, [admins]);
+      setAdmins(users.filter((u) => u.role === "admin"));
+      setEngineers(users.filter((u) => u.role === "engineer"));
+    } catch (err) {
+      console.error("Failed to fetch users by role", err);
+      setAdmins([]);
+      setEngineers([]);
+    } finally {
+      // setLoading(false);
+    }
+  };
+  fetchUsers();
+}, []);
 
-  useEffect(() => {
-    localStorage.setItem("engineers", JSON.stringify(engineers));
-  }, [engineers]);
+
+
+  // useEffect(() => {
+  //   localStorage.setItem("admins", JSON.stringify(admins));
+  // }, [admins]);
+
+  // useEffect(() => {
+  //   localStorage.setItem("engineers", JSON.stringify(engineers));
+  // }, [engineers]);
 
   const toggleStatus = (id, type) => {
     const setter = type === "admin" ? setAdmins : setEngineers;
     const list = type === "admin" ? admins : engineers;
+    console.log(list);
 
     setter(list.map((u) => (u.id === id ? { ...u, active: !u.active } : u)));
   };
 
-  const handleAddOrUpdate = () => {
-    const list = activeTab === "admin" ? admins : engineers;
-    const setter = activeTab === "admin" ? setAdmins : setEngineers;
+  // const handleAddOrUpdate = () => {
+  //   const list = activeTab === "admin" ? admins : engineers;
+  //   const setter = activeTab === "admin" ? setAdmins : setEngineers;
+
+  //   if (editId) {
+  //     const updatedList = list.map((item) =>
+  //       item.id === editId ? { ...formData, id: editId, srNo: item.srNo } : item
+  //     );
+  //     setter(updatedList);
+  //   } else {
+  //     const newUser = {
+  //       ...formData,
+  //       id: Date.now(),
+  //       srNo: list.length + 1,
+  //     };
+  //     setter([...list, newUser]);
+  //   }
+
+  //   setFormData({
+  //     name: "",
+  //     email: "",
+  //     mobile: "",
+  //     city: "",
+  //     designation: "",
+  //     active: true,
+  //   });
+  //   setEditId(null);
+  //   setOpenDialog(false);
+  // };
+
+  const handleAddOrUpdate = async () => {
+  const list = activeTab === "admin" ? admins : engineers;
+  const setter = activeTab === "admin" ? setAdmins : setEngineers;
+  const role = activeTab; // "admin" or "engineer"
+
+  try {
+    //setLoading(true);
 
     if (editId) {
+      // Update existing user
+      await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${editId}`, {
+        ...formData,
+        role,
+        password: "123456"
+      });
+
       const updatedList = list.map((item) =>
         item.id === editId ? { ...formData, id: editId, srNo: item.srNo } : item
       );
       setter(updatedList);
+      toast.success(`${role} updated successfully`);
     } else {
+      // Create new user
+      const response = await new ApiService().apipost(ServerUrl.API_REGISTER, {
+        ...formData,
+        role,
+        password: "123456", // Assuming password is required
+      });
+
       const newUser = {
         ...formData,
-        id: Date.now(),
+        id: response.data?.id || Date.now(), // fallback if backend doesn't return ID
         srNo: list.length + 1,
       };
       setter([...list, newUser]);
+      toast.success(`${role} added successfully`);
     }
 
+    // Reset form and close dialog
     setFormData({
       name: "",
       email: "",
@@ -83,7 +155,13 @@ const Manage = () => {
     });
     setEditId(null);
     setOpenDialog(false);
-  };
+  } catch (err) {
+    toast.error(err?.response?.data?.message || `${editId ? "Update" : "Add"} failed`);
+  } finally {
+    //setLoading(false);
+  }
+};
+
 
   const handleEdit = (row) => {
     setFormData(row.original);
