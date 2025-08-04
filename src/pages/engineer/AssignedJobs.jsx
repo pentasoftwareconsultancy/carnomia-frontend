@@ -63,11 +63,11 @@ const AssignedJobs = () => {
   const handleStartPdi = (jobId) => {
     setPdiStatus((prev) => ({ ...prev, [jobId]: true }));
     const selectedJob = allJobs.find(job => job.id === jobId);
-    navigate('/OngoingJobs', { state: { job: selectedJob } });
+    navigate('/ongoing-job', { state: { job: selectedJob } });
   };
 
   const handleNewPdi = () => {
-    navigate('/OngoingJobs');
+    navigate('/ongoing-job');
   };
 
   const today = new Date().toISOString().slice(0, 10);

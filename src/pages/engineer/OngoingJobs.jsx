@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -11,7 +12,7 @@ import {
   Paper,
   Button,
 } from "@mui/material";
-import InspectionForm from "./InspectionReport/InspectionForm"; // Assuming you have an InspectionForm component
+import InspectionForm from "./InspectionReport/InspectionForm"; // Ensure this path is correct
 
 const jobs = [
   { id: 1, project: "Inventory App", date: "2025-07-09", engineer: "Onkar Basawane", status: "In Progress - PDI" },
@@ -21,6 +22,12 @@ const jobs = [
 
 const OngoingJobs = () => {
   const [selectedJob, setSelectedJob] = useState(null);
+  const navigate = useNavigate();
+
+  const handleContinueInspection = (job) => {
+    setSelectedJob(job);
+    navigate('/inspection-form', { state: { job } });
+  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -53,7 +60,7 @@ const OngoingJobs = () => {
                     variant="outlined"
                     color="success"
                     size="small"
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => handleContinueInspection(job)}
                   >
                     Continue for Inspection
                   </Button>

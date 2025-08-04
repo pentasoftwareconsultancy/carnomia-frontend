@@ -1,37 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
+  Card, CardContent, Typography, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, Chip, Box,
+  IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent,
+  DialogContentText, DialogActions, Button,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
-  FiTool,
-  FiUser,
-  FiMapPin,
-  FiCalendar,
-  FiMoreVertical,
-  FiFileText,
+  FiTool, FiUser, FiMapPin, FiCalendar, FiMoreVertical, FiFileText,
 } from 'react-icons/fi';
 import EditRequestForm from './EditRequestForm';
+import ApiService from '../../../core/services/api.service';
+import ServerUrl from '../../../core/constants/serverUrl.constant';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: '#ffffff',
@@ -97,11 +77,29 @@ const columns = [
   { id: 'actions', label: 'Actions', icon: <FiMoreVertical size={16} /> },
 ];
 
-const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode }) => {
+const AllRequests = ({ setSelectedRequest, setViewMode }) => {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchPDIRequest = async () => {
+      try {
+        const response = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
+        if (response?.data?.data) {
+          setRequests(response.data.data); // set all requests
+        }
+      } catch (err) {
+        console.error('Failed to fetch PDI requests', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPDIRequest();
+  }, []);
 
   const handleMenuOpen = (event, request) => {
     setAnchorEl(event.currentTarget);
@@ -126,7 +124,9 @@ const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode })
   };
 
   const handleEditSave = (updatedRequest) => {
-    setRequests(requests.map((r) => (r.id === updatedRequest.id ? updatedRequest : r)));
+    setRequests((prev) =>
+      prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
+    );
     setEditOpen(false);
     setSelectedRequest(null);
   };
@@ -142,7 +142,7 @@ const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode })
   };
 
   const handleDeleteConfirm = () => {
-    setRequests(requests.filter((r) => r.id !== selectedRow.id));
+    setRequests((prev) => prev.filter((r) => r.id !== selectedRow.id));
     setDeleteOpen(false);
     setSelectedRequest(null);
   };
@@ -151,6 +151,14 @@ const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode })
     setDeleteOpen(false);
     setSelectedRequest(null);
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ textAlign: 'center', p: 4 }}>
+        <Typography variant="body1">Loading requests...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%', overflowX: 'hidden', p: 0, m: 0 }}>
@@ -179,7 +187,7 @@ const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode })
               <FiFileText size={20} />
               All Requests
             </Typography>
-            <Typography variant="body2" sx={{ color: '#666', textAlign: { xs: 'left', sm: 'right' } }}>
+            <Typography variant="body2" sx={{ color: '#666' }}>
               {requests.length} requests found
             </Typography>
           </Box>
@@ -209,10 +217,7 @@ const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode })
                       key={request.id}
                       sx={{
                         backgroundColor: index % 2 === 0 ? '#fff' : '#f9fafb',
-                        '&:hover': {
-                          backgroundColor: '#e3f2fd',
-                      
-                        },
+                        '&:hover': { backgroundColor: '#e3f2fd' },
                         transition: 'background 0.3s ease',
                       }}
                     >
@@ -238,12 +243,7 @@ const AllRequests = ({ requests, setRequests, setSelectedRequest, setViewMode })
                           anchorEl={anchorEl}
                           open={Boolean(anchorEl) && selectedRow?.id === request.id}
                           onClose={handleMenuClose}
-                          PaperProps={{
-                            sx: {
-                              borderRadius: 2,
-                              boxShadow: 6,
-                            },
-                          }}
+                          PaperProps={{ sx: { borderRadius: 2, boxShadow: 6 } }}
                         >
                           <StyledMenuItem onClick={handleView}>View</StyledMenuItem>
                           <StyledMenuItem onClick={handleEditOpen}>Edit</StyledMenuItem>

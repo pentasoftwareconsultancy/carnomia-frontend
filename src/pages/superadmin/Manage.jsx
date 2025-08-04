@@ -1,371 +1,325 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Button,
-  Switch,
-  FormControlLabel,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  IconButton,
-  Menu,
-  MenuItem,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import MaterialTable from "../../components/constants/MaterialTable";
-import ApiService from "../../core/services/api.service";
-import  ServerUrl  from "../../core/constants/serverUrl.constant";
 import { toast } from "react-toastify";
+import ApiService from "../../core/services/api.service";
+import ServerUrl from "../../core/constants/serverUrl.constant";
 
-const Manage = () => {
-  const [activeTab, setActiveTab] = useState("admin");
-  const [openDialog, setOpenDialog] = useState(false);
+const ROLES = {
+  ADMIN: "admin",
+  ENGINEER: "engineer",
+};
 
-  const [admins, setAdmins] = useState([]);
-  const [engineers, setEngineers] = useState([]);
+export default function Manage() {
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const mobileRegex = /^\d{10}$/;
+
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [engineerUsers, setEngineerUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false); 
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [activeTab, setActiveTab] = useState(ROLES.ADMIN);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     mobile: "",
     city: "",
     designation: "",
+    password: "",
     active: true,
   });
 
-  const [editId, setEditId] = useState(null);
 
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchUsers(ROLES.ADMIN), fetchUsers(ROLES.ENGINEER)]);
+      } catch (error) {
+        toast.error("Failed to initialize user data");
+        console.error("Init error:", error);
+      }
+      setLoading(false);
+    };
+    init();
+  }, []); // Empty dependency array since this runs once on mount
 
-useEffect(() => {
-  const fetchUsers = async () => {
+  const fetchUsers = async (role) => {
     try {
-      const response = await new ApiService().apipost(
-        `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}?roles=admin,engineer`
+      const response = await new ApiService().apiget(
+        `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}/${role}`
       );
-      const users = response?.data?.users || [];
+      if (!response || !response.data) {
+        throw new Error("Invalid response from server");
+      }
+      const updatedUsers = response.data.map((user) => ({
+        ...user,
+        id: user._id,
+        onEdit: () => handleEdit(user, role),
+        onDelete: () => handleDelete(user._id, role),
+      }));
 
-      setAdmins(users.filter((u) => u.role === "admin"));
-      setEngineers(users.filter((u) => u.role === "engineer"));
-    } catch (err) {
-      console.error("Failed to fetch users by role", err);
-      setAdmins([]);
-      setEngineers([]);
-    } finally {
-      // setLoading(false);
+      role === ROLES.ADMIN
+        ? setAdminUsers((prev) =>
+            JSON.stringify(prev) === JSON.stringify(updatedUsers) ? prev : updatedUsers
+          )
+        : setEngineerUsers((prev) =>
+            JSON.stringify(prev) === JSON.stringify(updatedUsers) ? prev : updatedUsers
+          );
+    } catch (error) {
+      toast.error(`Failed to fetch ${role}s`);
+      console.error(`Fetch ${role} error:`, error);
     }
   };
-  fetchUsers();
-}, []);
 
-
-
-  // useEffect(() => {
-  //   localStorage.setItem("admins", JSON.stringify(admins));
-  // }, [admins]);
-
-  // useEffect(() => {
-  //   localStorage.setItem("engineers", JSON.stringify(engineers));
-  // }, [engineers]);
-
-  const toggleStatus = (id, type) => {
-    const setter = type === "admin" ? setAdmins : setEngineers;
-    const list = type === "admin" ? admins : engineers;
-    console.log(list);
-
-    setter(list.map((u) => (u.id === id ? { ...u, active: !u.active } : u)));
+  const handleEdit = (user, role) => {
+    setEditId(user._id);
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      mobile: user.mobile || "",
+      city: user.city || "",
+      designation: user.designation || "",
+      password: "",
+      active: user.active ?? true,
+    });
+    setActiveTab(role);
+    setOpen(true);
   };
 
-  // const handleAddOrUpdate = () => {
-  //   const list = activeTab === "admin" ? admins : engineers;
-  //   const setter = activeTab === "admin" ? setAdmins : setEngineers;
+  const handleDelete = async (id, role) => {
 
-  //   if (editId) {
-  //     const updatedList = list.map((item) =>
-  //       item.id === editId ? { ...formData, id: editId, srNo: item.srNo } : item
-  //     );
-  //     setter(updatedList);
-  //   } else {
-  //     const newUser = {
-  //       ...formData,
-  //       id: Date.now(),
-  //       srNo: list.length + 1,
-  //     };
-  //     setter([...list, newUser]);
-  //   }
-
-  //   setFormData({
-  //     name: "",
-  //     email: "",
-  //     mobile: "",
-  //     city: "",
-  //     designation: "",
-  //     active: true,
-  //   });
-  //   setEditId(null);
-  //   setOpenDialog(false);
-  // };
+    if (!window.confirm(`Are you sure you want to delete this ${role}?`)) return;
+    try {
+      await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${id}`);
+      toast.success(`${role.charAt(0).toUpperCase() + role.slice(1)} deleted successfully`);
+      fetchUsers(role);
+    } catch (error) {
+      toast.error(`Failed to delete ${role}`);
+      console.error(`Delete ${role} error:`, error);
+    }
+  };
 
   const handleAddOrUpdate = async () => {
-  const list = activeTab === "admin" ? admins : engineers;
-  const setter = activeTab === "admin" ? setAdmins : setEngineers;
-  const role = activeTab; // "admin" or "engineer"
+    const { name, email, mobile, city, designation, password } = formData;
+    const role = activeTab;
 
-  try {
-    //setLoading(true);
-
-    if (editId) {
-      // Update existing user
-      await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${editId}`, {
-        ...formData,
-        role,
-        password: "123456"
-      });
-
-      const updatedList = list.map((item) =>
-        item.id === editId ? { ...formData, id: editId, srNo: item.srNo } : item
-      );
-      setter(updatedList);
-      toast.success(`${role} updated successfully`);
-    } else {
-      // Create new user
-      const response = await new ApiService().apipost(ServerUrl.API_REGISTER, {
-        ...formData,
-        role,
-        password: "123456", // Assuming password is required
-      });
-
-      const newUser = {
-        ...formData,
-        id: response.data?.id || Date.now(), // fallback if backend doesn't return ID
-        srNo: list.length + 1,
-      };
-      setter([...list, newUser]);
-      toast.success(`${role} added successfully`);
+    // Validate required fields
+    if (!name.trim() || !email.trim() || !mobile.trim() || !city.trim() || !designation.trim()) {
+      toast.error("All fields except password are required");
+      return;
     }
 
-    // Reset form and close dialog
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email format");
+      return;
+    }
+    if (!mobileRegex.test(mobile)) {
+      toast.error("Mobile number must be 10 digits");
+      return;
+    }
+
+    // Require password for new users
+    if (!editId && !password.trim()) {
+      toast.error("Password is required for new users");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Conditionally include password for updates
+      const payload = editId
+        ? { ...formData, role, password: formData.password || undefined }
+        : { ...formData, role };
+      const response = editId
+        ? await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${editId}`, payload)
+        : await new ApiService().apipost(ServerUrl.API_REGISTER, payload);
+
+      if (!response || !response.data) {
+        throw new Error("Invalid response from server");
+      }
+      if (!response.data.success) {
+        toast.error(response.data.message || `Failed to ${editId ? "update" : "add"} ${role}`);
+        return;
+      }
+
+      toast.success(
+        `${role.charAt(0).toUpperCase() + role.slice(1)} ${editId ? "updated" : "added"} successfully`
+      );
+      fetchUsers(role);
+      handleClose();
+    } catch (error) {
+      toast.error(`Error ${editId ? "updating" : "adding"} ${role}`);
+      console.error(`Submit ${role} error:`, error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    setEditId(null);
     setFormData({
       name: "",
       email: "",
       mobile: "",
       city: "",
       designation: "",
+      password: "",
       active: true,
     });
-    setEditId(null);
-    setOpenDialog(false);
-  } catch (err) {
-    toast.error(err?.response?.data?.message || `${editId ? "Update" : "Add"} failed`);
-  } finally {
-    //setLoading(false);
-  }
-};
-
-
-  const handleEdit = (row) => {
-    setFormData(row.original);
-    setEditId(row.original.id);
-    setOpenDialog(true);
+    setOpen(false);
   };
 
-  const handleDelete = (row, type) => {
-    const id = row.original.id;
-    if (type === "admin") {
-      setAdmins((prev) => prev.filter((u) => u.id !== id));
-    } else {
-      setEngineers((prev) => prev.filter((u) => u.id !== id));
-    }
-  };
-
-  const ActionMenu = ({ row, type }) => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
-
-    const handleMenuOpen = (event) => {
-      setAnchorEl(event.currentTarget);
-    };
-
-    const handleMenuClose = () => {
-      setAnchorEl(null);
-    };
-
-    return (
-      <>
-        <IconButton onClick={handleMenuOpen}>
-          <MoreVertIcon />
-        </IconButton>
-        <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-          <MenuItem
-            onClick={() => {
-              alert("View:\n" + JSON.stringify(row.original, null, 2));
-              handleMenuClose();
-            }}
-          >
-            View
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleEdit(row);
-              handleMenuClose();
-            }}
+  // Memoize columns to prevent unnecessary re-renders
+  const getColumns = useCallback(() => [
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "email", header: "Email" },
+    { accessorKey: "mobile", header: "Mobile" },
+    { accessorKey: "city", header: "City" },
+    { accessorKey: "designation", header: "Designation" },
+    {
+      id: "actions",
+      header: "Actions",
+      Cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => row.original.onEdit()}
+            aria-label={`Edit ${row.original.name}`}
           >
             Edit
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleDelete(row, type);
-              handleMenuClose();
-            }}
-            sx={{ color: "red" }}
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            color="error"
+            onClick={() => row.original.onDelete()}
+            aria-label={`Delete ${row.original.name}`}
           >
             Delete
-          </MenuItem>
-        </Menu>
-      </>
-    );
-  };
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
 
-  const columns = (type) => {
-    const baseColumns = [
-      { accessorKey: "srNo", header: "Sr No", size: 60 },
-      { accessorKey: "name", header: "Name", size: 120 },
-      { accessorKey: "email", header: "Email", size: 160 },
-      { accessorKey: "mobile", header: "Mobile", size: 120 },
-      { accessorKey: "designation", header: "Designation", size: 150 },
-      {
-        accessorKey: "active",
-        header: "Status",
-        size: 100,
-        Cell: ({ row }) => (
-          <FormControlLabel
-            control={
-              <Switch
-                checked={row.original.active}
-                onChange={() => toggleStatus(row.original.id, type)}
-                color="success"
-              />
-            }
-            label={row.original.active ? "Active" : "Inactive"}
-          />
-        ),
-      },
-    ];
-
-    // Insert City column before Action if engineer
-    if (type === "engineer") {
-      baseColumns.splice(baseColumns.length - 1, 0, {
-        accessorKey: "city",
-        header: "City",
-        size: 120,
-      });
-    }
-
-    // Add Action column last
-    baseColumns.push({
-      header: "Action",
-      size: 80,
-      Cell: ({ row }) => <ActionMenu row={row} type={type} />,
-    });
-
-    return baseColumns;
-  };
+  const columns = useMemo(() => getColumns(), [getColumns]);
 
   return (
     <div className="p-6">
-      {/* Tab buttons */}
+      {/* Tabs */}
       <div className="flex gap-4 mb-6">
         <Button
-          variant={activeTab === "admin" ? "contained" : "outlined"}
-          onClick={() => setActiveTab("admin")}
+          variant={activeTab === ROLES.ADMIN ? "contained" : "outlined"}
+          onClick={() => setActiveTab(ROLES.ADMIN)}
+          aria-label="Manage Admins"
         >
-          Manage Admin
+          Manage Admins
         </Button>
         <Button
-          variant={activeTab === "engineer" ? "contained" : "outlined"}
-          onClick={() => setActiveTab("engineer")}
+          variant={activeTab === ROLES.ENGINEER ? "contained" : "outlined"}
+          onClick={() => setActiveTab(ROLES.ENGINEER)}
+          aria-label="Manage Engineers"
         >
-          Manage Engineer
+          Manage Engineers
         </Button>
       </div>
 
-      {/* Material Table */}
+      {/* Table */}
       <MaterialTable
-        title={activeTab === "admin" ? "Admins" : "Engineers"}
-        data={activeTab === "admin" ? admins : engineers}
-        columns={columns(activeTab)}
-        addButtonLabel={`+ Add ${activeTab === "admin" ? "Admin" : "Engineer"}`}
+        title={activeTab === ROLES.ADMIN ? "Admins" : "Engineers"}
+        data={activeTab === ROLES.ADMIN ? adminUsers : engineerUsers}
+        columns={columns}
+        loading={loading}
+        addButtonLabel={`+ Add ${activeTab === ROLES.ADMIN ? "Admin" : "Engineer"}`}
         onAdd={() => {
+          setEditId(null);
           setFormData({
             name: "",
             email: "",
             mobile: "",
             city: "",
             designation: "",
+            password: "",
             active: true,
           });
-          setEditId(null);
-          setOpenDialog(true);
+          setOpen(true);
         }}
       />
 
-      {/* Dialog for Add/Edit */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
-        <DialogTitle>
-          {editId ? "Edit" : "Add"} {activeTab === "admin" ? "Admin" : "Engineer"}
+      {/* Dialog */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="sm"
+        aria-labelledby="user-dialog-title"
+      >
+        <DialogTitle id="user-dialog-title">
+          {editId
+            ? `Edit ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`
+            : `Add ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            label="Name"
-            fullWidth
-            margin="dense"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <TextField
-            label="Email"
-            fullWidth
-            margin="dense"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-          <TextField
-            label="Mobile"
-            fullWidth
-            margin="dense"
-            value={formData.mobile}
-            onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-          />
-          {activeTab === "engineer" && (
+          {["name", "email", "mobile", "city", "designation"].map((field) => (
             <TextField
-              label="City"
+              key={field}
+              label={field.charAt(0).toUpperCase() + field.slice(1)}
               fullWidth
               margin="dense"
-              value={formData.city}
-              onChange={(e) =>
-                setFormData({ ...formData, city: e.target.value })
-              }
+              value={formData[field]}
+              onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+              aria-describedby={`${field}-description`}
+            />
+          ))}
+          {!editId && (
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              margin="dense"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              aria-describedby="password-description"
             />
           )}
-          <TextField
-            label="Designation"
-            fullWidth
-            margin="dense"
-            value={formData.designation}
-            onChange={(e) =>
-              setFormData({ ...formData, designation: e.target.value })
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.active}
+                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                aria-label="Active status"
+              />
             }
+            label="Active"
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddOrUpdate}>
-            {editId ? "Update" : "Save"}
+          <Button onClick={handleClose} aria-label="Cancel user action">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddOrUpdate}
+            disabled={submitting}
+            aria-label={editId ? "Update user" : "Add user"}
+          >
+            {submitting ? "Submitting..." : editId ? "Update" : "Add"}
           </Button>
         </DialogActions>
       </Dialog>
     </div>
   );
-};
-
-export default Manage;
+}

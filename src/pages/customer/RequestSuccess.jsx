@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
+import ApiService from "../../core/services/api.service";
+import ServerUrl from "../../core/constants/serverUrl.constant";
 
 const RequestSuccess = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [pdirequest, setpdirequest] = useState([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("recentRequest");
-    if (stored) {
-      setData({ ...JSON.parse(stored), bookingId: "PUN21050001" });
-    }
+    const fetchPDIRequest = async () => {
+      try {
+        const response = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
+        if (response?.data?.data?.length > 0) {
+          const latestRequest = response.data.data[response.data.data.length - 1];
+          setData(latestRequest);
+        }
+      } catch (err) {
+        console.error("Failed to fetch PDI requests", err);
+      }
+    };
+
+    fetchPDIRequest();
   }, []);
 
   if (!data) return null;
 
-  const {
-    brand,
-    model,
-    variant,
-    transmission,
-    fuel,
-    dealer,
-    address,
-    image,
-    bookingId,
-  } = data;
+  const { bookingId, brand, model, imageUrl } = data;
 
   return (
     <div className="min-h-screen bg-[#F1FFE0] flex items-center justify-center font-sans px-4 py-10">
@@ -50,14 +52,14 @@ const RequestSuccess = () => {
         </p>
 
         <img
-          src={image}
+          src={imageUrl}
           alt={`${brand} ${model}`}
           className="mx-auto w-full max-w-[500px] object-contain mb-8"
         />
 
         <div className="flex justify-end">
           <button
-            onClick={() => navigate("/customer/dashboard/recent-request")}
+            onClick={() => navigate("/customer/dashboard")}
             className="bg-green-800 hover:bg-green-900 text-white font-bold px-6 py-3 rounded-full shadow-lg transition"
           >
             Go to your Dashboard

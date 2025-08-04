@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import ApiService from "../../../core/services/api.service";
-import  ServerUrl  from "../../../core/constants/serverUrl.constant";
+import ServerUrl from "../../../core/constants/serverUrl.constant";
 import { toast } from "react-toastify";
 
 const AddCar = () => {
@@ -11,7 +11,11 @@ const AddCar = () => {
     variant: "",
     transmissionType: "",
     fuelType: "",
-    imageUrl: '',
+    BHPs: "",
+    Airbags: "",
+    Mileage: "",
+    NCAP: "",
+    imageUrl: "",
   });
 
   const handleChange = (e) => {
@@ -23,10 +27,10 @@ const AddCar = () => {
     }));
   };
 
-// Handle imageUrl file change
+  // Handle imageUrl file change
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    
+
     if (!file) return;
 
     const formData = new FormData();
@@ -62,20 +66,46 @@ const AddCar = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { brand, model, variant, transmissionType, fuelType, imageUrl } = carDetails;
+    const {
+      brand,
+      model,
+      variant,
+      transmissionType,
+      fuelType,
+      BHPs,
+      Airbags,
+      Mileage,
+      NCAP,
+      imageUrl,
+    } = carDetails;
 
-    if (!brand || !model || !variant || !transmissionType || !fuelType || !imageUrl) {
+    if (
+      !brand ||
+      !model ||
+      !variant ||
+      !transmissionType ||
+      !fuelType ||
+      !BHPs ||
+      !Airbags ||
+      !Mileage ||
+      !NCAP ||
+      !imageUrl
+    ) {
       toast.error("Please fill all fields and upload an imageUrl.");
       return;
     }
 
     try {
-    const payload = {
+      const payload = {
         brand,
         model,
         variant,
         transmissionType,
         fuelType,
+        BHPs,
+        Airbags,
+        Mileage,
+        NCAP,
         imageUrl, // Use the imageUrl obtained from image upload
       };
 
@@ -97,6 +127,10 @@ const AddCar = () => {
           variant: "",
           transmissionType: "",
           fuelType: "",
+          BHPs: "",
+          Airbags: "",
+          Mileage: "",
+          NCAP: "",
           imageUrl: "", // Reset the imageUrl after submission
         });
         document.getElementById("carImage").value = null; // Reset file input
@@ -125,7 +159,7 @@ const AddCar = () => {
             value={carDetails.brand}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-4 py-2"
-            placeholder="e.g., Honda"
+            placeholder="e.g., Toyota"
           />
         </div>
         <div>
@@ -136,7 +170,7 @@ const AddCar = () => {
             value={carDetails.model}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-4 py-2"
-            placeholder="e.g., Elevate"
+            placeholder="e.g., Innova Crysta"
           />
         </div>
         <div>
@@ -147,36 +181,74 @@ const AddCar = () => {
             value={carDetails.variant}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-4 py-2"
-            placeholder="e.g., ZX CVT"
+            placeholder="e.g., 2.4 GX 7 STR"
           />
         </div>
         <div>
           <label className="block font-semibold">Transmission</label>
-          <select
+          <input
+            type="text"
             name="transmissionType"
             value={carDetails.transmissionType}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-4 py-2"
-          >
-            <option value="">Select</option>
-            <option value="Manual">Manual</option>
-            <option value="Automatic">Automatic</option>
-          </select>
+            placeholder="e.g., Automatic"
+          />
         </div>
         <div>
           <label className="block font-semibold">Fuel Type</label>
-          <select
+          <input
+            type="text"
             name="fuelType"
             value={carDetails.fuelType}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-4 py-2"
-          >
-            <option value="">Select</option>
-            <option value="Petrol">Petrol</option>
-            <option value="Diesel">Diesel</option>
-            <option value="Electric">Electric</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
+            placeholder="e.g., Petrol"
+          />
+        </div>
+        <div>
+          <label className="block font-semibold">BHPs</label>
+          <input
+            type="text"
+            name="BHPs"
+            value={carDetails.BHPs}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-4 py-2"
+            placeholder="e.g., 150"
+          />
+        </div>
+        <div>
+          <label className="block font-semibold">Airbags</label>
+          <input
+            type="text"
+            name="Airbags"
+            value={carDetails.Airbags}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-4 py-2"
+            placeholder="e.g., 6"
+          />
+        </div>
+        <div>
+          <label className="block font-semibold">Mileage</label>
+          <input
+            type="text"
+            name="Mileage"
+            value={carDetails.Mileage}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-4 py-2"
+            placeholder="e.g., 15 km/l"
+          />
+        </div>
+        <div>
+          <label className="block font-semibold">NCAP</label>
+          <input
+            type="text"
+            name="NCAP"
+            value={carDetails.NCAP}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-4 py-2"
+            placeholder="e.g., 5 stars"
+          />
         </div>
         <div>
           <label className="block font-semibold">Upload Image</label>

@@ -5,7 +5,6 @@ import PublicLayout from "../components/layout/PublicLayout";
 import AuthLayout from "../components/layout/AuthLayout";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import ProtectedRoute from "./ProtectedRoute";
-import AuthRedirect from "./AuthRedirect";
 import ScrollToTop from "../pages/ScrollToTop";
 import { useAuth } from "../core/contexts/AuthContext";
 

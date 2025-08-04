@@ -88,7 +88,7 @@ const Signup = () => {
           <img src={Car} alt="Car" className="mt-2 max-w-[500px] mx-auto" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-[#f9fcf4] p-6 rounded-2xl shadow-md mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-white p-6 rounded-2xl shadow-md mx-auto">
           <h2 className="text-3xl font-bold text-green-700 text-center">Signup</h2>
 
           <input
@@ -98,7 +98,7 @@ const Signup = () => {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border rounded px-4 py-2"
+            className="w-full mb-2 p-3 border rounded-lg border-gray-300"
           />
 
           <input
@@ -108,7 +108,7 @@ const Signup = () => {
             value={form.email}
             onChange={handleChange}
             required
-            className={`w-full border rounded px-4 py-2 ${errors.email ? "border-red-500" : ""}`}
+            className={`w-full mb-2 p-3 border rounded-lg border-gray-300 ${errors.email ? "border-red-500" : ""}`}
           />
           {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
@@ -119,7 +119,7 @@ const Signup = () => {
             value={form.mobile}
             onChange={handleChange}
             required
-            className={`w-full border rounded px-4 py-2 ${errors.mobile ? "border-red-500" : ""}`}
+            className={`w-full mb-2 p-3 border rounded-lg border-gray-300 ${errors.mobile ? "border-red-500" : ""}`}
           />
           {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
 
@@ -127,7 +127,7 @@ const Signup = () => {
             name="city"
             onChange={handleChange}
             required
-            className="w-full border rounded px-4 py-2"
+            className="w-full mb-2 p-3 border rounded-lg border-gray-300"
           >
             <option>Select City</option>
             {locations.map((city, index) => (

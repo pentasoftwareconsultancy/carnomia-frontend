@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,13 +15,14 @@ import {
   Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import ApiService from '../../../core/services/api.service';
+import ServerUrl from '../../../core/constants/serverUrl.constant';
 
 // Styled Components
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: '#ffffff',
   borderRadius: theme.spacing(2),
   boxShadow: theme.shadows[6],
-  margin: 0,
   width: '100%',
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   '&:hover': {
@@ -37,7 +38,7 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
 }));
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontSize: { xs: '0.8rem', sm: '0.9rem' },
+  fontSize: '0.9rem',
   padding: theme.spacing(1),
   textAlign: 'center',
   color: '#000000',
@@ -47,11 +48,32 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const EngineerManagement = ({ engineers, setEngineers }) => {
-  const handleToggle = (id) => {
-    setEngineers(engineers.map(eng =>
-      eng.id === id ? { ...eng, active: !eng.active } : eng
-    ));
+const EngineerManagement = () => {
+  const [engineers, setEngineers] = useState([]);
+
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      try {
+        const response = await new ApiService().apiget(ServerUrl.API_GET_ALL_USERS_BY_ROLES + 'engineer');
+        if (response?.data?.data) {
+          setEngineers(response.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch engineers", err);
+      }
+    };
+
+    fetchEngineers();
+  }, []);
+
+  const handleToggle = async (id) => {
+    setEngineers((prev) =>
+      prev.map((eng) =>
+        eng.id === id ? { ...eng, active: !eng.active } : eng
+      )
+    );
+
+
   };
 
   const renderTable = (data, columns, renderRow, emptyMessage) => (
@@ -85,7 +107,7 @@ const EngineerManagement = ({ engineers, setEngineers }) => {
   );
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '100%', p: 0, m: 0, bgcolor: '#F1FFE0' }}>
+    <Box sx={{ width: '100%', p: 0, bgcolor: '#F1FFE0' }}>
       <StyledCard>
         <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
           <Typography
@@ -109,7 +131,6 @@ const EngineerManagement = ({ engineers, setEngineers }) => {
                 hover
                 sx={{
                   backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb',
-                  transition: 'background-color 0.3s ease',
                   '&:hover': { backgroundColor: '#f1f5f9' },
                 }}
               >
