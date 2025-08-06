@@ -49,6 +49,7 @@ import Customize from "../pages/superadmin/customize/Customize";
 import Analytics from "../pages/superadmin/Analytics";
 import InspectionReports from "../pages/superadmin/InspectionReports";
 import PaymentManagements from "../pages/superadmin/PaymentManagements";
+import Report from "../pages/engineer/report/Report";
 
 // 404
 const NotFound = () => (
@@ -125,6 +126,7 @@ const AppRoutes = () => {
           <Route path="completed-job" element={<CompletedJobs />} />
           <Route path="payment-status" element={<EngineerPayment />} />
           <Route path="contact-support" element={<EngineerSupport />} />
+          <Route path="report" element={<Report />} />
         </Route>
 
         {/* Admin Dashboard Layout */}

@@ -134,7 +134,7 @@ const FreqeuntlyAsked = () => {
   })).filter(section => section.questions.length > 0);
 
   return (
-    <div className="bg-[#F1FFE0] min-h-screen font-sans">
+    <div className="bg-[#f1f8e9] min-h-screen font-sans">
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}

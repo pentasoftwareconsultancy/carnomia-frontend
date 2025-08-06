@@ -18,7 +18,7 @@ image:
 
 export default function ServicesCard() {
 return (
-<div className="bg-[#F1FFE0] py-16 px-4 sm:px-6 lg:px-8">
+<div className="bg-[#f1f8e9] py-16 px-4 sm:px-6 lg:px-8">
 <div className="max-w-7xl mx-auto">
 
 <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
@@ -37,7 +37,7 @@ Our Services
             <h3 className="text-2xl font-semibold mb-4">{service.title}</h3>
             <Link
               to={service.path}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md w-fit text-sm font-medium transition"
+              className="bg-[#81da5b] cursor-pointer text-white px-6 py-2 rounded-md w-fit text-sm font-medium transition"
               aria-label={`Book ${service.title}`}
             >
               Book Your PDI Now

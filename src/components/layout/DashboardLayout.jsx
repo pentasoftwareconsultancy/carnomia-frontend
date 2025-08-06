@@ -28,7 +28,7 @@ const DashboardLayout = ({ role }) => {
           mobileOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
         />
-        <main className="flex-1 overflow-y-auto p-4 bg-[#F1FFE0]">
+        <main className="flex-1 overflow-y-auto p-4 bg-[#f1f8e9]">
           <Outlet />
         </main>
       </div>

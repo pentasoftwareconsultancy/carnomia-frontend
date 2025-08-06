@@ -14,7 +14,7 @@ const TermsPopup = ({ onClose, onAgree }) => {
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}
-          className="bg-[#F1FFE0] rounded-lg px-6 pt-5 pb-4 text-left shadow-xl w-full max-w-lg sm:p-6"
+          className="bg-[#f1f8e9] rounded-lg px-6 pt-5 pb-4 text-left shadow-xl w-full max-w-lg sm:p-6"
         >
           <div className="text-center">
             <h3 className="text-lg font-medium text-gray-900">Terms & Conditions</h3>

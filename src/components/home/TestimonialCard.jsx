@@ -33,7 +33,7 @@ function TestimonialCard() {
   ];
 
   return (
-    <section className="w-full bg-[#F1FFE0] px-4 sm:px-6 md:px-16 py-16">
+    <section className="w-full bg-[#f1f8e9] px-4 sm:px-6 md:px-16 py-16">
    <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
         What Our Customers Say
       </h2>

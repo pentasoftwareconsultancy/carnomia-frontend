@@ -111,7 +111,7 @@ const Recent = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F1FFE0] px-4 sm:px-6 md:px-8 py-6 font-sans">
+    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 md:px-8 py-6 font-sans">
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -135,7 +135,7 @@ const Recent = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Vehicle Image - Full width on mobile, 2/3 on desktop */}
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-            className="lg:col-span-2 bg-[#F1FFE0] rounded-xl shadow-xl overflow-hidden border border-gray-100">
+            className="lg:col-span-2 bg-[#f1f8e9] rounded-xl shadow-xl overflow-hidden border border-gray-100">
             <div className="relative h-48 sm:h-64 md:h-80 w-full">
               <img src={state.formData.image || 'https://via.placeholder.com/800x400?text=No+Image'}
                 alt="Vehicle" className="w-full h-full object-cover" />

@@ -35,7 +35,7 @@ const ContactSupport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1FFE0] px-4 sm:px-6 lg:px-12 py-12">
+    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 lg:px-12 py-12">
       <ToastContainer position="top-center" autoClose={3000} />
       {showConfetti && <Confetti recycle={false} numberOfPieces={250} />}
 
@@ -57,7 +57,7 @@ const ContactSupport = () => {
             We’re here to help you drive smart with confidence.
           </p>
 
-          <div className="bg-[#F1FFE0] shadow-xl rounded-2xl p-5 sm:p-6 border border-gray-200 space-y-6">
+          <div className="bg-[#f1f8e9] shadow-xl rounded-2xl p-5 sm:p-6 border border-gray-200 space-y-6">
             {[
               {
                 icon: <FiPhone className="text-xl sm:text-2xl" />,

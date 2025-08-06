@@ -28,7 +28,7 @@ const ContactSupport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1FFE0] px-4 sm:px-6 lg:px-20 py-12 font-sans">
+    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 lg:px-20 py-12 font-sans">
       <ToastContainer position="top-center" autoClose={3000} />
       {showConfetti && <Confetti recycle={false} numberOfPieces={250} />}
 

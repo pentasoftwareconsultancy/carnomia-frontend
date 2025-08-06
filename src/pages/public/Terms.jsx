@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 
 const Terms = () => {
 return (
-<div className="bg-[#F1FFE0] min-h-screen font-sans text-gray-800">
+<div className="bg-[#f1f8e9] min-h-screen font-sans text-gray-800">
 {/* Header */}
 <motion.header
 className="bg-black py-12 px-4 text-center"

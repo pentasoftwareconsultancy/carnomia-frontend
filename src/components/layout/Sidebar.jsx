@@ -28,16 +28,17 @@ const Sidebar = ({ role, links, mobileOpen, onCloseMobile }) => {
       <aside
         className={clsx(
           "fixed z-40 lg:static top-0 left-0 h-full transition-all duration-300 bg-gray-800 text-white flex flex-col justify-between",
-          collapsed ? "w-20" : "w-64",
+          collapsed ? "w-20" : "w-55",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="p-4">
+        <div className="mt-14 p-4">
+
           {/* Collapse Button */}
           <div className="flex justify-between items-center mb-4">
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="text-white hover:text-green-500"
+              className="px-2 py-2 mr-2 bg-[#81da5b] rounded-4xl text-white hover:text-white"
             >
               {collapsed ? <FiArrowRight size={20} /> : <FiArrowLeft size={20} />}
             </button>

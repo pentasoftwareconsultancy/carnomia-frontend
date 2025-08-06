@@ -30,7 +30,7 @@ const RequestSuccess = () => {
   const { bookingId, brand, model, imageUrl } = data;
 
   return (
-    <div className="min-h-screen bg-[#F1FFE0] flex items-center justify-center font-sans px-4 py-10">
+    <div className="min-h-screen bg-[#f1f8e9] flex items-center justify-center font-sans px-4 py-10">
       <div className="bg-white rounded-xl shadow-lg max-w-5xl w-full px-6 py-10 sm:px-10 text-center">
         <h1 className="text-green-700 text-xl sm:text-2xl font-semibold mb-2">
           Congratulations, your PDI is booked successfully!

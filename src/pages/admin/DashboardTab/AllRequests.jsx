@@ -90,7 +90,7 @@ const AllRequests = ({ setSelectedRequest, setViewMode }) => {
       try {
         const response = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
         if (response?.data?.data) {
-          setRequests(response.data.data); // set all requests
+          setRequests(response.data.data); 
         }
       } catch (err) {
         console.error('Failed to fetch PDI requests', err);

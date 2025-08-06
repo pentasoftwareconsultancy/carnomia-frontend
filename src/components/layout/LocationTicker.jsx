@@ -10,7 +10,7 @@ export default function LocationTicker() {
   const allLocations = [...locations, ...locations]; // repeat for loop effect
 
   return (
-    <div className="w-full bg-[#F1FFE0] overflow-hidden text-sm text-black py-2">
+    <div className="w-full bg-[#f1f8e9] overflow-hidden text-sm text-black py-2">
       <div className="location-marquee whitespace-nowrap flex space-x-6 px-6">
         {allLocations.map((loc, index) => (
           <span key={index} className="inline-block px-2">

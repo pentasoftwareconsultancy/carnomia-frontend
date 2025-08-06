@@ -12,7 +12,7 @@ import {
   Paper,
   Button,
 } from "@mui/material";
-import InspectionForm from "./InspectionReport/InspectionForm"; // Ensure this path is correct
+import Report from "./report/Report";
 
 const jobs = [
   { id: 1, project: "Inventory App", date: "2025-07-09", engineer: "Onkar Basawane", status: "In Progress - PDI" },
@@ -26,7 +26,7 @@ const OngoingJobs = () => {
 
   const handleContinueInspection = (job) => {
     setSelectedJob(job);
-    navigate('/inspection-form', { state: { job } });
+    navigate('/report', { state: { job } });
   };
 
   return (
@@ -60,7 +60,7 @@ const OngoingJobs = () => {
                     variant="outlined"
                     color="success"
                     size="small"
-                    onClick={() => handleContinueInspection(job)}
+                    onClick={() => navigate("/engineer/dashboard/report")}
                   >
                     Continue for Inspection
                   </Button>

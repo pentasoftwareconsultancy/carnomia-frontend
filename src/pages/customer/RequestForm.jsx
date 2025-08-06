@@ -158,7 +158,7 @@ const handleSubmit = async (e) => {
 
 
   return (
-    <div className="min-h-screen bg-[#F1FFE0] px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-8 sm:py-10 font-sans">
+    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-8 sm:py-10 font-sans">
       <div className="mt-12 sm:mt-16 md:mt-20 flex flex-col md:flex-row justify-center items-center md:items-start gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-7xl mx-auto">
         {/* Left side (title & image) */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center text-center">

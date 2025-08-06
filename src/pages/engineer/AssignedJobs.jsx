@@ -63,11 +63,6 @@ const AssignedJobs = () => {
   const handleStartPdi = (jobId) => {
     setPdiStatus((prev) => ({ ...prev, [jobId]: true }));
     const selectedJob = allJobs.find(job => job.id === jobId);
-    navigate('/ongoing-job', { state: { job: selectedJob } });
-  };
-
-  const handleNewPdi = () => {
-    navigate('/ongoing-job');
   };
 
   const today = new Date().toISOString().slice(0, 10);
@@ -83,8 +78,8 @@ const AssignedJobs = () => {
   });
 
   return (
-    <div className="bg-gradient-to-br from-green-50 to-gray-50 min-h-screen p-4 md:p-6 font-sans">
-      {/* Header */}
+    <div className="bg-[#f1f8e9] min-h-screen p-4 md:p-6 font-sans">
+
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Engineer Dashboard</h1>
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 md:gap-4">
@@ -198,7 +193,7 @@ const AssignedJobs = () => {
                 </div>
 
                 <button
-                  onClick={() => handleStartPdi(job.id)}
+                  onClick={() => navigate("/engineer/dashboard/ongoing-job")}
                   disabled={pdiStatus[job.id]}
                   className={`w-full py-2.5 rounded-lg font-semibold mt-auto flex items-center justify-center transition-all ${
                     pdiStatus[job.id]

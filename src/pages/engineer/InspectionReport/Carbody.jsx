@@ -14,7 +14,7 @@ export default function CarBody() {
   ];
 
   return (
-    <div className="bg-[#F1FFE0] min-h-screen py-10 font-sans">
+    <div className="bg-[#f1f8e9] min-h-screen py-10 font-sans">
       <div className="mx-4 sm:mx-6 md:mx-12 lg:mx-16">
         {panels.map((name, idx) => (
           <BodyPanelCard key={idx} index={idx + 1} label={name} />
@@ -106,7 +106,8 @@ function BodyPanelCard({ index, label }) {
 
   return (
     <section
-      className={`border border-gray-400 rounded-xl p-5 bg-[#F1FFE0] ${
+      className={`border border-gray-400 rounded-xl p-5 bg-[#f1f8e9] 
+      ${
         index > 1 ? "mt-8" : ""
       }`}
     >

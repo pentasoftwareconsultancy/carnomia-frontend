@@ -98,7 +98,7 @@ const Completed = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F1FFE0] py-4 px-2 sm:px-4 md:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f1f8e9] py-4 px-2 sm:px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

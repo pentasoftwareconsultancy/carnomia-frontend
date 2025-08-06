@@ -115,8 +115,8 @@ export default function Footer() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <h3 className="font-bold mb-4 text-lg">Contact</h3>
-          <p className="my-2 hover:text-green-400 transition">+91 8055163427</p>
-          <p className="my-2 hover:text-green-400 transition">+91 7378703199</p>
+          <p className="my-2 hover:text-green-400 transition">+91 7385978109</p>
+          <p className="my-2 hover:text-green-400 transition">+91 7378554409</p>
         </motion.div>
       </div>
 
@@ -131,8 +131,6 @@ export default function Footer() {
           <FaCalendarAlt />
           <span>Working Days:</span>
           <span className="font-medium text-white">Monday - Sunday</span>
-        </div>
-        <div className="flex justify-center gap-4 items-center flex-wrap text-gray-300">
           <FaRegClock />
           <span>Working Hours:</span>
           <span className="font-medium text-white">09:30am - 06:30pm</span>
@@ -142,8 +140,10 @@ export default function Footer() {
       {/* Copyright */}
       <div className="flex justify-center items-center gap-2 text-xs py-3 border-t border-gray-800 text-gray-400">
         <FaCopyright />
-        <span>2025 DriveSta. All Rights Reserved.</span>
+        <span>2025 Drivesta. All Rights Reserved.</span>
+        <div>Developed By Smart Software Solutions Pvt Ltd</div>
       </div>
+
     </footer>
   );
 }

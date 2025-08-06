@@ -74,7 +74,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-[#F1FFE0] px-4 py-10">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-[#f1f8e9] px-4 py-10">
       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div className="text-center md:text-left px-2 sm:px-6">
           <h1 className="text-3xl font-extrabold leading-snug">
@@ -251,7 +251,7 @@ export default Signup;
 //   };
 
 //   return (
-//     <div className="min-h-screen flex flex-col justify-center items-center bg-[#F1FFE0] px-4 py-10">
+//     <div className="min-h-screen flex flex-col justify-center items-center bg-[#f1f8e9] px-4 py-10">
 //       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 //         <div className="text-center md:text-left px-2 sm:px-6">
 //           <h1 className="text-3xl font-extrabold leading-snug">

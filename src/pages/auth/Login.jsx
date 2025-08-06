@@ -124,7 +124,7 @@ useEffect(() => {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row min-h-screen bg-[#F1FFE0] items-center justify-center">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-[#f1f8e9] items-center justify-center">
         <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-10">
           <h1 className="text-3xl font-extrabold text-black mb-2">We Inspect Before You Invest!</h1>
           <h2 className="text-2xl text-green-600 font-bold mb-4">Unlock the Unseen with Tech!</h2>
@@ -433,7 +433,7 @@ useEffect(() => {
 
 //   return (
 //     <>
-//       <div className="flex flex-col lg:flex-row min-h-screen bg-[#F1FFE0] items-center justify-center">
+//       <div className="flex flex-col lg:flex-row min-h-screen bg-[#f1f8e9] items-center justify-center">
 //         <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-10">
 //           <h1 className="text-3xl font-extrabold text-black mb-2">We Inspect Before You Invest!</h1>
 //           <h2 className="text-2xl text-green-600 font-bold mb-4">Unlock the Unseen with Tech!</h2>

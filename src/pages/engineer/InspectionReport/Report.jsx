@@ -3,7 +3,7 @@ import { FaCamera, FaUpload, FaPlus, FaUser, FaTimes } from "react-icons/fa";
 
 export default function Report() {
   return (
-    <div className="bg-[#F1FFE0] min-h-screen py-10 font-sans">
+    <div className="bg-[#f1f8e9] min-h-screen py-10 font-sans">
       <div className="px-4 sm:px-6 md:px-12 lg:px-16">
         <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6">
           <h1 className="text-xl font-semibold">Drivesta</h1>
@@ -123,7 +123,8 @@ function PhotoCard({ heading, isLast }) {
 
   return (
     <section
-      className={`border border-gray-400 rounded-xl p-4 bg-[#F1FFE0] ${
+      className={`border border-gray-400 rounded-xl p-4 bg-[#f1f8e9]
+     ${
         !isLast ? "mb-6" : ""
       }`}
     >

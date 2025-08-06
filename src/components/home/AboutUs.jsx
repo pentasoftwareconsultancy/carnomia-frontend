@@ -53,7 +53,7 @@ const imageAnim = {
 
 export default function AboutUs() {
   return (
-    <div className="bg-[#F1FFE0] py-10">
+    <div className="bg-[#f1f8e9] py-10">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
         About Us
       </h2>
@@ -71,7 +71,7 @@ export default function AboutUs() {
               variants={container}
             >
               <motion.h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-green-400 mb-6 leading-tight"
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#81da5b] mb-6 leading-tight"
                 variants={item}
               >
                 Who We Are
@@ -81,7 +81,7 @@ export default function AboutUs() {
                 className="text-gray-300 text-base sm:text-lg leading-relaxed mb-4"
                 variants={item}
               >
-                <span className="font-semibold text-green-400">Drivesta</span>{" "}
+                <span className="font-semibold text-[#81da5b]">Drivesta</span>{" "}
                 is India's most trusted Pre‑Delivery Inspection (PDI) platform.
                 We ensure that your new or used car is mechanically and
                 aesthetically flawless before it reaches you.
