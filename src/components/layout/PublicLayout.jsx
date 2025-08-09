@@ -1,4 +1,4 @@
-import React from "react";
+import ReactLocationTicker from "react";
 import LocationTicker from "../layout/LocationTicker";
 import Navbar from "../layout/Navbar";
 import Footer from "../layout/Footer";

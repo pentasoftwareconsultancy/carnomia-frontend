@@ -33,8 +33,8 @@ const ToggleButton = ({ checked, onChange, label }) => {
 
 const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPhoto }) => {
   const rubberPanels = [
-    'bonnet', 'frontLeftDoor', 'rearLeftDoor', 'boot', 'rearRightDoor',
-    'frontRightDoor', 'frontWiper', 'rearWiper', 'sunroof'
+    'rubber_bonnet_issues', 'rubber_front_left_door_issues', 'rubber_rear_left_door_issues', 'rubber_boot_issues', 'rubber_rear_right_door_issues',
+    'rubber_front_right_door_issues', 'rubber_front_wiper_issues', 'rubber_rear_wiper_issues', 'rubber_sunroof_issues'
   ];
 
   const videoRefs = useRef({});
@@ -43,7 +43,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
   const [photos, setPhotos] = useState({});
   const [showDropdown, setShowDropdown] = useState(null);
   const [condition, setCondition] = useState({});
-  const [rearWiperEnabled, setRearWiperEnabled] = useState(false);
+  const [rubber_rear_wiper_issuesEnabled, setrubber_rear_wiper_issuesEnabled] = useState(false);
 
   useEffect(() => {
     const initMaps = rubberPanels.reduce((acc, id) => {
@@ -59,6 +59,13 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
     setIsCameraActive(initMaps.isCameraActive);
     setPhotos(initMaps.photos);
     setCondition(initMaps.condition);
+
+    console.log('Initial states set:', {
+      streamStates: initMaps.streamStates,
+      isCameraActive: initMaps.isCameraActive,
+      photos: initMaps.photos,
+      condition: initMaps.condition,
+    });
   }, []);
 
   useEffect(() => {
@@ -70,6 +77,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
   }, [streamStates]);
 
   const handleCameraClick = async (id, idx) => {
+    console.log(`handleCameraClick called for ${id} index ${idx}`);
     const activeArr = [...(isCameraActive[id] || Array(5).fill(false))];
     const stateArr = [...(streamStates[id] || Array(5).fill(null))];
 
@@ -81,6 +89,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
         if (videoRefs.current[`${id}-${idx}`]) {
           videoRefs.current[`${id}-${idx}`].srcObject = stream;
         }
+        console.log('Camera stream started:', id, idx);
       } catch (err) {
         console.error('Error accessing camera:', err);
         alert('Camera access denied. Please allow camera permissions.');
@@ -90,6 +99,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
       stateArr[idx]?.getTracks().forEach(t => t.stop());
       activeArr[idx] = false;
       stateArr[idx] = null;
+      console.log('Camera stream stopped and photo taken:', id, idx);
     }
 
     setStreamStates(prev => ({ ...prev, [id]: stateArr }));
@@ -110,6 +120,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
     setPhotos(prev => ({ ...prev, [id]: arr }));
     setRubberDetails(prev => ({ ...prev, [id]: arr }));
     setShowDropdown(null);
+    console.log(`Photo taken for ${id} index ${idx}`, image);
   };
 
   const handleFileUpload = (e, id, idx) => {
@@ -122,6 +133,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
         setPhotos(prev => ({ ...prev, [id]: arr }));
         setRubberDetails(prev => ({ ...prev, [id]: arr }));
         setShowDropdown(null);
+        console.log(`Photo uploaded for ${id} index ${idx}`, reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -129,11 +141,13 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
 
   const toggleDropdown = (id, idx) => {
     setShowDropdown(curr => (curr === `${id}-${idx}` ? null : `${id}-${idx}`));
+    console.log(`Dropdown toggled for ${id} index ${idx}`);
   };
 
   const handlePlusClick = (id, idx) => {
     if (photos[id]?.[idx]) {
       setShowPhoto(photos[id][idx]);
+      console.log(`Showing photo for ${id} index ${idx}`);
     } else {
       toggleDropdown(id, idx);
     }
@@ -157,22 +171,28 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
         {rubberPanels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
-            {id === 'rearWiper' ? (
+            {id === 'rubber_rear_wiper_issues' ? (
               <>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-md text-white font-medium text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1'))}`}</label>
                   <ToggleButton
-                    checked={rearWiperEnabled}
-                    onChange={() => setRearWiperEnabled(prev => !prev)}
+                    checked={rubber_rear_wiper_issuesEnabled}
+                    onChange={() => {
+                      setrubber_rear_wiper_issuesEnabled(prev => !prev);
+                      console.log(`Toggle rubber_rear_wiper_issuesEnabled: ${!rubber_rear_wiper_issuesEnabled}`);
+                    }}
                   />
                 </div>
-                {rearWiperEnabled && (
+                {rubber_rear_wiper_issuesEnabled && (
                   <>
                     <div className="mb-4">
                       <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                       <select
                         value={condition[id] || 'None'}
-                        onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
+                        onChange={e => {
+                          setCondition(prev => ({ ...prev, [id]: e.target.value }));
+                          console.log(`Condition changed for ${id}: ${e.target.value}`);
+                        }}
                         className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       >
                         <option>None</option>
@@ -191,7 +211,10 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
                                   src={photos[id][i]}
                                   alt={`Photo ${i + 1} for ${id}`}
                                   className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                                  onClick={() => setShowPhoto(photos[id][i])}
+                                  onClick={() => {
+                                    setShowPhoto(photos[id][i]);
+                                    console.log(`Clicked photo for ${id} index ${i}`);
+                                  }}
                                 />
                               ) : (
                                 <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
@@ -245,7 +268,10 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
                   <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                   <select
                     value={condition[id] || 'None'}
-                    onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
+                    onChange={e => {
+                      setCondition(prev => ({ ...prev, [id]: e.target.value }));
+                      console.log(`Condition changed for ${id}: ${e.target.value}`);
+                    }}
                     className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
                     <option>None</option>
@@ -264,7 +290,10 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
                               src={photos[id][i]}
                               alt={`Photo ${i + 1} for ${id}`}
                               className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                              onClick={() => setShowPhoto(photos[id][i])}
+                              onClick={() => {
+                                setShowPhoto(photos[id][i]);
+                                console.log(`Clicked photo for ${id} index ${i}`);
+                              }}
                             />
                           ) : (
                             <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">

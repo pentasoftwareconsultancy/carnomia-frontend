@@ -24,7 +24,6 @@ const ActionMenu = ({ request, setSelectedRequest, setRequests, setViewMode, set
         label: 'Edit',
         icon: <Edit fontSize="small" />,
         action: () => {
-          console.log('Edit clicked for request', request);
           setSelectedRequest(request);
           setEditMode(true);
           handleClose();

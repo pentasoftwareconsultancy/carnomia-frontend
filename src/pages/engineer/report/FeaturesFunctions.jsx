@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from 'react-icons/ai';
 
-const ToggleButton = ({ checked, onChange, label }) => {
+const ToggleButton = ({ checked, onChange }) => {
   const handleChange = (e) => {
     const scrollY = window.scrollY;
     onChange(e);
@@ -8,15 +9,9 @@ const ToggleButton = ({ checked, onChange, label }) => {
   };
 
   return (
-    <label className="flex flex-col items-center cursor-pointer">
+    <label className="flex items-center cursor-pointer">
       <div className="relative">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={handleChange}
-          className="sr-only"
-          autoFocus={false}
-        />
+        <input type="checkbox" checked={checked} onChange={handleChange} className="sr-only" />
         <div className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${checked ? 'bg-lime-500' : ''}`}>
           <div
             className={`absolute w-5 h-5 bg-white rounded-full shadow -left-1 top-0 transition-transform duration-200 ease-in-out ${
@@ -25,57 +20,174 @@ const ToggleButton = ({ checked, onChange, label }) => {
           />
         </div>
       </div>
-      <span className="mt-1 text-white text-sm">{label}</span>
     </label>
   );
 };
 
-const FeaturesFunctions = ({ featuresFunctionsDetails, setFeaturesFunctionsDetails }) => {
-  const featurePanels = [
-    'parkingSensorsFront', 'parkingSensorsRear', 'frontViewCamera', 'rearViewCamera',
-    '360 Camera', 'touchScreen', 'speakers', 'electricORVM', 'autoDimmingIRVM',
-    'ventilatedSeatDriverSide', 'ventilatedSeatCo-DriverSide', 'ventilatedSeatRear'
+const PhotoSlot = ({
+  id,
+  idx,
+  photo,
+  onPlusClick,
+  onCameraClick,
+  onFileUpload,
+  showDropdown,
+  isCameraActive,
+  videoRefs,
+}) => (
+  <div className="relative">
+    {photo ? (
+      <img
+        src={photo}
+        alt={`Photo ${idx + 1} for ${id}`}
+        className="w-24 h-24 object-cover rounded-md cursor-pointer"
+        onClick={() => onPlusClick(id, idx)}
+      />
+    ) : (
+      <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
+        <button
+          onClick={() => onPlusClick(id, idx)}
+          className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
+          title="Add Photo"
+        >
+          <AiOutlinePlus className="text-xl" />
+        </button>
+      </div>
+    )}
+
+    {showDropdown === `${id}-${idx}` && (
+      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
+        <button
+          onClick={() => onCameraClick(id, idx)}
+          className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 w-full text-left"
+        >
+          <AiOutlineCamera className="mr-2" /> Take Photo
+        </button>
+        <label className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
+          <AiOutlineUpload className="mr-2" /> Upload Photo
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => onFileUpload(e, id, idx)} />
+        </label>
+      </div>
+    )}
+
+    <video
+      ref={(el) => (videoRefs.current[`${id}-${idx}`] = el)}
+      autoPlay
+      className={isCameraActive?.[id]?.[idx] ? 'w-24 h-24 rounded-md' : 'hidden'}
+    />
+  </div>
+);
+
+const SeatBelts = ({ seatBeltDetails, setSeatBeltDetails, showPhoto, setShowPhoto }) => {
+  const seatBeltPanels = [
+    'seatbelt_driver_issues',
+    'seatbelt_codriver_issues',
+    'seatbelt_rear_left_passenger_issues',
+    'seatbelt_rear_right_passenger_issues',
+    'seatbelt_third_row_issues',
   ];
 
-  // Initialize toggleStates with default values to prevent blank screen
-  const [toggleStates, setToggleStates] = useState(
-    featurePanels.reduce((acc, id) => {
-      acc[id] = { available: false, issueObserved: false };
-      return acc;
-    }, {})
-  );
+  const videoRefs = useRef({});
+  const [streamStates, setStreamStates] = useState({});
+  const [isCameraActive, setIsCameraActive] = useState({});
+  const [photos, setPhotos] = useState({});
+  const [showDropdown, setShowDropdown] = useState(null);
+  const [condition, setCondition] = useState({});
+  const [seatbeltThirdRowEnabled, setSeatbeltThirdRowEnabled] = useState(false);
 
   useEffect(() => {
-    // Log props and state for debugging
-    console.log('Props:', { featuresFunctionsDetails, setFeaturesFunctionsDetails });
-    console.log('Initial toggleStates:', toggleStates);
+    // Initialize all panel states with arrays of 5 nulls or default values
+    const init = seatBeltPanels.reduce(
+      (acc, id) => {
+        acc.streamStates[id] = Array(5).fill(null);
+        acc.isCameraActive[id] = Array(5).fill(false);
+        acc.photos[id] = Array(5).fill(null);
+        acc.condition[id] = 'None';
+        return acc;
+      },
+      { streamStates: {}, isCameraActive: {}, photos: {}, condition: {} }
+    );
 
-    // Sync initial state with parent
-    if (typeof setFeaturesFunctionsDetails === 'function') {
-      setFeaturesFunctionsDetails(toggleStates);
-    } else {
-      console.error('setFeaturesFunctionsDetails is not a function');
-    }
-  }, []); // Run only once on mount
+    setStreamStates(init.streamStates);
+    setIsCameraActive(init.isCameraActive);
+    setPhotos(init.photos);
+    setCondition(init.condition);
+  }, []);
 
-  const handleToggleChange = (id, type) => {
-    setToggleStates(prev => {
-      const newState = {
-        ...prev,
-        [id]: {
-          ...prev[id],
-          [type]: !prev[id][type]
+  useEffect(() => {
+    // Cleanup streams on unmount
+    return () => {
+      Object.values(streamStates).forEach((streams) =>
+        streams.forEach((stream) => stream?.getTracks().forEach((track) => track.stop()))
+      );
+    };
+  }, [streamStates]);
+
+  const handleCameraClick = async (id, idx) => {
+    const activeArr = [...(isCameraActive[id] || Array(5).fill(false))];
+    const stateArr = [...(streamStates[id] || Array(5).fill(null))];
+
+    if (!activeArr[idx]) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stateArr[idx] = stream;
+        activeArr[idx] = true;
+        if (videoRefs.current[`${id}-${idx}`]) {
+          videoRefs.current[`${id}-${idx}`].srcObject = stream;
         }
-      };
-      // Sync with parent
-      if (typeof setFeaturesFunctionsDetails === 'function') {
-        setFeaturesFunctionsDetails(newState);
-      } else {
-        console.error('setFeaturesFunctionsDetails is not a function');
+      } catch (err) {
+        console.error('Camera error:', err);
+        alert('Camera access denied.');
       }
-      console.log('Updated toggleStates:', newState);
-      return newState;
-    });
+    } else {
+      takePhoto(id, idx, stateArr[idx]);
+      stateArr[idx]?.getTracks().forEach((t) => t.stop());
+      activeArr[idx] = false;
+      stateArr[idx] = null;
+    }
+
+    setStreamStates((prev) => ({ ...prev, [id]: stateArr }));
+    setIsCameraActive((prev) => ({ ...prev, [id]: activeArr }));
+  };
+
+  const takePhoto = (id, idx, stream) => {
+    const video = videoRefs.current[`${id}-${idx}`];
+    if (!video) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const image = canvas.toDataURL('image/png');
+
+    const arr = [...(photos[id] || Array(5).fill(null))];
+    arr[idx] = image;
+    setPhotos((prev) => ({ ...prev, [id]: arr }));
+    setSeatBeltDetails((prev) => ({ ...prev, [id]: arr }));
+    setShowDropdown(null);
+  };
+
+  const handleFileUpload = (e, id, idx) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const arr = [...(photos[id] || Array(5).fill(null))];
+        arr[idx] = reader.result;
+        setPhotos((prev) => ({ ...prev, [id]: arr }));
+        setSeatBeltDetails((prev) => ({ ...prev, [id]: arr }));
+        setShowDropdown(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePlusClick = (id, idx) => {
+    if (photos[id]?.[idx]) {
+      setShowPhoto(photos[id][idx]);
+    } else {
+      setShowDropdown((curr) => (curr === `${id}-${idx}` ? null : `${id}-${idx}`));
+    }
   };
 
   const capitalizeFirstWord = (str) => {
@@ -86,38 +198,87 @@ const FeaturesFunctions = ({ featuresFunctionsDetails, setFeaturesFunctionsDetai
     return words.join(' ');
   };
 
-  // Log toggleStates before render for debugging
-  console.log('Rendering with toggleStates:', toggleStates);
+  const renderPanel = (id, idx) => {
+    const isThirdRow = id === 'seatbelt_third_row_issues';
+    const showContent = isThirdRow ? seatbeltThirdRowEnabled : true;
 
-  // Fallback UI if toggleStates is empty or undefined
-  if (!toggleStates || Object.keys(toggleStates).length === 0) {
-    return <div className="text-white">Loading features and functions data...</div>;
+    return (
+      <div key={id} className="flex flex-col w-full">
+        <div className="flex justify-between items-center mb-2">
+          <label className="text-md text-white font-medium text-left">
+            {`${idx + 1}. ${capitalizeFirstWord(id.replace(/_/g, ' '))}`}
+          </label>
+          {isThirdRow && (
+            <ToggleButton checked={seatbeltThirdRowEnabled} onChange={() => setSeatbeltThirdRowEnabled((prev) => !prev)} />
+          )}
+        </div>
+
+        {showContent && (
+          <>
+            <div className="mb-4">
+              <label className="text-md text-white font-medium text-left mb-2">Issues</label>
+              <select
+                value={condition[id] || 'None'}
+                onChange={(e) => setCondition((prev) => ({ ...prev, [id]: e.target.value }))}
+                className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
+              >
+                <option>None</option>
+                <option>Crack</option>
+                <option>Chip</option>
+                <option>Scratch</option>
+              </select>
+            </div>
+
+            {condition[id] !== 'None' && (
+              <div className="mt-2 flex flex-col items-center">
+                <div className="mt-2 flex flex-wrap gap-4 justify-center">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <PhotoSlot
+                      key={i}
+                      id={id}
+                      idx={i}
+                      photo={photos[id]?.[i]}
+                      onPlusClick={handlePlusClick}
+                      onCameraClick={handleCameraClick}
+                      onFileUpload={handleFileUpload}
+                      showDropdown={showDropdown}
+                      isCameraActive={isCameraActive}
+                      videoRefs={videoRefs}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  if (!photos || Object.keys(photos).length === 0) {
+    return <div className="text-white">Loading seat belt panel data...</div>;
   }
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Features & Functions</h2>
-      <div className="grid grid-cols-1 gap-6 sm:gap-6">
-        {featurePanels.map((id, idx) => (
-          <div key={id} className="flex flex-col w-full">
-            <label className="text-md text-white font-medium mb-2 text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1')).replace('360', '360°')}`}</label>
-            <div className="flex justify-center items-center gap-18">
-              <ToggleButton
-                checked={toggleStates[id]?.available || false}
-                onChange={() => handleToggleChange(id, 'available')}
-                label="Available"
-              />
-              <ToggleButton
-                checked={toggleStates[id]?.issueObserved || false}
-                onChange={() => handleToggleChange(id, 'issueObserved')}
-                label="Issue Observed"
-              />
-            </div>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Seat Belts</h2>
+      <div className="grid grid-cols-1 gap-6 sm:gap-8">{seatBeltPanels.map((id, idx) => renderPanel(id, idx))}</div>
+
+      {showPhoto && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
+          <div className="relative max-w-screen max-h-screen p-4">
+            <img src={showPhoto} alt="Full View" className="max-w-screen max-h-screen object-contain rounded-md" />
+            <button
+              onClick={() => setShowPhoto(null)}
+              className="absolute top-4 right-4 text-white bg-red-500 rounded-full p-2 hover:bg-red-600"
+            >
+              ✕
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default FeaturesFunctions;
+export default SeatBelts;

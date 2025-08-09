@@ -37,10 +37,10 @@ const features = [
 // Car video section
 const CarAnimation = () => {
   return (
-<div className="w-full  max-h-[260px] sm:max-h-[350px] my-6 rounded-xl overflow-hidden flex justify-center items-center">
+<div className="w-full my-6 overflow-hidden flex justify-center items-center">
 
       <video
-        className="w-full h-full sm:max-h-[360px] object-cover"
+        className="w-full h-full"
         autoPlay
         muted
         loop
@@ -95,7 +95,7 @@ export default function KeyFeaturesCard() {
               />
 
               <motion.div
-                className="absolute top-16 left-2 w-[350px] h-[80px] bg-[#7ED957] rounded-xl"
+                className="absolute top-16 left-2 w-[350px] h-[80px] bg-[#81da5b] rounded-xl"
                 initial={{ x: 0, y: 0 }}
                 whileHover={{ x: 4, y: 4 }}
                 transition={{ type: "spring", stiffness: 300 }}

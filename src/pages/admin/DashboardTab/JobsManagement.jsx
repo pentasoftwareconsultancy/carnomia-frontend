@@ -152,7 +152,7 @@ const JobsManagement = ({ requests, setRequests, setSelectedRequest, setViewMode
             </Box>
           </Box>
           {renderTable(
-            requests.filter(r => assignedJobsFilter === 'assigned' ? r.status === 'assigned' : r.status === 'new'),
+            requests.filter(r => assignedJobsFilter === 'assigned' ? r.status === 'assigned' : r.status === 'NEW'),
             assignedJobsFilter === 'assigned'
               ? ['Booking ID', 'Customer', 'Engineer', 'Date', 'Slot', 'Actions']
               : ['Booking ID', 'Customer', 'Location', 'Date', 'Time', 'Actions'],

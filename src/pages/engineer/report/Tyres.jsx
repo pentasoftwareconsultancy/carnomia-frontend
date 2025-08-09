@@ -272,6 +272,7 @@ const Tyres = () => {
     frontRight: { brand: '', subBrand: '', size: '', manufacturingDate: '', threadDepth: '', issue: '', photos: [] },
     spareWheel: { brand: '', subBrand: '', size: '', manufacturingDate: '', threadDepth: '', issue: '', photos: [] },
   });
+
   const [showPhoto, setShowPhoto] = useState(null);
 
   const handleUpdateTyreData = (tyreKey) => (data) => {
@@ -280,6 +281,16 @@ const Tyres = () => {
       [tyreKey]: data,
     }));
   };
+
+  useEffect(() => {
+    console.log('Tyres Data Updated:');
+    Object.entries(tyresData).forEach(([tyreKey, tyreFields]) => {
+      console.log(`--- ${tyreKey} ---`);
+      Object.entries(tyreFields).forEach(([field, value]) => {
+        console.log(`Field: ${field}, Value:`, value);
+      });
+    });
+  }, [tyresData]);
 
   const tyrePositions = [
     { id: 'frontLeft', name: 'Front Left Side' },

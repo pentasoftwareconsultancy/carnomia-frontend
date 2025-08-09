@@ -9,10 +9,11 @@ export const AuthProvider = ({ children }) => {
 
   // Auto-sync from storage on mount
   useEffect(() => {
-    const storedUser = StorageService.getData("user");
+    let storedUser = StorageService.getData("user");
     if (storedUser) {
+      storedUser = JSON.parse(storedUser);
       console.log("my user logged")
-      setUser(JSON.parse(storedUser));
+      setUser(storedUser);
       setIsLoggedIn(true);
     }
   }, []);

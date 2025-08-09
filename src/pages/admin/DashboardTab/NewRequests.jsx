@@ -13,6 +13,7 @@ import { FiUser, FiPhone, FiCalendar } from 'react-icons/fi';
 import RequestDetails from './RequestDetails';
 import ApiService from '../../../core/services/api.service';
 import ServerUrl from '../../../core/constants/serverUrl.constant';
+import { APPLICATION_CONSTANTS } from '../../../core/constants/app.constant';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: '#ffffff',
@@ -67,25 +68,45 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const NewRequests = ({ setSelectedRequest, setViewMode }) => {
+const NewRequests = ({ setViewMode }) => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   useEffect(() => {
-    const fetchPDIRequest = async () => {
+    let isMounted = true; // prevents state updates after unmount
+
+    const fetchPDIRequests = async () => {
       try {
-        const response = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
-        if (response?.data?.data?.length > 0) {
-          setRequests(response.data.data); 
+        setLoading(true); // optional: show loader
+
+        const api = new ApiService();
+        const { data } = await api.apipost(ServerUrl.API_GET_ALLPDIREQUEST_STATUSES,[APPLICATION_CONSTANTS.REQUEST_STATUS.NEW]);
+
+        if (isMounted && Array.isArray(data?.data)) {
+          setRequests(data.data);
+          console.log(data.data);
         }
-      } catch (err) {
-        console.error('Failed to fetch PDI requests', err);
+      } catch (error) {
+        console.error("Failed to fetch PDI requests:", error);
+        if (isMounted) {
+          setError("Unable to load PDI requests."); // optional: show error in UI
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchPDIRequest();
+    fetchPDIRequests();
+
+    return () => {
+      isMounted = false; // cleanup on unmount
+    };
   }, []);
+
 
   const handleAssignClick = (request) => {
     setSelectedRequest(request);
@@ -121,7 +142,7 @@ const NewRequests = ({ setSelectedRequest, setViewMode }) => {
           </Typography>
 
           <Grid container >
-            {requests.filter((r) => r.status === 'new').length === 0 ? (
+            {requests.filter((r) => r.status === 'NEW').length === 0 ? (
               <Grid item xs={12}>
                 <Typography
                   variant="body2"
@@ -135,7 +156,7 @@ const NewRequests = ({ setSelectedRequest, setViewMode }) => {
               </Grid>
             ) : (
               requests
-                .filter((r) => r.status === 'new')
+                .filter((r) => r.status === 'NEW')
                 .map((r) => (
                   <Grid item xs={6} sm={6} md={4} lg={3} key={r.id || r._id}>
                     <StyledPaper elevation={0}>
@@ -178,7 +199,7 @@ const NewRequests = ({ setSelectedRequest, setViewMode }) => {
                                 fontWeight: 600,
                               }}
                             >
-                              #{r.id}
+                              #{r.bookingId}
                             </span>
                           </Typography>
                         </Box>
@@ -193,7 +214,7 @@ const NewRequests = ({ setSelectedRequest, setViewMode }) => {
                               color: '#555',
                             }}
                           >
-                            {r.phone || 'Not provided'}
+                            {r.customerMobile || 'Not provided'}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -204,7 +225,7 @@ const NewRequests = ({ setSelectedRequest, setViewMode }) => {
                               color: '#555',
                             }}
                           >
-                            {r.date ? `${r.date} ${r.time || ''}` : 'Not scheduled'}
+                            {r.createdAt ? `${r.createdAt}` : 'Not scheduled'}
                           </Typography>
                         </Box>
                       </Box>
@@ -233,7 +254,7 @@ const NewRequests = ({ setSelectedRequest, setViewMode }) => {
           setSelectedRequest(null);
           setModalOpen(false);
         }}
-        request={setRequests}
+        request={selectedRequest}
         onAssign={handleAssignEngineer}
         setModalOpen={setModalOpen}
       />

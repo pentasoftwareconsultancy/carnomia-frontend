@@ -11,6 +11,7 @@ const ToggleButton = ({ checked, onChange, label }) => {
   return (
     <label className="flex items-center cursor-pointer">
       <div className="relative">
+        
         <input
           type="checkbox"
           checked={checked}
@@ -33,8 +34,8 @@ const ToggleButton = ({ checked, onChange, label }) => {
 
 const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => {
   const glassPanels = [
-    'frontWindshield', 'frontLeftDoor', 'leftSideORVM', 'rearLeftDoor', 'rearLeftQuarterGlass',
-    'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'rightSideORVM', 'sunroof'
+    'front_windshield_brand', 'front_left_door_glass_brand', 'left_side_orvm_issues', 'rear_left_door_glass_brand', 'rear_left_quarter_glass_brand',
+    'rear_windshield_brand', 'rear_right_quarter_glass_brand', 'rear_right_door_glass_brand', 'front_right_door_glass_brand', 'right_side_orvm_issues', 'sunroof_glass_brand'
   ];
 
   const videoRefs = useRef({});
@@ -48,10 +49,11 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
 
   useEffect(() => {
     const initMaps = glassPanels.reduce((acc, id) => {
-      const photoCount = ['frontWindshield', 'frontLeftDoor', 'rearLeftDoor', 'rearLeftQuarterGlass', 'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'sunroof'].includes(id) ? 5 : 1;
+      const photoCount = ['front_windshield_brand', 'front_left_door_glass_brand', 'rear_left_door_glass_brand', 'rear_left_quarter_glass_brand', 'rear_windshield_brand', 'rear_right_quarter_glass_brand', 'rear_right_door_glass_brand', 'front_right_door_glass_brand', 'sunroof_glass_brand'].includes(id) ? 5 : 1;
       acc.streamStates[id] = Array(photoCount).fill(null);
       acc.isCameraActive[id] = Array(photoCount).fill(false);
       acc.photos[id] = Array(photoCount).fill(null);
+
       acc.brand[id] = '';
       acc.manufacturingDate[id] = '';
       acc.condition[id] = 'None';
@@ -64,7 +66,26 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
     setBrand(initMaps.brand);
     setManufacturingDate(initMaps.manufacturingDate);
     setCondition(initMaps.condition);
+
+    console.log('Initial glass state:', {
+      streamStates: initMaps.streamStates,
+      isCameraActive: initMaps.isCameraActive,
+      photos: initMaps.photos,
+      brand: initMaps.brand,
+      manufacturingDate: initMaps.manufacturingDate,
+      condition: initMaps.condition,
+    });
   }, []);
+
+  // Log photos state changes
+  useEffect(() => {
+    console.log('Photos updated:', photos);
+  }, [photos]);
+
+  // Log brand state changes
+  useEffect(() => {
+    console.log('Brand updated:', brand);
+  }, [brand]);
 
   useEffect(() => {
     return () => {
@@ -112,8 +133,19 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
     const image = canvas.toDataURL('image/png');
     const arr = [...(photos[id] || Array(photos[id]?.length || 1).fill(null))];
     arr[idx] = image;
-    setPhotos(prev => ({ ...prev, [id]: arr }));
-    setGlassDetails(prev => ({ ...prev, [id]: arr }));
+
+    setPhotos(prev => {
+      const newPhotos = { ...prev, [id]: arr };
+      console.log(`Photo taken for ${id}[${idx}]:`, arr[idx]);
+      return newPhotos;
+    });
+
+    setGlassDetails(prev => {
+      const newDetails = { ...prev, [id]: arr };
+      console.log('Glass details updated:', newDetails);
+      return newDetails;
+    });
+
     setShowDropdown(null);
   };
 
@@ -148,6 +180,7 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
     const scrollY = window.scrollY;
     setter(e.target.value);
     window.scrollTo(0, scrollY);
+    console.log('Input changed:', e.target.value);
   };
 
   const capitalizeFirstWord = (str) => {
@@ -167,7 +200,7 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Glass Panels</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
         {glassPanels.map((id, idx) => {
-          const isGlassSpecial = ['frontWindshield', 'frontLeftDoor', 'rearLeftDoor', 'rearLeftQuarterGlass', 'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'sunroof'].includes(id);
+          const isGlassSpecial = ['front_windshield_brand', 'front_left_door_glass_brand', 'rear_left_door_glass_brand', 'rear_left_quarter_glass_brand', 'rear_windshield_brand', 'rear_right_quarter_glass_brand', 'rear_right_door_glass_brand', 'front_right_door_glass_brand', 'sunroof_glass_brand'].includes(id);
           const photoCount = isGlassSpecial ? 5 : 1;
 
           return (

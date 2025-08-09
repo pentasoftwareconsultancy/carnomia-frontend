@@ -14,6 +14,15 @@ class ServerUrl {
     static API_MODULE_META = "/meta";    
     static API_ADD_VEHICLE = ServerUrl.API_MODULE_META + "/Vehicle";
     static API_GET_VEHICLES = ServerUrl.API_MODULE_META + "/getallvehicle";
+    static API_UPDATE_VEHICLES = ServerUrl.API_MODULE_META + "/updateVehicle";
+    static API_DELETE_VEHICLES = ServerUrl.API_MODULE_META + "/deleteVehicle";
+
+    static API_ADD_LOCATIONS = ServerUrl.API_MODULE_META + "/createLocations";
+    static API_GET_LOCATIONS = ServerUrl.API_MODULE_META + "/getLocations";
+    static API_UPDATE_LOCATIONS = ServerUrl.API_MODULE_META + "/updateLocations";
+    static API_DELETE_LOCATIONS = ServerUrl.API_MODULE_META + "/deleteLocations";
+
+  
 
     static API_MODULE_COMMON = "/common";    
     static API_UPLOAD_IMAGE = ServerUrl.API_MODULE_COMMON + "/upload";
@@ -22,7 +31,11 @@ class ServerUrl {
     static API_PDI_CREATE = ServerUrl.API_MODULE_PDI + "/create";
     static API_PDI_UPDATE = ServerUrl.API_MODULE_PDI + "/update";
     static API_GET_ALLPDIREQUEST = ServerUrl.API_MODULE_PDI + "/request";
+    static API_GET_REQUEST_BY_ID = ServerUrl.API_MODULE_PDI + "/request-by-id";
+    static API_GET_INSPECTION_UPDATE = ServerUrl.API_MODULE_PDI + "/request/updateInspectionById";
+    static API_GET_ALLPDIREQUEST_STATUSES = ServerUrl.API_MODULE_PDI + "/requests/statuses";
+    static API_GET_ALL_REQUESTS_BY_ENGINEER = ServerUrl.API_MODULE_PDI + "/request-by-engineer";
+    static API_ASSIGN_ENGINEER = ServerUrl.API_MODULE_PDI + "/request/assign";
     
 }
-export default ServerUrl;  
-
+export default ServerUrl;

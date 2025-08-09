@@ -59,12 +59,13 @@ const NotFound = () => (
 const AppRoutes = () => {
   const { isLoggedIn, user } = useAuth();
 
+  console.log("User:", user, "isLoggedIn:", isLoggedIn);
+
   return (
     <>
       <ScrollToTop />
       <Routes>
-
-        {/* Public Layout */}
+        {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about-us" element={<About />} />
@@ -74,96 +75,114 @@ const AppRoutes = () => {
           <Route path="/blogs" element={<Blog />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/faq" element={<FreqeuntlyAsked />} />
-        {/* Protected Form Routes */}
+        </Route>
+
+        {/* Auth Routes */}
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/login"
+            element={
+              !isLoggedIn ? (
+                <Login />
+              ) : (
+                <Navigate to={`/${user?.role}/dashboard`} replace />
+              )
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              !isLoggedIn ? (
+                <Signup />
+              ) : (
+                <Navigate to={`/${user?.role}/dashboard`} replace />
+              )
+            }
+          />
+        </Route>
+
+        {/* Protected Form Routes (for logged-in users) */}
         <Route element={<ProtectedRoute isAllowed={isLoggedIn} />}>
           <Route path="/request" element={<RequestForm />} />
           <Route path="/success" element={<RequestSuccess />} />
         </Route>
-        </Route>
 
-        {/* Auth Layout */}
-        {/* <Route
+        {/* Customer Dashboard */}
+        <Route
           element={
-            <AuthRedirect
-              isAllowed={isLoggedIn}
-              redirectTo={`/${user?.role || "customer"}/`}
+            <ProtectedRoute
+              isAllowed={isLoggedIn && user?.role === "customer"}
+              redirectPath="/login"
             />
           }
-        > */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={!isLoggedIn ? <Login /> : <Navigate to="/" replace />} />
-            <Route path="/signup" element={!isLoggedIn ? <Signup /> : <Navigate to="/" replace/>} />
-          </Route> 
-        {/* </Route> */}
-
-        {/* Customer Dashboard Layout */}
-        <Route
-          path="/customer/dashboard"
-          element={
-            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "customer"}>
-              <DashboardLayout role="customer" />
-            </ProtectedRoute>
-          }
         >
-          <Route index element={<Navigate to="recent-request" replace />} />
-          <Route path="recent-request" element={<RecentRequest />} />
-          <Route path="completed-request" element={<CompletedRequest />} />
-          <Route path="contact-support" element={<CustomerSupport />} />
+          <Route path="/customer/dashboard" element={<DashboardLayout role="customer" />}>
+            <Route index element={<Navigate to="recent-request" replace />} />
+            <Route path="recent-request" element={<RecentRequest />} />
+            <Route path="completed-request" element={<CompletedRequest />} />
+            <Route path="contact-support" element={<CustomerSupport />} />
+          </Route>
         </Route>
 
-        {/* Engineer Dashboard Layout */}
+        {/* Engineer Dashboard */}
         <Route
-          path="/engineer/dashboard"
           element={
-            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "engineer"}>
-              <DashboardLayout role="engineer" />
-            </ProtectedRoute>
+            <ProtectedRoute
+              isAllowed={isLoggedIn && user?.role === "engineer"}
+              redirectPath="/login"
+            />
           }
         >
-          <Route index element={<Navigate to="assigned" replace />} />
-          <Route path="assigned" element={<AssignedJobs />} />
-          <Route path="ongoing-job" element={<OngoingJobs />} />
-          <Route path="completed-job" element={<CompletedJobs />} />
-          <Route path="payment-status" element={<EngineerPayment />} />
-          <Route path="contact-support" element={<EngineerSupport />} />
-          <Route path="report" element={<Report />} />
+          <Route path="/engineer/dashboard" element={<DashboardLayout role="engineer" />}>
+            <Route index element={<Navigate to="assigned" replace />} />
+            <Route path="assigned" element={<AssignedJobs />} />
+            <Route path="ongoing-job" element={<OngoingJobs />} />
+            <Route path="completed-job" element={<CompletedJobs />} />
+            <Route path="payment-status" element={<EngineerPayment />} />
+            <Route path="contact-support" element={<EngineerSupport />} />
+            <Route path="report/:id" element={<Report />} />
+          </Route>
         </Route>
 
-        {/* Admin Dashboard Layout */}
+        {/* Admin Dashboard */}
         <Route
-          path="/admin/dashboard"
           element={
-            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "admin"}>
-              <DashboardLayout role="admin" />
-            </ProtectedRoute>
+            <ProtectedRoute
+              isAllowed={isLoggedIn && user?.role === "admin"}
+              redirectPath="/login"
+            />
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
-          <Route path="inspection-report" element={<InspectionReport />} />
-          <Route path="payment-management" element={<PaymentManagement/>} />
+          <Route path="/admin/dashboard" element={<DashboardLayout role="admin" />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="inspection-report" element={<InspectionReport />} />
+            <Route path="payment-management" element={<PaymentManagement />} />
+          </Route>
         </Route>
 
-        {/* Superadmin Dashboard Layout */}
+        {/* Superadmin Dashboard */}
         <Route
-          path="/superadmin/dashboard"
           element={
-            <ProtectedRoute isAllowed={isLoggedIn && user?.role === "superadmin"}>
-              <DashboardLayout role="superadmin" />
-            </ProtectedRoute>
+            <ProtectedRoute
+              isAllowed={isLoggedIn && user?.role === "superadmin"}
+              redirectPath="/login"
+            />
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<SuperAdminDashboard />} />
-          <Route path="manage-users" element={<Manage />} />
-          <Route path="customize" element={<Customize />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="inspection-report" element={<InspectionReports />} />
-          <Route path="payment-management" element={<PaymentManagements/>} />
+          <Route path="/superadmin/dashboard" element={<DashboardLayout role="superadmin" />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<SuperAdminDashboard />} />
+            <Route path="manage-users" element={<Manage />} />
+            <Route path="customize" element={<Customize />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="inspection-report" element={<InspectionReports />} />
+            <Route path="payment-management" element={<PaymentManagements />} />
+          </Route>
         </Route>
 
-        {/* Fallback 404 */}
+        {/* 404 Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

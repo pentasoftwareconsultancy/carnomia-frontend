@@ -1,6 +1,7 @@
 import React from "react";
 
 function TestimonialCard() {
+  // Renamed the component to avoid naming conflict
   const feedbackData = [
     {
       name: "Priti Tole",
@@ -10,7 +11,7 @@ function TestimonialCard() {
       img: "https://randomuser.me/api/portraits/women/68.jpg",
     },
     {
-      name: "Saideep Gopale",
+      name: "Sahil Theurkar",
       feedback:
         "Loved how professional and transparent the service was. From tyre checks to engine status, everything was covered.",
       stars: 4,
@@ -24,49 +25,93 @@ function TestimonialCard() {
       img: "https://randomuser.me/api/portraits/men/55.jpg",
     },
     {
-      name: "Sahil Theurkar",
+      name: "Saideep Gopale",
       feedback:
         "Super smooth experience! The engineer explained everything clearly, and I felt confident driving out of the dealership.",
       stars: 5,
       img: "https://randomuser.me/api/portraits/men/76.jpg",
     },
+    {
+      name: "Anjali Patil",
+      feedback:
+        "Drivesta made my first car purchase stress-free. Their attention to detail is unmatched. Highly recommended!",
+      stars: 5,
+      img: "https://randomuser.me/api/portraits/women/65.jpg",
+    },
+    {
+      name: "Shubham Shelke",
+      feedback:
+        "I was impressed by how easy it was to schedule an inspection. The team was punctual and knowledgeable.",
+      stars: 4,
+      img: "https://randomuser.me/api/portraits/men/40.jpg",
+    },
+    {
+      name: "Pratiksha Patil",
+      feedback:
+        "Very professional and detailed inspection. Gave me full confidence in the vehicle I was about to buy.",
+      stars: 5,
+      img: "https://randomuser.me/api/portraits/women/22.jpg",
+    },
+    {
+      name: "Tanmay Yelwande",
+      feedback:
+        "Excellent service! The checklist covered areas I hadn’t even considered. 10/10 would use again.",
+      stars: 5,
+      img: "https://randomuser.me/api/portraits/men/63.jpg",
+    },
   ];
 
-  return (
-    <section className="w-full bg-[#f1f8e9] px-4 sm:px-6 md:px-16 py-16">
-   <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
-        What Our Customers Say
-      </h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {feedbackData.map(({ name, feedback, stars, img }, idx) => (
-          <div
-            key={idx}
-            className="bg-black text-white rounded-2xl p-6 border border-[#ffd95c] hover:border-yellow-400 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
-          >
-            {/* avatar + name */}
-            <div className="flex items-center gap-3 mb-2">
-              <img
-                src={img}
-                alt={name}
-                className="w-11 h-11 rounded-full object-cover border-2 border-white ring-2 ring-yellow-400 hover:scale-105 transition-transform duration-300"
-              />
-              <h4 className="font-semibold text-base">{name}</h4>
-            </div>
-
-            {/* testimonial */}
-            <p className="text-sm text-gray-200 mb-3 leading-relaxed">
-              {feedback}
-            </p>
-
-            {/* star rating */}
-            <div className="text-yellow-400 text-lg hover:animate-pulse">
-              {"★".repeat(stars) + "☆".repeat(5 - stars)}
-            </div>
+  const Testimonials = ({ item }) => (
+    <div className="p-4 rounded-2xl mx-4 shadow hover:shadow-lg transition-all duration-200 w-72 shrink-0 bg-[#eefcdf] border border-[#81da5b]">
+      <div className="flex gap-2 items-center">
+        <img
+          className="size-11 rounded-full border-2 border-white ring-2 ring-yellow-400"
+          src={item.img}
+          alt="User"
+        />
+        <div className="flex flex-col">
+          <p className="font-medium text-gray-800">{item.name}</p>
+          <div className="text-yellow-500 text-sm">
+            {"★".repeat(item.stars)}
+            {"☆".repeat(5 - item.stars)}
           </div>
-        ))}
+        </div>
       </div>
-    </section>
+      <p className="text-sm py-4 text-gray-600 leading-relaxed">
+        {item.feedback}
+      </p>
+    </div>
+  );
+
+  return (
+    <>
+      <style>{`
+        @keyframes marqueeScroll {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+
+        .marquee-inner {
+          animation: marqueeScroll 12s linear infinite;
+        }
+      `}</style>
+
+      <section className="bg-[#f1f8e9] py-12">
+        <h2 className="text-2xl  font-bold text-center mb-10 text-gray-800">
+          What Our Customers Say
+        </h2>
+
+        <div className="marquee-row w-full mx-auto max-w-6xl overflow-hidden relative">
+          <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none bg-gradient-to-r from-[#f1f8e9] to-transparent"></div>
+          <div className="marquee-inner flex transform-gpu min-w-[200%] pt-6 pb-5">
+            {[...feedbackData].map((item, index) => (
+              <Testimonials key={index} item={item} />
+            ))}
+          </div>
+          <div className="absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none bg-gradient-to-l from-[#f1f8e9] to-transparent"></div>
+        </div>
+      </section>
+    </>
   );
 }
 

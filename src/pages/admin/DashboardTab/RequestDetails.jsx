@@ -76,23 +76,25 @@ export default function RequestDetails({ open, onClose, request, onAssign, setMo
 
   if (!open || !request) return null;
 
+  // Destructure your actual data fields from request with safe defaults
   const {
     customerName = 'John Doe',
-    phone = '+1 (555) 123-4567',
-    location = 'New York, NY',
-    id = 'REQ-001',
+    customerMobile: phone = '+1 (555) 123-4567',
+    location = 'New York, NY',        // You may want to add this field to your object if missing
+    _id: id = 'REQ-001',
     bookingId = 'BOOK-001',
     date = '2023-06-15',
-    time = '10:00 AM',
+    // time is not in your object, you can parse from date if needed or default
+    time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     brand = 'Toyota',
     model = 'Camry',
     variant = 'Hybrid XLE',
-    dealerAddress = '123 Main St, New York, NY'
+    dealerAddress = '123 Main St, New York, NY'  // Add this field if your data has it
   } = request;
 
   const handleAssign = (engineer, selectedSlot) => {
     if (onAssign) {
-      onAssign(request.id, engineer, selectedSlot);
+      onAssign(id, engineer, selectedSlot);
       setModalOpen(false);
       setStep(1);
     }

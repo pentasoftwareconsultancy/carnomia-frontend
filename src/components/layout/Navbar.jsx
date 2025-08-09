@@ -5,53 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import drivesta from "../../assets/logos/drivesta.png";
 import { useAuth } from "../../core/contexts/AuthContext";
 import StorageService from "../../core/services/storage.service";
-
-const locations = [
-  "Aundh",
-  "Baner",
-  "Balewadi",
-  "Bavdhan",
-  "Bibwewadi",
-  "Boat Club Road",
-  "Camp",
-  "Chinchwad",
-  "Dhanori",
-  "Dhankawadi",
-  "Erandwane",
-  "Fatima Nagar",
-  "Hadapsar",
-  "Hinjewadi",
-  "Kalyani Nagar",
-  "Karve Nagar",
-  "Kharadi",
-  "Kondhwa",
-  "Koregaon Park",
-  "Kothrud",
-  "Lohegaon",
-  "Magarpatta",
-  "Moshi",
-  "Mundhwa",
-  "NIBM Road",
-  "Nigdi",
-  "Pashan",
-  "Paud Road",
-  "Pimple Gurav",
-  "Pimple Nilakh",
-  "Pimple Saudagar",
-  "Sadashiv Peth",
-  "Salunke Vihar",
-  "Satara Road",
-  "Shivajinagar",
-  "Sinhagad Road",
-  "Sus Road",
-  "Swargate",
-  "Tingre Nagar",
-  "Viman Nagar",
-  "Wadgaon Sheri",
-  "Wakad",
-  "Warje",
-  "Yerawada",
-];
+import ApiService from "../../core/services/api.service";
+import ServerUrl from "../../core/constants/serverUrl.constant";
+import { toast } from "react-toastify";
 
 export default function Navbar({ onToggleSidebar }) {
   const { isLoggedIn, user, login, logout } = useAuth();
@@ -60,6 +16,31 @@ export default function Navbar({ onToggleSidebar }) {
   const [editableUser, setEditableUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // ✅ State for fetched city list
+  const [cityList, setCityList] = useState([]);
+
+  // Fetch cities from backend
+  const fetchCities = async () => {
+    try {
+      const response = await new ApiService().apiget(
+        ServerUrl.API_GET_LOCATIONS
+      );
+      if (response?.data?.locations) {
+        setCityList(response.data.locations);
+      } else {
+        setCityList([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch Locations", err);
+      toast.error("Error fetching cities");
+    }
+  };
+
+  // ✅ Fetch cities on mount
+  useEffect(() => {
+    fetchCities();
+  }, []);
 
   // Sync with localStorage on mount if context is empty
   useEffect(() => {
@@ -76,16 +57,14 @@ export default function Navbar({ onToggleSidebar }) {
     } catch (e) {
       console.warn("Failed to parse stored user:", e);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize editable copy when user becomes available
   useEffect(() => {
     if (user && !editableUser) {
       setEditableUser({ ...user });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [selectedCity, setSelectedCity] = useState("");
   const [open, setOpen] = useState(false);
@@ -102,15 +81,18 @@ export default function Navbar({ onToggleSidebar }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredLocations = locations.filter((city) =>
-    city.toLowerCase().includes(search.toLowerCase())
+  // ✅ Filter fetched city list instead of hardcoded array
+  const filteredLocations = cityList.filter((city) =>
+    city.name
+      ? city.name.toLowerCase().includes(search.toLowerCase())
+      : city.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Animation variants (unchanged)
   const backdropVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.3 } },
   };
-
   const dropdownVariants = {
     hidden: { opacity: 0, y: -20, scale: 0.95 },
     visible: {
@@ -121,7 +103,6 @@ export default function Navbar({ onToggleSidebar }) {
     },
     exit: { opacity: 0, y: -20, scale: 0.95, transition: { duration: 0.2 } },
   };
-
   const cityItemVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: (i) => ({
@@ -141,7 +122,6 @@ export default function Navbar({ onToggleSidebar }) {
     },
     tap: { scale: 0.98 },
   };
-
   const checkmarkVariants = {
     hidden: { scale: 0, opacity: 0 },
     visible: {
@@ -155,7 +135,6 @@ export default function Navbar({ onToggleSidebar }) {
     setShowProfile((s) => !s);
     setIsEditing(false);
   };
-
   const handleEdit = () => setIsEditing(true);
 
   const handleSave = () => {
@@ -177,24 +156,24 @@ export default function Navbar({ onToggleSidebar }) {
     logout();
     navigate("/login");
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditableUser((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleGoToDashboard = () => {
-    if (!user) return;
+    const currentUser = JSON.parse(user);
+    if (!currentUser) return;
     const currentPath = location.pathname;
-    if (user.role === "admin" && currentPath.startsWith("/admin")) return;
-    if (user.role === "superadmin" && currentPath.startsWith("/superadmin"))
+    if (currentUser.role === "admin" && currentPath.startsWith("/admin")) return;
+    if (currentUser.role === "superadmin" && currentPath.startsWith("/superadmin"))
       return;
-    if (user.role === "engineer" && currentPath.startsWith("/engineer")) return;
-    if (!user.role && currentPath === "/dashboard") return;
+    if (currentUser.role === "engineer" && currentPath.startsWith("/engineer")) return;
+    if (!currentUser.role && currentPath === "/dashboard") return;
 
-    if (user.role === "admin") navigate("/admin/dashboard");
-    else if (user.role === "superadmin") navigate("/superadmin/dashboard");
-    else if (user.role === "engineer") navigate("/engineer/dashboard");
+    if (currentUser.role === "admin") navigate("/admin/dashboard");
+    else if (currentUser.role === "superadmin") navigate("/superadmin/dashboard");
+    else if (currentUser.role === "engineer") navigate("/engineer/dashboard");
     else navigate("/");
 
     setShowProfile(false);
@@ -254,7 +233,6 @@ export default function Navbar({ onToggleSidebar }) {
           <div className="flex-1" />
 
           <div className="flex items-center flex-wrap justify-center sm:justify-end gap-3 sm:gap-4">
-            
             {/* Welcome message for dashboards only */}
             {/* {user && location.pathname.includes("dashboard") && (
               <div className="text-[#81da5b] font-semibold text-base sm:text-lg truncate mt-2 sm:mt-0">
@@ -327,7 +305,7 @@ export default function Navbar({ onToggleSidebar }) {
                   className="w-10 h-10 rounded-full bg-[#81da5a] cursor-pointer text-white font-bold flex items-center justify-center hover:bg-[#81da5b] transition"
                   aria-label="User Profile"
                 >
-                  {((user?.name?.[0] || "U").toUpperCase())}
+                  {(user?.name?.[0] || "U").toUpperCase()}
                 </button>
 
                 {showProfile && (

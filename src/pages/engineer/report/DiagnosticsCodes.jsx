@@ -6,13 +6,24 @@ const DiagnosticsCodes = () => {
 
   const handleAddCode = () => {
     if (code.trim()) {
-      setCodeList([...codeList, code.trim()]);
+      const newCode = code.trim();
+      setCodeList(prev => {
+        const updatedList = [...prev, newCode];
+        console.log('Added code:', newCode);
+        console.log('Updated code list:', updatedList);
+        return updatedList;
+      });
       setCode(''); // Clear input field after adding
     }
   };
 
   const handleRemoveCode = (indexToRemove) => {
-    setCodeList(codeList.filter((_, index) => index !== indexToRemove));
+    setCodeList(prev => {
+      const updatedList = prev.filter((_, index) => index !== indexToRemove);
+      console.log(`Removed code at index ${indexToRemove}`);
+      console.log('Updated code list:', updatedList);
+      return updatedList;
+    });
   };
 
   return (

@@ -31,9 +31,9 @@ const ToggleButton = ({ checked, onChange, label }) => {
   );
 };
 
-const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setShowPhoto }) => {
+const BodyPanels = ({ bodyPanels, setBodyPanels }) => {
   const panels = [
-    'bonnet', 'bumper', 'frontLeftFender', 'frontLeftDoor', 'rearLeftDoor',
+    'bonnet_issue', 'bumper', 'frontLeftFender', 'frontLeftDoor', 'rearLeftDoor',
     'rearLeftQuarterPanel', 'boot', 'rearBumper', 'rearRightQuarterPanel',
     'rearRightDoor', 'frontRightDoor', 'frontRightFender', 'roof'
   ];
@@ -122,7 +122,7 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
     const arr = [...(photos[id] || [])];
     arr[idx] = image;
     setPhotos(prev => ({ ...prev, [id]: arr }));
-    setMechanicalDetails(prev => ({ ...prev, [id]: arr }));
+    // setMechanicalDetails(prev => ({ ...prev, [id]: arr }));
   };
 
   const toggleDropdown = (id, idx) => {
@@ -173,8 +173,8 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
                   <div className="flex items-center justify-between">
                     <input
                       type="number"
-                      value={paint[id] || ''}
-                      onChange={handleInputChange((value) => setPaint(prev => ({ ...prev, [id]: value })))}
+                      value={bodyPanels[id] || ''}
+                      onChange={handleInputChange((value) => setBodyPanels(prev => ({ ...prev, [id]: value })))}
                       className="p-2 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       placeholder="Enter thickness (mm)"
                     />
@@ -183,10 +183,10 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
                         <label className="text-md text-white font-medium flex items-center">
                           <input
                             type="checkbox"
-                            checked={mechanicalDetails.repaintBonnet || false}
-                            onChange={handleCheckboxChange((checked) =>
-                              setMechanicalDetails(prev => ({ ...prev, repaintBonnet: checked }))
-                            )}
+                            // checked={mechanicalDetails.repaintBonnet || false}
+                            // onChange={handleCheckboxChange((checked) =>
+                            //   setMechanicalDetails(prev => ({ ...prev, repaintBonnet: checked }))
+                            // )}
                             className="mr-2 h-5 w-5 text-lime-600 focus:ring-lime-500 border-gray-300 rounded"
                           />
                           Repaint
@@ -201,8 +201,8 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
                 <div className="mb-4">
                   <label className="text-md text-white font-medium text-left mb-2">Issue</label>
                   <select
-                    value={issue[id] || 'None'}
-                    onChange={handleSelectChange((value) => setIssue(prev => ({ ...prev, [id]: value })))}
+                    value={bodyPanels[id] || 'None'}
+                    onChange={handleSelectChange((value) => setBodyPanels(prev => ({ ...prev, [id]: value })))}
                     className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
                     <option>None</option>
@@ -283,7 +283,7 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
                             src={photos[id][i]}
                             alt=""
                             className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                            onClick={() => setShowPhoto(photos[id][i])}
+                            // onClick={() => setShowPhoto(photos[id][i])}
                           />
                         ) : (
                           <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
@@ -312,7 +312,7 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
                                     setPhotos(prev => {
                                       const arr = [...(prev[id] || [])];
                                       arr[i] = reader.result;
-                                      setMechanicalDetails(prevD => ({ ...prevD, [id]: arr }));
+                                      // setMechanicalDetails(prevD => ({ ...prevD, [id]: arr }));
                                       return { ...prev, [id]: arr };
                                     });
                                     setShowDropdown(null);
@@ -339,7 +339,7 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
         })}
       </div>
 
-      {showPhoto && (
+      {/* {showPhoto && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="relative">
             <img src={showPhoto} alt="" className="max-w-[90vw] max-h-[90vh] object-contain" />
@@ -347,7 +347,7 @@ const BodyPanels = ({ mechanicalDetails, setMechanicalDetails, showPhoto, setSho
               className="absolute top-2 right-2 p-2 bg-red-500 rounded-full text-white">✕</button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
