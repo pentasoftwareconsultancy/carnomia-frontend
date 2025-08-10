@@ -46,6 +46,12 @@ const Report = () => {
   const { id } = useParams(); 
   const [photos, setPhotos] = useState({});
   const [bodyPanels, setBodyPanels] = useState({});
+  const [glassPanels, setGlassPanels] = useState({});
+  const [rubberPanels, setRubberPanels] = useState({});
+  const [seatPanels, setSeatPanels] = useState({});
+  const [seatBeltPanels, setSeatBeltPanels] = useState({});
+  const [plasticPanels, setPlasticPanels] = useState({});
+  const [featurePanels, setFeaturePanels] = useState({});
 
   const [requestDetails, setRequestDetails] = useState({});
   const [step, setStep] = useState(0);
@@ -139,6 +145,12 @@ const Report = () => {
     const payload = {
       ...photos,
       ...bodyPanels,
+      ...glassPanels,
+      ...rubberPanels,
+      ...seatPanels,
+      ...seatBeltPanels,
+      ...plasticPanels,
+      ...featurePanels,
     }
 
     if(status) {
@@ -179,58 +191,43 @@ const Report = () => {
       case 4:
         return (
           <Glasses
-            safetyDetails={safetyDetails}
-            setSafetyDetails={setSafetyDetails}
+            glassPanels={glassPanels}
+            setGlassPanels={setGlassPanels}
           />
         );
       case 5:
         return (
           <RubberComponent
-            vehicleInfo={requestDetails}
-            basicDetails={basicDetails}
-            interiorDetails={interiorDetails}
-            mechanicalDetails={mechanicalDetails}
-            safetyDetails={safetyDetails}
+            rubberPanels={rubberPanels}
+            setRubberPanels={setRubberPanels}
           />
         );
       case 6:
         return (
           <SeatsFabrics
-            vehicleInfo={requestDetails}
-            basicDetails={basicDetails}
-            interiorDetails={interiorDetails}
-            mechanicalDetails={mechanicalDetails}
-            safetyDetails={safetyDetails}
+            seatPanels={seatPanels}
+            setSeatPanels={setSeatPanels}
           />
         );
       case 7:
         return (
           <SeatBelts
-            vehicleInfo={requestDetails}
-            basicDetails={basicDetails}
-            interiorDetails={interiorDetails}
-            mechanicalDetails={mechanicalDetails}
-            safetyDetails={safetyDetails}
+            seatBeltPanels={seatBeltPanels}
+            setSeatBeltPanels={setSeatBeltPanels}
           />
         );
       case 8:
         return (
           <PlasticPanel
-            vehicleInfo={requestDetails}
-            basicDetails={basicDetails}
-            interiorDetails={interiorDetails}
-            mechanicalDetails={mechanicalDetails}
-            safetyDetails={safetyDetails}
+            plasticPanels={plasticPanels}
+            setPlasticPanels={setPlasticPanels}
           />
         );
       case 9:
         return (
           <FeaturesFunctions
-            vehicleInfo={requestDetails}
-            basicDetails={basicDetails}
-            interiorDetails={interiorDetails}
-            mechanicalDetails={mechanicalDetails}
-            safetyDetails={safetyDetails}
+            featurePanels={featurePanels}
+            setFeaturePanels={setFeaturePanels}
           />
         );
       case 10:
@@ -297,10 +294,10 @@ const Report = () => {
         return (
           <Tyres
             vehicleInfo={requestDetails}
-            basicDetails={basicDetails}
-            interiorDetails={interiorDetails}
-            mechanicalDetails={mechanicalDetails}
-            safetyDetails={safetyDetails}
+            // basicDetails={basicDetails}
+            // interiorDetails={interiorDetails}
+            // mechanicalDetails={mechanicalDetails}
+            // safetyDetails={safetyDetails}
           />
         );
       default:
@@ -347,7 +344,6 @@ const Report = () => {
         </div>
 
         <div className="w-full flex justify-center px-2">{renderStep()}</div>
-
         <div className="flex flex-col sm:flex-row justify-between mt-8 sm:mt-12 w-full max-w-4xl gap-4 sm:gap-0 px-2">
           {step > 0 ? (
             <button

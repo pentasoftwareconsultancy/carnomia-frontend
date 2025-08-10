@@ -31,8 +31,8 @@ const ToggleButton = ({ checked, onChange, label }) => {
   );
 };
 
-const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPhoto }) => {
-  const rubberPanels = [
+const RubberComponent = ({ rubberPanels, setrubberPanels}) => {
+  const panels = [
     'rubber_bonnet_issues', 'rubber_front_left_door_issues', 'rubber_rear_left_door_issues', 'rubber_boot_issues', 'rubber_rear_right_door_issues',
     'rubber_front_right_door_issues', 'rubber_front_wiper_issues', 'rubber_rear_wiper_issues', 'rubber_sunroof_issues'
   ];
@@ -46,7 +46,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
   const [rubber_rear_wiper_issuesEnabled, setrubber_rear_wiper_issuesEnabled] = useState(false);
 
   useEffect(() => {
-    const initMaps = rubberPanels.reduce((acc, id) => {
+    const initMaps = panels.reduce((acc, id) => {
       const photoCount = 5; // All panels support up to 5 photos
       acc.streamStates[id] = Array(photoCount).fill(null);
       acc.isCameraActive[id] = Array(photoCount).fill(false);
@@ -59,6 +59,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
     setIsCameraActive(initMaps.isCameraActive);
     setPhotos(initMaps.photos);
     setCondition(initMaps.condition);
+    setrubberPanels();
 
     console.log('Initial states set:', {
       streamStates: initMaps.streamStates,
@@ -115,7 +116,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
     const image = canvas.toDataURL('image/png');
-    const arr = [...(photos[id] || Array(5).fill(null))];
+    const arr = [...(rubberPanels[id] || Array(5).fill(null))];
     arr[idx] = image;
     setPhotos(prev => ({ ...prev, [id]: arr }));
     setRubberDetails(prev => ({ ...prev, [id]: arr }));
@@ -145,7 +146,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
   };
 
   const handlePlusClick = (id, idx) => {
-    if (photos[id]?.[idx]) {
+    if (rubberPanels[id]?.[idx]) {
       setShowPhoto(photos[id][idx]);
       console.log(`Showing photo for ${id} index ${idx}`);
     } else {
@@ -169,7 +170,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Rubber Panels</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {rubberPanels.map((id, idx) => (
+        {panels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
             {id === 'rubber_rear_wiper_issues' ? (
               <>
@@ -206,13 +207,13 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
                         <div className="mt-2 flex flex-wrap gap-4 justify-center">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <div key={i} className="relative">
-                              {photos[id]?.[i] ? (
+                              {rubberPanels[id]?.[i] ? (
                                 <img
                                   src={photos[id][i]}
                                   alt={`Photo ${i + 1} for ${id}`}
                                   className="w-24 h-24 object-cover rounded-md cursor-pointer"
                                   onClick={() => {
-                                    setShowPhoto(photos[id][i]);
+                                    setShowPhoto(rubberPanels[id][i]);
                                     console.log(`Clicked photo for ${id} index ${i}`);
                                   }}
                                 />
@@ -221,7 +222,7 @@ const RubberComponent = ({ rubberDetails, setRubberDetails, showPhoto, setShowPh
                                   <button
                                     onClick={() => handlePlusClick(id, i)}
                                     className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
-                                    title={photos[id]?.[i] ? "View Photo" : "Add Photo"}
+                                    title={rubberPanels[id]?.[i] ? "View Photo" : "Add Photo"}
                                   >
                                     <AiOutlinePlus className="text-xl" />
                                   </button>

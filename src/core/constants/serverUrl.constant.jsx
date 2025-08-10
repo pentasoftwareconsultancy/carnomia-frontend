@@ -36,6 +36,7 @@ class ServerUrl {
     static API_GET_ALLPDIREQUEST_STATUSES = ServerUrl.API_MODULE_PDI + "/requests/statuses";
     static API_GET_ALL_REQUESTS_BY_ENGINEER = ServerUrl.API_MODULE_PDI + "/request-by-engineer";
     static API_ASSIGN_ENGINEER = ServerUrl.API_MODULE_PDI + "/request/assign";
-    
+    static API_WITHVEHICLE_DATA = ServerUrl.API_MODULE_PDI + "/PDIRequestwithvehicledata";
+
 }
 export default ServerUrl;

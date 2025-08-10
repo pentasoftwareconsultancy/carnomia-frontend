@@ -1,112 +1,146 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Fluid data definitions - can be moved to a separate file
-const FLUIDS = [
-  { id: 'fluid_coolant', name: '1. Fluid Coolant' },
-  { id: 'fluid_engine_oil', name: '2. Fluid Engine Oil' },
-  { id: 'fluid_brake_oil', name: '3. Fluid Brake Oil' },
-  { id: 'fluid_washer_fluid', name: '4. Fluid Washer Fluid' },
-];
-
-// Individual fluid card component with two checkboxes
-const FluidCard = ({
-  fluidId,
-  fluidName,
-  withinRange,
-  onWithinRangeChange,
-  contamination,
-  onContaminationChange,
-}) => {
-  // Handles checkbox change, preserves scroll position, logs event
-  const handleCheckboxChange = (event, onChange, label) => {
-    const isChecked = event.target.checked;
-    const currentScrollY = window.scrollY;
-
-    // Call parent handler
-    onChange(isChecked);
-
-    console.log(`[FluidCard] ${fluidName} - ${label} changed to:`, isChecked);
-
-    // Restore scroll to avoid jump on state update
-    window.scrollTo(0, currentScrollY);
+const ToggleButton = ({ checked, onChange }) => {
+  const handleChange = (e) => {
+    const scrollY = window.scrollY;
+    onChange(e);
+    window.scrollTo(0, scrollY);
   };
 
   return (
-    <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full">
-      <h3 className="text-lg sm:text-xl font-medium mb-4 text-white text-left">{fluidName}</h3>
-      <div className="flex items-center justify-between">
-        {/* Within Range Checkbox */}
-        <label htmlFor={`${fluidId}-withinRange`} className="flex items-center gap-2 cursor-pointer">
-          <input
-            id={`${fluidId}-withinRange`}
-            type="checkbox"
-            checked={withinRange}
-            onChange={(e) => handleCheckboxChange(e, onWithinRangeChange, 'Within Range')}
-            className="w-5 h-5 text-lime-500 bg-gray-600 border-white/20 rounded focus:ring-lime-500 focus:ring-2"
+    <label className="flex items-center cursor-pointer">
+      <div className="relative">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={handleChange}
+          className="sr-only"
+          autoFocus={false}
+        />
+        <div className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${checked ? 'bg-lime-500' : ''}`}>
+          <div
+            className={`absolute w-5 h-5 bg-white rounded-full shadow -left-1 top-0 transition-transform duration-200 ease-in-out ${
+              checked ? 'transform translate-x-5' : ''
+            }`}
           />
-          <span className="text-white text-sm">Within Range</span>
-        </label>
-
-        {/* Contamination Checkbox */}
-        <label htmlFor={`${fluidId}-contamination`} className="flex items-center gap-2 cursor-pointer">
-          <input
-            id={`${fluidId}-contamination`}
-            type="checkbox"
-            checked={contamination}
-            onChange={(e) => handleCheckboxChange(e, onContaminationChange, 'Contamination')}
-            className="w-5 h-5 text-lime-500 bg-gray-600 border-white/20 rounded focus:ring-lime-500 focus:ring-2"
-          />
-          <span className="text-white text-sm">Contamination</span>
-        </label>
+        </div>
       </div>
-    </div>
+    </label>
   );
 };
 
-const FluidLevels = () => {
-  // State holds the status of all fluids
-  const [fluids, setFluids] = useState({
-    fluid_coolant: { withinRange: false, contamination: false },
-    fluid_engine_oil: { withinRange: false, contamination: false },
-    fluid_brake_oil: { withinRange: false, contamination: false },
-    fluid_washer_fluid: { withinRange: false, contamination: false },
-  });
+const LiveParameters = () => {
+  const [engineLoadEnabled, setEngineLoadEnabled] = useState(false);
+  const [idleRPMEnabled, setIdleRPMEnabled] = useState(false);
+  const [engineLoad, setEngineLoad] = useState('');
+  const [idleRPM, setIdleRPM] = useState('');
+  const [batteryVoltage, setBatteryVoltage] = useState('');
+  const [distanceSinceCodeClear, setDistanceSinceCodeClear] = useState('');
+  const [distanceCurrentBlock, setDistanceCurrentBlock] = useState('');
 
-  // Update handler called by FluidCard for checkbox changes
-  // fluidId = string, field = 'withinRange' | 'contamination'
-  const handleFluidStatusChange = (fluidId, field) => (newValue) => {
-    setFluids((prev) => {
-      const updatedFluid = { ...prev[fluidId], [field]: newValue };
-      const newState = { ...prev, [fluidId]: updatedFluid };
-
-      // Log updated state for debugging
-      console.log(`[FluidLevels] Updated ${fluidId}:`, updatedFluid);
-
-      // TODO: Add backend API call here to sync changes, e.g.:
-      // api.updateFluidStatus(fluidId, field, newValue).catch(console.error);
-
-      return newState;
-    });
+  const capitalizeFirstWord = (str) => {
+    if (!str) return str;
+    const words = str.trim().split(' ');
+    if (words.length === 0) return str;
+    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+    return words.join(' ');
   };
+
+  const parameters = [
+    {
+      id: 'engineLoad',
+      label: 'Engine Load',
+      enabled: engineLoadEnabled,
+      setEnabled: setEngineLoadEnabled,
+      value: engineLoad,
+      setValue: setEngineLoad,
+      allowDecimal: true,
+    },
+    {
+      id: 'idleRPM',
+      label: 'Idle RPM',
+      enabled: idleRPMEnabled,
+      setEnabled: setIdleRPMEnabled,
+      value: idleRPM,
+      setValue: setIdleRPM,
+      allowDecimal: false,
+    },
+    {
+      id: 'batteryVoltage',
+      label: 'Battery Voltage',
+      value: batteryVoltage,
+      setValue: setBatteryVoltage,
+      allowDecimal: true,
+    },
+    {
+      id: 'distanceSinceCodeClear',
+      label: 'Distance Since Code Clear',
+      value: distanceSinceCodeClear,
+      setValue: setDistanceSinceCodeClear,
+      allowDecimal: true,
+    },
+    {
+      id: 'distanceCurrentBlock',
+      label: 'Distance In Current Lock Block',
+      value: distanceCurrentBlock,
+      setValue: setDistanceCurrentBlock,
+      allowDecimal: true,
+    },
+  ];
+
+  // Logging all parameter field names and their current values whenever any changes
+  useEffect(() => {
+    console.log('Live Parameters Updated:');
+    parameters.forEach((param) => {
+      if (param.enabled !== undefined) {
+        console.log(`Toggle: live_${param.id}_toggle, Value:`, param.enabled);
+      }
+      console.log(`Field: live_${param.id}, Value:`, param.value);
+    });
+  }, [
+    engineLoadEnabled,
+    idleRPMEnabled,
+    engineLoad,
+    idleRPM,
+    batteryVoltage,
+    distanceSinceCodeClear,
+    distanceCurrentBlock,
+  ]);
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Fluid Levels</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-6">
-        {FLUIDS.map(({ id, name }) => (
-          <FluidCard
-            key={id}
-            fluidId={id}
-            fluidName={name}
-            withinRange={fluids[id].withinRange}
-            onWithinRangeChange={handleFluidStatusChange(id, 'withinRange')}
-            contamination={fluids[id].contamination}
-            onContaminationChange={handleFluidStatusChange(id, 'contamination')}
-          />
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Live Parameters</h2>
+      <div className="grid grid-cols-1 gap-6 sm:gap-6">
+        {parameters.map((param, idx) => (
+          <div key={param.id} className="flex flex-col w-full">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-md text-white font-medium text-left">{`${idx + 1}. ${capitalizeFirstWord(param.label.replace(/([A-Z])/g, ' $1'))}`}</label>
+              {param.enabled !== undefined && (
+                <ToggleButton
+                  checked={param.enabled}
+                  onChange={() => param.setEnabled(!param.enabled)}
+                />
+              )}
+            </div>
+            {(param.enabled || param.enabled === undefined) && (
+              <input
+                type="text"
+                value={param.value}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (param.allowDecimal ? /^\d*\.?\d*$/.test(value) : /^\d*$/.test(value)) {
+                    param.setValue(value);
+                  }
+                }}
+                placeholder={`Enter ${param.label}`}
+                className="w-full p-2 border border-white/20 rounded bg-[#ffffff0a] text-white focus:outline-none focus:ring-2 focus:ring-lime-500"
+              />
+            )}
+          </div>
         ))}
       </div>
     </div>
   );
 };
 
-export default FluidLevels;
+export default LiveParameters;

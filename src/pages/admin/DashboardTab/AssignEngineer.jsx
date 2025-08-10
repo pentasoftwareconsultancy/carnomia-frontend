@@ -145,7 +145,7 @@ const AssignEngineer = ({ request, onAssign, onBack }) => {
 
         if (response.data) {
           alert('Engineer assigned successfully!');
-          setModalOpen(false);
+          // setModalOpen(false);
           // if (onAssign) onAssign(payload);
         } else {
           alert('Failed to assign engineer: ' + (response.data.message || 'Unknown error'));

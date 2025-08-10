@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from 'react-icons/ai';
 
-const seatPanels = [
+const panels = [
   'seat_driver',
   'seat_driver_head_rest',
   'seat_codriver',
@@ -43,7 +43,7 @@ const ToggleButton = ({ checked, onChange }) => {
   );
 };
 
-const SeatsFabrics = ({ seatDetails, setSeatDetails, showPhoto, setShowPhoto }) => {
+const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
   const videoRefs = useRef({});
   const [streamStates, setStreamStates] = useState({});
   const [isCameraActive, setIsCameraActive] = useState({});
@@ -55,12 +55,13 @@ const SeatsFabrics = ({ seatDetails, setSeatDetails, showPhoto, setShowPhoto }) 
   useEffect(() => {
     const initConditions = {};
     const initPhotos = {};
-    seatPanels.forEach(panel => {
+    panels.forEach(panel => {
       initConditions[panel] = 'None';
       initPhotos[panel] = Array(5).fill(null);
     });
     setCondition(initConditions);
     setPhotos(initPhotos);
+    setSeatPanels();
 
     console.log("Initialized conditions:", initConditions);
     console.log("Initialized photos:", initPhotos);
@@ -187,7 +188,7 @@ const SeatsFabrics = ({ seatDetails, setSeatDetails, showPhoto, setShowPhoto }) 
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Seats & Fabrics</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {seatPanels.map((id, idx) => (
+        {panels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
             {id === 'seat_third_row' ? (
               <>

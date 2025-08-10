@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from 'react-icons/ai';
 
-const plasticPanels = [
+const panels = [
   'plastic_driver_door',
   'plastic_codriver_door',
   'plastic_rear_left_passenger_door',
@@ -44,7 +44,7 @@ const ToggleButton = ({ checked, onChange }) => {
   );
 };
 
-const PlasticPanel = ({ plasticPanelDetails, setPlasticPanelDetails, showPhoto, setShowPhoto }) => {
+const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
   const videoRefs = useRef({});
   const [streamStates, setStreamStates] = useState({});
   const [isCameraActive, setIsCameraActive] = useState({});
@@ -57,12 +57,13 @@ const PlasticPanel = ({ plasticPanelDetails, setPlasticPanelDetails, showPhoto, 
     // Initialize condition and photos state
     const initConditions = {};
     const initPhotos = {};
-    plasticPanels.forEach(panel => {
+    panels.forEach(panel => {
       initConditions[panel] = 'None';
       initPhotos[panel] = Array(5).fill(null);
     });
     setCondition(initConditions);
     setPhotos(initPhotos);
+    setPlasticPanels();
 
     console.log("Initialized plastic panel conditions:", initConditions);
     console.log("Initialized plastic panel photos:", initPhotos);
@@ -189,7 +190,7 @@ const PlasticPanel = ({ plasticPanelDetails, setPlasticPanelDetails, showPhoto, 
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Plastic Panels</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {plasticPanels.map((id, idx) => (
+        {panels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
             {id === 'plastic_third_row' ? (
               <>

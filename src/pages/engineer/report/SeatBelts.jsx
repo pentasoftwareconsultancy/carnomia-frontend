@@ -78,8 +78,8 @@ const PhotoSlot = ({
   </div>
 );
 
-const SeatBelts = ({ seatBeltDetails, setSeatBeltDetails, showPhoto, setShowPhoto }) => {
-  const seatBeltPanels = ['driverSide', 'co-DriverSide', 'rearLeftPassenger', 'rearRightPassenger', 'thirdRow'];
+const SeatBelts = ({ seatBeltPanels, setSeatBeltPanels }) => {
+  const panels = ['driverSide', 'co-DriverSide', 'rearLeftPassenger', 'rearRightPassenger', 'thirdRow'];
 
   const videoRefs = useRef({});
   const [streamStates, setStreamStates] = useState({});
@@ -105,6 +105,7 @@ const SeatBelts = ({ seatBeltDetails, setSeatBeltDetails, showPhoto, setShowPhot
     setIsCameraActive(updated.isCameraActive);
     setPhotos(updated.photos);
     setCondition(updated.condition);
+    setSeatBeltPanels();
   }, []);
 
   useEffect(() => {

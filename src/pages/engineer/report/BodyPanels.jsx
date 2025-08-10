@@ -32,10 +32,10 @@ const ToggleButton = ({ checked, onChange, label }) => {
 };
 
 const BodyPanels = ({ bodyPanels, setBodyPanels }) => {
-  const panels = [
-    'bonnet_issue', 'bumper', 'frontLeftFender', 'frontLeftDoor', 'rearLeftDoor',
-    'rearLeftQuarterPanel', 'boot', 'rearBumper', 'rearRightQuarterPanel',
-    'rearRightDoor', 'frontRightDoor', 'frontRightFender', 'roof'
+const panels = [
+    'bonnet_issue', 'bumper_issue', 'front_left_fender_issue', 'front_left_door_issue', '  rear_left_door_issue',
+    'rear_left_quarter_panel_issue', '  boot_issue', 'rear_bumper_issue', 'rear_right_quarter_panel_issue',
+    'rear_right_door_issue', 'front_right_door_issue', 'front_right_fender_issue', '  roof_issue'
   ];
 
   const videoRefs = useRef({});
