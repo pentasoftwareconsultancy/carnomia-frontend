@@ -1,19 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from 'react-icons/ai';
 
-const panels = [
-  'seat_driver',
-  'seat_driver_head_rest',
-  'seat_codriver',
-  'seat_codriver_head_rest',
-  'seat_rear',
-  'seat_rear_head_rest',
-  'seat_third_row',
-  'seat_third_row_head_rest',
-  'seat_roof',
-  'seat_sunroof'
-];
-
 const ToggleButton = ({ checked, onChange }) => {
   const handleChange = (e) => {
     const scrollY = window.scrollY;
@@ -43,55 +30,42 @@ const ToggleButton = ({ checked, onChange }) => {
   );
 };
 
-const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
+const SeatsFabrics = ({ seatDetails, setSeatDetails, showPhoto, setShowPhoto }) => {
+  const seatPanels = [
+    'driverSeat', 'driverSeatHeadRest', 'co-DriverSeat', 'co-DriverSeatHeadRest',
+    'rearSeat', 'rearSeatHeadRest', 'thirdRowSeat', 'thirdRowSeatHeadRest',
+    'roof', 'sunroof'
+  ];
+
   const videoRefs = useRef({});
   const [streamStates, setStreamStates] = useState({});
   const [isCameraActive, setIsCameraActive] = useState({});
   const [photos, setPhotos] = useState({});
   const [showDropdown, setShowDropdown] = useState(null);
   const [condition, setCondition] = useState({});
-  const [seat_third_row_toggle, setSeat_third_row_toggle] = useState(false);
+  const [thirdRowSeatEnabled, setThirdRowSeatEnabled] = useState(false);
 
   useEffect(() => {
-    const initConditions = {};
-    const initPhotos = {};
-    panels.forEach(panel => {
-      initConditions[panel] = 'None';
-      initPhotos[panel] = Array(5).fill(null);
-    });
-    setCondition(initConditions);
-    setPhotos(initPhotos);
-    setSeatPanels();
+    const initMaps = seatPanels.reduce((acc, id) => {
+      const photoCount = 5; // All panels support up to 5 photos
+      acc.streamStates[id] = Array(photoCount).fill(null);
+      acc.isCameraActive[id] = Array(photoCount).fill(false);
+      acc.photos[id] = Array(photoCount).fill(null);
+      acc.condition[id] = 'None';
+      return acc;
+    }, { streamStates: {}, isCameraActive: {}, photos: {}, condition: {} });
 
-    console.log("Initialized conditions:", initConditions);
-    console.log("Initialized photos:", initPhotos);
+    setStreamStates(initMaps.streamStates);
+    setIsCameraActive(initMaps.isCameraActive);
+    setPhotos(initMaps.photos);
+    setCondition(initMaps.condition);
   }, []);
-
-  // Log condition changes with field names
-  useEffect(() => {
-    Object.entries(condition).forEach(([field, val]) => {
-      console.log(`Condition updated - Field: ${field}, Value: ${val}`);
-    });
-  }, [condition]);
-
-  // Log photos changes with field names and count
-  useEffect(() => {
-    Object.entries(photos).forEach(([field, arr]) => {
-      console.log(`Photos updated - Field: ${field}, Photos count: ${arr.filter(Boolean).length}`);
-    });
-  }, [photos]);
-
-  // Log third row toggle field and value
-  useEffect(() => {
-    console.log(`Toggle updated - Field: seat_third_row_toggle, Value: ${seat_third_row_toggle}`);
-  }, [seat_third_row_toggle]);
 
   useEffect(() => {
     return () => {
       Object.values(streamStates).forEach(streamArr => {
         streamArr.forEach(s => s?.getTracks().forEach(t => t.stop()));
       });
-      console.log("Cleanup camera streams on unmount");
     };
   }, [streamStates]);
 
@@ -107,7 +81,6 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
         if (videoRefs.current[`${id}-${idx}`]) {
           videoRefs.current[`${id}-${idx}`].srcObject = stream;
         }
-        console.log(`Camera started for ${id} index ${idx}`);
       } catch (err) {
         console.error('Error accessing camera:', err);
         alert('Camera access denied. Please allow camera permissions.');
@@ -117,7 +90,6 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
       stateArr[idx]?.getTracks().forEach(t => t.stop());
       activeArr[idx] = false;
       stateArr[idx] = null;
-      console.log(`Camera stopped for ${id} index ${idx}`);
     }
 
     setStreamStates(prev => ({ ...prev, [id]: stateArr }));
@@ -133,13 +105,11 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
     const image = canvas.toDataURL('image/png');
-
     const arr = [...(photos[id] || Array(5).fill(null))];
     arr[idx] = image;
     setPhotos(prev => ({ ...prev, [id]: arr }));
     setSeatDetails(prev => ({ ...prev, [id]: arr }));
     setShowDropdown(null);
-    console.log(`Photo taken - Field: ${id}, Index: ${idx}, Image data length: ${image.length}`);
   };
 
   const handleFileUpload = (e, id, idx) => {
@@ -152,7 +122,6 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
         setPhotos(prev => ({ ...prev, [id]: arr }));
         setSeatDetails(prev => ({ ...prev, [id]: arr }));
         setShowDropdown(null);
-        console.log(`Photo uploaded - Field: ${id}, Index: ${idx}, Image data length: ${reader.result.length}`);
       };
       reader.readAsDataURL(file);
     }
@@ -160,13 +129,11 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
 
   const toggleDropdown = (id, idx) => {
     setShowDropdown(curr => (curr === `${id}-${idx}` ? null : `${id}-${idx}`));
-    console.log(`Dropdown toggled - Field: ${id}, Index: ${idx}`);
   };
 
   const handlePlusClick = (id, idx) => {
     if (photos[id]?.[idx]) {
       setShowPhoto(photos[id][idx]);
-      console.log(`Viewing photo - Field: ${id}, Index: ${idx}`);
     } else {
       toggleDropdown(id, idx);
     }
@@ -188,30 +155,24 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Seats & Fabrics</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {panels.map((id, idx) => (
+        {seatPanels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
-            {id === 'seat_third_row' ? (
+            {id === 'thirdRowSeat' ? (
               <>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-md text-white font-medium text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/_/g, ' '))}`}</label>
+                  <label className="text-md text-white font-medium text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1'))}`}</label>
                   <ToggleButton
-                    checked={seat_third_row_toggle}
-                    onChange={() => setSeat_third_row_toggle(prev => {
-                      console.log("Toggle updated - Field: seat_third_row_toggle, New Value:", !prev);
-                      return !prev;
-                    })}
+                    checked={thirdRowSeatEnabled}
+                    onChange={() => setThirdRowSeatEnabled(prev => !prev)}
                   />
                 </div>
-                {seat_third_row_toggle && (
+                {thirdRowSeatEnabled && (
                   <>
                     <div className="mb-4">
                       <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                       <select
                         value={condition[id] || 'None'}
-                        onChange={e => {
-                          console.log(`Condition changed - Field: ${id}, New Value: ${e.target.value}`);
-                          setCondition(prev => ({ ...prev, [id]: e.target.value }));
-                        }}
+                        onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
                         className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       >
                         <option>None</option>
@@ -230,10 +191,7 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
                                   src={photos[id][i]}
                                   alt={`Photo ${i + 1} for ${id}`}
                                   className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                                  onClick={() => {
-                                    setShowPhoto(photos[id][i]);
-                                    console.log(`Viewing photo - Field: ${id}, Index: ${i}`);
-                                  }}
+                                  onClick={() => setShowPhoto(photos[id][i])}
                                 />
                               ) : (
                                 <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
@@ -282,15 +240,12 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
               </>
             ) : (
               <>
-                <label className="text-md text-white font-medium text-left mb-2">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/_/g, ' '))}`}</label>
+                <label className="text-md text-white font-medium text-left mb-2">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1'))}`}</label>
                 <div className="mb-4">
                   <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                   <select
                     value={condition[id] || 'None'}
-                    onChange={e => {
-                      console.log(`Condition changed - Field: ${id}, New Value: ${e.target.value}`);
-                      setCondition(prev => ({ ...prev, [id]: e.target.value }));
-                    }}
+                    onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
                     className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
                     <option>None</option>
@@ -309,10 +264,7 @@ const SeatsFabrics = ({ seatPanels, setSeatPanels }) => {
                               src={photos[id][i]}
                               alt={`Photo ${i + 1} for ${id}`}
                               className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                              onClick={() => {
-                                setShowPhoto(photos[id][i]);
-                                console.log(`Viewing photo - Field: ${id}, Index: ${i}`);
-                              }}
+                              onClick={() => setShowPhoto(photos[id][i])}
                             />
                           ) : (
                             <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">

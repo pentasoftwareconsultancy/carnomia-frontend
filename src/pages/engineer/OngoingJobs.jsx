@@ -57,7 +57,7 @@ const OngoingJobs = () => {
           <TableBody>
             {jobs.map((job, index) => (
               <TableRow key={index}>
-                <TableCell>{job.customerName}</TableCell>
+                <TableCell>{job.name}</TableCell>
                 <TableCell>{job.customerMobile}</TableCell>
                 <TableCell>{`${job.brand} ${job.model}`}</TableCell>
                 <TableCell>{job.bookingId}</TableCell>

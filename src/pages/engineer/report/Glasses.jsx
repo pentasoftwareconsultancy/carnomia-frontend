@@ -11,7 +11,6 @@ const ToggleButton = ({ checked, onChange, label }) => {
   return (
     <label className="flex items-center cursor-pointer">
       <div className="relative">
-        
         <input
           type="checkbox"
           checked={checked}
@@ -32,10 +31,10 @@ const ToggleButton = ({ checked, onChange, label }) => {
   );
 };
 
-const Glasses = ({ glassPanels, setglassPanels }) => {
-  const panels = [
-    'front_windshield_brand', 'front_left_door_glass_brand', 'left_side_orvm_issues', 'rear_left_door_glass_brand', 'rear_left_quarter_glass_brand',
-    'rear_windshield_brand', 'rear_right_quarter_glass_brand', 'rear_right_door_glass_brand', 'front_right_door_glass_brand', 'right_side_orvm_issues', 'sunroof_glass_brand'
+const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => {
+  const glassPanels = [
+    'frontWindshield', 'frontLeftDoor', 'leftSideORVM', 'rearLeftDoor', 'rearLeftQuarterGlass',
+    'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'rightSideORVM', 'sunroof'
   ];
 
   const videoRefs = useRef({});
@@ -48,12 +47,11 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
   const [condition, setCondition] = useState({});
 
   useEffect(() => {
-    const initMaps = panels.reduce((acc, id) => {
-      const photoCount = ['front_windshield_brand', 'front_left_door_glass_brand', 'rear_left_door_glass_brand', 'rear_left_quarter_glass_brand', 'rear_windshield_brand', 'rear_right_quarter_glass_brand', 'rear_right_door_glass_brand', 'front_right_door_glass_brand', 'sunroof_glass_brand'].includes(id) ? 5 : 1;
+    const initMaps = glassPanels.reduce((acc, id) => {
+      const photoCount = ['frontWindshield', 'frontLeftDoor', 'rearLeftDoor', 'rearLeftQuarterGlass', 'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'sunroof'].includes(id) ? 5 : 1;
       acc.streamStates[id] = Array(photoCount).fill(null);
       acc.isCameraActive[id] = Array(photoCount).fill(false);
       acc.photos[id] = Array(photoCount).fill(null);
-
       acc.brand[id] = '';
       acc.manufacturingDate[id] = '';
       acc.condition[id] = 'None';
@@ -66,27 +64,7 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
     setBrand(initMaps.brand);
     setManufacturingDate(initMaps.manufacturingDate);
     setCondition(initMaps.condition);
-    setgetPanels();
-    
-    console.log('Initial glass state:', {
-      streamStates: initMaps.streamStates,
-      isCameraActive: initMaps.isCameraActive,
-      photos: initMaps.photos,
-      brand: initMaps.brand,
-      manufacturingDate: initMaps.manufacturingDate,
-      condition: initMaps.condition,
-    });
   }, []);
-
-  // Log photos state changes
-  useEffect(() => {
-    console.log('Photos updated:', photos);
-  }, [photos]);
-
-  // Log brand state changes
-  useEffect(() => {
-    console.log('Brand updated:', brand);
-  }, [brand]);
 
   useEffect(() => {
     return () => {
@@ -134,19 +112,8 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
     const image = canvas.toDataURL('image/png');
     const arr = [...(photos[id] || Array(photos[id]?.length || 1).fill(null))];
     arr[idx] = image;
-
-    setPhotos(prev => {
-      const newPhotos = { ...prev, [id]: arr };
-      console.log(`Photo taken for ${id}[${idx}]:`, arr[idx]);
-      return newPhotos;
-    });
-
-    setGlassDetails(prev => {
-      const newDetails = { ...prev, [id]: arr };
-      console.log('Glass details updated:', newDetails);
-      return newDetails;
-    });
-
+    setPhotos(prev => ({ ...prev, [id]: arr }));
+    setGlassDetails(prev => ({ ...prev, [id]: arr }));
     setShowDropdown(null);
   };
 
@@ -181,7 +148,6 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
     const scrollY = window.scrollY;
     setter(e.target.value);
     window.scrollTo(0, scrollY);
-    console.log('Input changed:', e.target.value);
   };
 
   const capitalizeFirstWord = (str) => {
@@ -200,8 +166,8 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Glass Panels</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {panels.map((id, idx) => {
-          const isGlassSpecial = ['front_windshield_brand', 'front_left_door_glass_brand', 'rear_left_door_glass_brand', 'rear_left_quarter_glass_brand', 'rear_windshield_brand', 'rear_right_quarter_glass_brand', 'rear_right_door_glass_brand', 'front_right_door_glass_brand', 'sunroof_glass_brand'].includes(id);
+        {glassPanels.map((id, idx) => {
+          const isGlassSpecial = ['frontWindshield', 'frontLeftDoor', 'rearLeftDoor', 'rearLeftQuarterGlass', 'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'sunroof'].includes(id);
           const photoCount = isGlassSpecial ? 5 : 1;
 
           return (
@@ -214,7 +180,7 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
                     <label className="text-md text-white font-medium text-left mb-2">Brand</label>
                     <input
                       type="text"
-                      value={glassPanels[id] || ''}
+                      value={brand[id] || ''}
                       onChange={(e) => handleInputChange((value) => setBrand(prev => ({ ...prev, [id]: value })))(e)}
                       className="p-2 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       placeholder="Enter brand"
@@ -224,7 +190,7 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
                     <label className="text-md text-white font-medium text-left mb-2">Manufacturing MM/YY</label>
                     <input
                       type="text"
-                      value={glassPanels[id] || ''}
+                      value={manufacturingDate[id] || ''}
                       onChange={(e) => handleInputChange((value) => setManufacturingDate(prev => ({ ...prev, [id]: value })))(e)}
                       className="p-2 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       placeholder="MM/YY"
@@ -236,7 +202,7 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
               <div className="mb-4">
                 <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                 <select
-                  value={glassPanels[id] || 'None'}
+                  value={condition[id] || 'None'}
                   onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
                   className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                 >
@@ -252,19 +218,19 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
                   <div className="mt-2 flex flex-wrap gap-4 justify-center">
                     {Array.from({ length: photoCount }).map((_, i) => (
                       <div key={i} className="relative">
-                        {glassPanels[id]?.[i] ? (
+                        {photos[id]?.[i] ? (
                           <img
-                            src={glassPanels[id][i]}
+                            src={photos[id][i]}
                             alt={`Photo ${i + 1} for ${id}`}
                             className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                            onClick={() => setShowPhoto(glassPanels[id][i])}
+                            onClick={() => setShowPhoto(photos[id][i])}
                           />
                         ) : (
                           <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
                             <button
                               onClick={() => handlePlusClick(id, i)}
                               className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
-                              title={glassPanels[id]?.[i] ? "View Photo" : "Add Photo"}
+                              title={photos[id]?.[i] ? "View Photo" : "Add Photo"}
                             >
                               <AiOutlinePlus className="text-xl" />
                             </button>
@@ -294,7 +260,7 @@ const Glasses = ({ glassPanels, setglassPanels }) => {
                         <video
                           ref={el => (videoRefs.current[`${id}-${i}`] = el)}
                           autoPlay
-                          className={glassPanels[id]?.[i] ? 'w-24 h-24 rounded-md' : 'hidden'}
+                          className={isCameraActive[id]?.[i] ? 'w-24 h-24 rounded-md' : 'hidden'}
                         />
                       </div>
                     ))}

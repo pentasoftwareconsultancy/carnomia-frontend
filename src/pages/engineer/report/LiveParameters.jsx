@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const ToggleButton = ({ checked, onChange }) => {
   const handleChange = (e) => {
@@ -47,65 +47,12 @@ const LiveParameters = () => {
   };
 
   const parameters = [
-    {
-      id: 'engineLoad',
-      label: 'Engine Load',
-      enabled: engineLoadEnabled,
-      setEnabled: setEngineLoadEnabled,
-      value: engineLoad,
-      setValue: setEngineLoad,
-      allowDecimal: true,
-    },
-    {
-      id: 'idleRPM',
-      label: 'Idle RPM',
-      enabled: idleRPMEnabled,
-      setEnabled: setIdleRPMEnabled,
-      value: idleRPM,
-      setValue: setIdleRPM,
-      allowDecimal: false,
-    },
-    {
-      id: 'batteryVoltage',
-      label: 'Battery Voltage',
-      value: batteryVoltage,
-      setValue: setBatteryVoltage,
-      allowDecimal: true,
-    },
-    {
-      id: 'distanceSinceCodeClear',
-      label: 'Distance Since Code Clear',
-      value: distanceSinceCodeClear,
-      setValue: setDistanceSinceCodeClear,
-      allowDecimal: true,
-    },
-    {
-      id: 'distanceCurrentBlock',
-      label: 'Distance In Current Lock Block',
-      value: distanceCurrentBlock,
-      setValue: setDistanceCurrentBlock,
-      allowDecimal: true,
-    },
+    { id: 'engineLoad', label: 'Engine Load', enabled: engineLoadEnabled, setEnabled: setEngineLoadEnabled, value: engineLoad, setValue: setEngineLoad, allowDecimal: true },
+    { id: 'idleRPM', label: 'Idle RPM', enabled: idleRPMEnabled, setEnabled: setIdleRPMEnabled, value: idleRPM, setValue: setIdleRPM, allowDecimal: false },
+    { id: 'batteryVoltage', label: 'Battery Voltage', value: batteryVoltage, setValue: setBatteryVoltage, allowDecimal: true },
+    { id: 'distanceSinceCodeClear', label: 'Distance Since Code Clear', value: distanceSinceCodeClear, setValue: setDistanceSinceCodeClear, allowDecimal: true },
+    { id: 'distanceCurrentBlock', label: 'Distance In Current Lock Block', value: distanceCurrentBlock, setValue: setDistanceCurrentBlock, allowDecimal: true },
   ];
-
-  // Logging all parameter field names and their current values whenever any changes
-  useEffect(() => {
-    console.log('Live Parameters Updated:');
-    parameters.forEach((param) => {
-      if (param.enabled !== undefined) {
-        console.log(`Toggle: live_${param.id}_toggle, Value:`, param.enabled);
-      }
-      console.log(`Field: live_${param.id}, Value:`, param.value);
-    });
-  }, [
-    engineLoadEnabled,
-    idleRPMEnabled,
-    engineLoad,
-    idleRPM,
-    batteryVoltage,
-    distanceSinceCodeClear,
-    distanceCurrentBlock,
-  ]);
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">

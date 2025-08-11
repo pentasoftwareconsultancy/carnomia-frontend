@@ -1,20 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from 'react-icons/ai';
 
-const panels = [
-  'plastic_driver_door',
-  'plastic_codriver_door',
-  'plastic_rear_left_passenger_door',
-  'plastic_rear_right_passenger_door',
-  'plastic_third_row',
-  'plastic_dashboard',
-  'plastic_gear_console',
-  'plastic_steering',
-  'plastic_ac_vents',
-  'plastic_rear_ac_vents',
-  'plastic_irvm'
-];
-
 const ToggleButton = ({ checked, onChange }) => {
   const handleChange = (e) => {
     const scrollY = window.scrollY;
@@ -44,56 +30,41 @@ const ToggleButton = ({ checked, onChange }) => {
   );
 };
 
-const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
+const PlasticPanel = ({ plasticPanelDetails, setPlasticPanelDetails, showPhoto, setShowPhoto }) => {
+  const plasticPanels = [
+    'driverDoor', 'co-DriverDoor', 'rearLeftPassengerDoor', 'rearRightPassengerDoor',
+    'thirdRow', 'dashboard', 'gearConsole', 'steering', 'AcVents', 'rearAcVents', 'IRVM'
+  ];
+
   const videoRefs = useRef({});
   const [streamStates, setStreamStates] = useState({});
   const [isCameraActive, setIsCameraActive] = useState({});
   const [photos, setPhotos] = useState({});
   const [showDropdown, setShowDropdown] = useState(null);
   const [condition, setCondition] = useState({});
-  const [plastic_third_row_toggle, setPlastic_third_row_toggle] = useState(false);
+  const [thirdRowEnabled, setThirdRowEnabled] = useState(false);
 
   useEffect(() => {
-    // Initialize condition and photos state
-    const initConditions = {};
-    const initPhotos = {};
-    panels.forEach(panel => {
-      initConditions[panel] = 'None';
-      initPhotos[panel] = Array(5).fill(null);
-    });
-    setCondition(initConditions);
-    setPhotos(initPhotos);
-    setPlasticPanels();
+    const initMaps = plasticPanels.reduce((acc, id) => {
+      const photoCount = 5; // All panels support up to 5 photos
+      acc.streamStates[id] = Array(photoCount).fill(null);
+      acc.isCameraActive[id] = Array(photoCount).fill(false);
+      acc.photos[id] = Array(photoCount).fill(null);
+      acc.condition[id] = 'None';
+      return acc;
+    }, { streamStates: {}, isCameraActive: {}, photos: {}, condition: {} });
 
-    console.log("Initialized plastic panel conditions:", initConditions);
-    console.log("Initialized plastic panel photos:", initPhotos);
+    setStreamStates(initMaps.streamStates);
+    setIsCameraActive(initMaps.isCameraActive);
+    setPhotos(initMaps.photos);
+    setCondition(initMaps.condition);
   }, []);
-
-  // Log condition changes with field names and values
-  useEffect(() => {
-    Object.entries(condition).forEach(([field, val]) => {
-      console.log(`Condition updated - Field: ${field}, Value: ${val}`);
-    });
-  }, [condition]);
-
-  // Log photos changes with field names and count of photos
-  useEffect(() => {
-    Object.entries(photos).forEach(([field, arr]) => {
-      console.log(`Photos updated - Field: ${field}, Photos count: ${arr.filter(Boolean).length}`);
-    });
-  }, [photos]);
-
-  // Log third row toggle field and value
-  useEffect(() => {
-    console.log(`Toggle updated - Field: plastic_third_row_toggle, Value: ${plastic_third_row_toggle}`);
-  }, [plastic_third_row_toggle]);
 
   useEffect(() => {
     return () => {
       Object.values(streamStates).forEach(streamArr => {
         streamArr.forEach(s => s?.getTracks().forEach(t => t.stop()));
       });
-      console.log("Cleanup camera streams on unmount");
     };
   }, [streamStates]);
 
@@ -109,7 +80,6 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
         if (videoRefs.current[`${id}-${idx}`]) {
           videoRefs.current[`${id}-${idx}`].srcObject = stream;
         }
-        console.log(`Camera started for ${id} index ${idx}`);
       } catch (err) {
         console.error('Error accessing camera:', err);
         alert('Camera access denied. Please allow camera permissions.');
@@ -119,7 +89,6 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
       stateArr[idx]?.getTracks().forEach(t => t.stop());
       activeArr[idx] = false;
       stateArr[idx] = null;
-      console.log(`Camera stopped for ${id} index ${idx}`);
     }
 
     setStreamStates(prev => ({ ...prev, [id]: stateArr }));
@@ -135,13 +104,11 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
     const image = canvas.toDataURL('image/png');
-
     const arr = [...(photos[id] || Array(5).fill(null))];
     arr[idx] = image;
     setPhotos(prev => ({ ...prev, [id]: arr }));
     setPlasticPanelDetails(prev => ({ ...prev, [id]: arr }));
     setShowDropdown(null);
-    console.log(`Photo taken - Field: ${id}, Index: ${idx}, Image data length: ${image.length}`);
   };
 
   const handleFileUpload = (e, id, idx) => {
@@ -154,7 +121,6 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
         setPhotos(prev => ({ ...prev, [id]: arr }));
         setPlasticPanelDetails(prev => ({ ...prev, [id]: arr }));
         setShowDropdown(null);
-        console.log(`Photo uploaded - Field: ${id}, Index: ${idx}, Image data length: ${reader.result.length}`);
       };
       reader.readAsDataURL(file);
     }
@@ -162,13 +128,11 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
 
   const toggleDropdown = (id, idx) => {
     setShowDropdown(curr => (curr === `${id}-${idx}` ? null : `${id}-${idx}`));
-    console.log(`Dropdown toggled - Field: ${id}, Index: ${idx}`);
   };
 
   const handlePlusClick = (id, idx) => {
     if (photos[id]?.[idx]) {
       setShowPhoto(photos[id][idx]);
-      console.log(`Viewing photo - Field: ${id}, Index: ${idx}`);
     } else {
       toggleDropdown(id, idx);
     }
@@ -190,30 +154,24 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Plastic Panels</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {panels.map((id, idx) => (
+        {plasticPanels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
-            {id === 'plastic_third_row' ? (
+            {id === 'thirdRow' ? (
               <>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-md text-white font-medium text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/_/g, ' '))}`}</label>
+                  <label className="text-md text-white font-medium text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1'))}`}</label>
                   <ToggleButton
-                    checked={plastic_third_row_toggle}
-                    onChange={() => setPlastic_third_row_toggle(prev => {
-                      console.log("Toggle updated - Field: plastic_third_row_toggle, New Value:", !prev);
-                      return !prev;
-                    })}
+                    checked={thirdRowEnabled}
+                    onChange={() => setThirdRowEnabled(prev => !prev)}
                   />
                 </div>
-                {plastic_third_row_toggle && (
+                {thirdRowEnabled && (
                   <>
                     <div className="mb-4">
                       <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                       <select
                         value={condition[id] || 'None'}
-                        onChange={e => {
-                          console.log(`Condition changed - Field: ${id}, New Value: ${e.target.value}`);
-                          setCondition(prev => ({ ...prev, [id]: e.target.value }));
-                        }}
+                        onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
                         className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       >
                         <option>None</option>
@@ -232,10 +190,7 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
                                   src={photos[id][i]}
                                   alt={`Photo ${i + 1} for ${id}`}
                                   className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                                  onClick={() => {
-                                    setShowPhoto(photos[id][i]);
-                                    console.log(`Viewing photo - Field: ${id}, Index: ${i}`);
-                                  }}
+                                  onClick={() => setShowPhoto(photos[id][i])}
                                 />
                               ) : (
                                 <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
@@ -284,15 +239,12 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
               </>
             ) : (
               <>
-                <label className="text-md text-white font-medium text-left mb-2">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/_/g, ' '))}`}</label>
+                <label className="text-md text-white font-medium text-left mb-2">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1'))}`}</label>
                 <div className="mb-4">
                   <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                   <select
                     value={condition[id] || 'None'}
-                    onChange={e => {
-                      console.log(`Condition changed - Field: ${id}, New Value: ${e.target.value}`);
-                      setCondition(prev => ({ ...prev, [id]: e.target.value }));
-                    }}
+                    onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
                     className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   >
                     <option>None</option>
@@ -311,10 +263,7 @@ const PlasticPanel = ({ plasticPanels, setPlasticPanels }) => {
                               src={photos[id][i]}
                               alt={`Photo ${i + 1} for ${id}`}
                               className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                              onClick={() => {
-                                setShowPhoto(photos[id][i]);
-                                console.log(`Viewing photo - Field: ${id}, Index: ${i}`);
-                              }}
+                              onClick={() => setShowPhoto(photos[id][i])}
                             />
                           ) : (
                             <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">

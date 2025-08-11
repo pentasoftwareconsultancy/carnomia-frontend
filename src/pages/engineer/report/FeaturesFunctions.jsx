@@ -30,33 +30,33 @@ const ToggleButton = ({ checked, onChange, label }) => {
   );
 };
 
-const FeaturesFunctions = ({ featurePanels, setFeaturePanels }) => {
-  const panels = [
-    'feature_parking_sensors_front', 'feature_parking_sensors_rear', 'feature_front_view_camera', 'feature_rear_view_camera',
-    'feature_camera_360', 'feature_touch_screen', 'feature_speakers', 'feature_electric_orvm', 'feature_auto_dimming_irvm',
-    'feature_ventilated_seat_driver', 'feature_ventilated_seat_codriver', '  feature_ventilated_seat_rear'
+const FeaturesFunctions = ({ featuresFunctionsDetails, setFeaturesFunctionsDetails }) => {
+  const featurePanels = [
+    'parkingSensorsFront', 'parkingSensorsRear', 'frontViewCamera', 'rearViewCamera',
+    '360 Camera', 'touchScreen', 'speakers', 'electricORVM', 'autoDimmingIRVM',
+    'ventilatedSeatDriverSide', 'ventilatedSeatCo-DriverSide', 'ventilatedSeatRear'
   ];
 
+  // Initialize toggleStates with default values to prevent blank screen
   const [toggleStates, setToggleStates] = useState(
-    panels.reduce((acc, id) => {
+    featurePanels.reduce((acc, id) => {
       acc[id] = { available: false, issueObserved: false };
       return acc;
     }, {})
   );
 
   useEffect(() => {
-    console.log('Component mounted');
-    console.log('Props received:', { featuresFunctionsDetails, setFeaturesFunctionsDetails });
+    // Log props and state for debugging
+    console.log('Props:', { featuresFunctionsDetails, setFeaturesFunctionsDetails });
     console.log('Initial toggleStates:', toggleStates);
 
+    // Sync initial state with parent
     if (typeof setFeaturesFunctionsDetails === 'function') {
       setFeaturesFunctionsDetails(toggleStates);
-      setFeaturePanels();
-      console.log('Initial state synced to parent.');
     } else {
       console.error('setFeaturesFunctionsDetails is not a function');
     }
-  }, []); // Run once on mount
+  }, []); // Run only once on mount
 
   const handleToggleChange = (id, type) => {
     setToggleStates(prev => {
@@ -67,13 +67,13 @@ const FeaturesFunctions = ({ featurePanels, setFeaturePanels }) => {
           [type]: !prev[id][type]
         }
       };
-      console.log(`Toggle changed for ${id} - ${type}:`, newState[id][type]);
+      // Sync with parent
       if (typeof setFeaturesFunctionsDetails === 'function') {
         setFeaturesFunctionsDetails(newState);
-        console.log('State synced to parent:', newState);
       } else {
         console.error('setFeaturesFunctionsDetails is not a function');
       }
+      console.log('Updated toggleStates:', newState);
       return newState;
     });
   };
@@ -86,8 +86,10 @@ const FeaturesFunctions = ({ featurePanels, setFeaturePanels }) => {
     return words.join(' ');
   };
 
+  // Log toggleStates before render for debugging
   console.log('Rendering with toggleStates:', toggleStates);
 
+  // Fallback UI if toggleStates is empty or undefined
   if (!toggleStates || Object.keys(toggleStates).length === 0) {
     return <div className="text-white">Loading features and functions data...</div>;
   }
@@ -96,17 +98,17 @@ const FeaturesFunctions = ({ featurePanels, setFeaturePanels }) => {
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Features & Functions</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-6">
-        {panels.map((id, idx) => (
+        {featurePanels.map((id, idx) => (
           <div key={id} className="flex flex-col w-full">
             <label className="text-md text-white font-medium mb-2 text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1')).replace('360', '360°')}`}</label>
             <div className="flex justify-center items-center gap-18">
               <ToggleButton
-                checked={featurePanels[id]?.available || false}
+                checked={toggleStates[id]?.available || false}
                 onChange={() => handleToggleChange(id, 'available')}
                 label="Available"
               />
               <ToggleButton
-                checked={featurePanels[id]?.issueObserved || false}
+                checked={toggleStates[id]?.issueObserved || false}
                 onChange={() => handleToggleChange(id, 'issueObserved')}
                 label="Issue Observed"
               />

@@ -131,7 +131,7 @@ const AllRequests = ({ setSelectedRequest }) => {
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition`}
                   >
                     <TableCell align="center" className="text-sm">{req.bookingId}</TableCell>
-                    <TableCell align="center" className="text-sm">{req.customerName}</TableCell>
+                    <TableCell align="center" className="text-sm">{req.name}</TableCell>
                     <TableCell align="center">
                       <span className={`px-3 py-1 rounded-full font-semibold text-xs ${statusColors[req.status]?.bg} ${statusColors[req.status]?.text}`}>
                         {req.status}

@@ -171,7 +171,7 @@ const NewRequests = ({ setViewMode }) => {
                           }}
                         >
                           <FiUser  style={{ marginRight: 6 }} />
-                          {r.customerName || 'Unknown Customer'}
+                          {r.name || 'Unknown Customer'}
                         </Typography>
 
                         <Box
