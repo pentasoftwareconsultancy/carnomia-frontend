@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-const FluidCard = ({ fluidName, withinRange, setWithinRange, contamination, setContamination }) => {
-  const handleCheckboxChange = (e, setState) => {
+const FluidCard = ({ fluidName, withinRange, onWithinRangeChange, contamination, onContaminationChange }) => {
+  const handleCheckboxChange = (e, callback) => {
     const scrollY = window.scrollY;
-    setState(e.target.checked);
+    callback(e.target.checked);
     window.scrollTo(0, scrollY);
   };
 
@@ -15,7 +15,7 @@ const FluidCard = ({ fluidName, withinRange, setWithinRange, contamination, setC
           <input
             type="checkbox"
             checked={withinRange}
-            onChange={(e) => handleCheckboxChange(e, setWithinRange)}
+            onChange={(e) => handleCheckboxChange(e, onWithinRangeChange)}
             className="w-5 h-5 text-lime-500 bg-gray-600 border-white/20 rounded focus:ring-lime-500 focus:ring-2"
           />
           <span className="text-white text-sm">Within Range</span>
@@ -24,7 +24,7 @@ const FluidCard = ({ fluidName, withinRange, setWithinRange, contamination, setC
           <input
             type="checkbox"
             checked={contamination}
-            onChange={(e) => handleCheckboxChange(e, setContamination)}
+            onChange={(e) => handleCheckboxChange(e, onContaminationChange)}
             className="w-5 h-5 text-lime-500 bg-gray-600 border-white/20 rounded focus:ring-lime-500 focus:ring-2"
           />
           <span className="text-white text-sm">Contamination</span>
@@ -34,40 +34,33 @@ const FluidCard = ({ fluidName, withinRange, setWithinRange, contamination, setC
   );
 };
 
-const FluidLevels = () => {
-  const [fluids, setFluids] = useState({
-    coolant: { withinRange: false, contamination: false },
-    engineOil: { withinRange: false, contamination: false },
-    brakeOil: { withinRange: false, contamination: false },
-    washerFluid: { withinRange: false, contamination: false },
-  });
-
-  const handleCheckboxChange = (fluidKey, field) => (value) => {
-    setFluids((prev) => ({
-      ...prev,
-      [fluidKey]: { ...prev[fluidKey], [field]: value },
-    }));
-  };
-
-  const fluidData = [
-    { id: 'coolant', name: '1. Coolant' },
-    { id: 'engineOil', name: '2. Engine Oil' },
-    { id: 'brakeOil', name: '3. Brake Oil' },
-    { id: 'washerFluid', name: '4. Washer Fluid' },
+const FluidLevels = ({ data = {}, onChange }) => {
+  const fluidsList = [
+    { id: "coolant", name: "1. Coolant" },
+    { id: "engineOil", name: "2. Engine Oil" },
+    { id: "brakeOil", name: "3. Brake Oil" },
+    { id: "washerFluid", name: "4. Washer Fluid" },
   ];
+
+  // Call onChange with field and value when checkbox toggled
+  const handleToggle = (field, value) => {
+    if (typeof onChange === 'function') {
+      onChange(field, value);
+    }
+  };
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Fluid Levels</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-6">
-        {fluidData.map((fluid) => (
-          <FluidCard                                                                                                    
-            key={fluid.id}
-            fluidName={fluid.name}
-            withinRange={fluids[fluid.id].withinRange}
-            setWithinRange={handleCheckboxChange(fluid.id, 'withinRange')}
-            contamination={fluids[fluid.id].contamination}
-            setContamination={handleCheckboxChange(fluid.id, 'contamination')}
+        {fluidsList.map(({ id, name }) => (
+          <FluidCard
+            key={id}
+            fluidName={name}
+            withinRange={data[`fluid_${id}_withinRange`] ?? false}
+            onWithinRangeChange={(checked) => handleToggle(`fluid_${id}_withinRange`, checked)}
+            contamination={data[`fluid_${id}_contamination`] ?? false}
+            onContaminationChange={(checked) => handleToggle(`fluid_${id}_contamination`, checked)}
           />
         ))}
       </div>

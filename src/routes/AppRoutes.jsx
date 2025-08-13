@@ -159,6 +159,8 @@ const AppRoutes = () => {
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="inspection-report" element={<InspectionReport />} />
             <Route path="payment-management" element={<PaymentManagement />} />
+            <Route path="report/:id" element={<Report />} />
+         
           </Route>
         </Route>
 

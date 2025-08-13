@@ -37,7 +37,7 @@ const OngoingJobs = () => {
   }, []);
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: 1 }}>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: "bold", color: "#1b5e20" }}>
         Ongoing Jobs – PDI in Progress
       </Typography>
@@ -57,7 +57,7 @@ const OngoingJobs = () => {
           <TableBody>
             {jobs.map((job, index) => (
               <TableRow key={index}>
-                <TableCell>{job.name}</TableCell>
+                <TableCell>{job.customerName}</TableCell>
                 <TableCell>{job.customerMobile}</TableCell>
                 <TableCell>{`${job.brand} ${job.model}`}</TableCell>
                 <TableCell>{job.bookingId}</TableCell>

@@ -162,18 +162,40 @@ export default function Navbar({ onToggleSidebar }) {
   };
 
   const handleGoToDashboard = () => {
-    const currentUser = JSON.parse(user);
-    if (!currentUser) return;
-    const currentPath = location.pathname;
-    if (currentUser.role === "admin" && currentPath.startsWith("/admin")) return;
-    if (currentUser.role === "superadmin" && currentPath.startsWith("/superadmin"))
-      return;
-    if (currentUser.role === "engineer" && currentPath.startsWith("/engineer")) return;
-    if (!currentUser.role && currentPath === "/dashboard") return;
+    let currentUser = user; // changed from const to let
 
+    if (!currentUser) return;
+
+    const currentPath = location.pathname;
+
+    if (typeof user === "string") {
+      try {
+        currentUser = JSON.parse(user);
+      } catch (err) {
+        console.error("Invalid JSON format for user:", user);
+        return;
+      }
+    }
+
+    // Prevent navigation if already on correct dashboard
+    if (currentUser.role === "admin" && currentPath.startsWith("/admin"))
+      return;
+    if (
+      currentUser.role === "superadmin" &&
+      currentPath.startsWith("/superadmin")
+    )
+      return;
+    if (currentUser.role === "engineer" && currentPath.startsWith("/engineer"))
+      return;
+    if (currentUser.role === "customer" && currentPath.startsWith("/customer"))
+      return;
+
+    // Navigate based on role
     if (currentUser.role === "admin") navigate("/admin/dashboard");
-    else if (currentUser.role === "superadmin") navigate("/superadmin/dashboard");
+    else if (currentUser.role === "superadmin")
+      navigate("/superadmin/dashboard");
     else if (currentUser.role === "engineer") navigate("/engineer/dashboard");
+    else if (currentUser.role === "customer") navigate("/customer/dashboard");
     else navigate("/");
 
     setShowProfile(false);

@@ -117,7 +117,7 @@ const AllRequests = ({ setSelectedRequest }) => {
             <Table>
               <TableHead>
                 <TableRow className="bg-white">
-                  {['Booking ID', 'Customer', 'Status', 'Location', 'Date', 'Slot', 'Actions'].map((head) => (
+                  {['Booking ID', 'Customer', 'Status', 'address', 'Date', 'Slot', 'Actions'].map((head) => (
                     <TableCell key={head} align="center" className="text-green-700 font-bold text-sm">
                       {head}
                     </TableCell>
@@ -131,13 +131,13 @@ const AllRequests = ({ setSelectedRequest }) => {
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition`}
                   >
                     <TableCell align="center" className="text-sm">{req.bookingId}</TableCell>
-                    <TableCell align="center" className="text-sm">{req.name}</TableCell>
+                    <TableCell align="center" className="text-sm">{req.customerName}</TableCell>
                     <TableCell align="center">
-                      <span className={`px-3 py-1 rounded-full font-semibold text-xs ${statusColors[req.status]?.bg} ${statusColors[req.status]?.text}`}>
+                    <span className={`px-3 py-1 rounded-full font-semibold text-xs ${statusColors[req.status]?.bg} ${statusColors[req.status]?.text}`}>
                         {req.status}
                       </span>
                     </TableCell>
-                    <TableCell align="center" className="text-sm">{req.location}</TableCell>
+                    <TableCell align="center" className="text-sm">{req.address}</TableCell>
                     <TableCell align="center" className="text-sm">{req.date}</TableCell>
                     <TableCell align="center" className="text-sm">{req.slot || 'N/A'}</TableCell>
                     <TableCell align="center">

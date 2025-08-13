@@ -1,198 +1,218 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from 'react-icons/ai';
+import React, { useState, useEffect, useRef } from "react";
+import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
+import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
+import FileUploaderService from "../../../services/upload-document.service";
 
-const ToggleButton = ({ checked, onChange, label }) => {
-  const handleChange = (e) => {
-    const scrollY = window.scrollY;
-    onChange(e);
-    window.scrollTo(0, scrollY);
-  };
+const glassPanels = [
+  "front_windshield",
+  "front_left_door_glass",
+  "left_side_orvm",
+  "rear_left_door_glass",
+  "rear_left_quarter_glass",
+  "rear_windshield",
+  "rear_right_quarter_glass",
+  "rear_right_door_glass",
+  "front_right_door_glass",
+  "right_side_orvm",
+  "sunroof_glass", 
+];
 
-  return (
-    <label className="flex items-center cursor-pointer">
-      <div className="relative">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={handleChange}
-          className="sr-only"
-          autoFocus={false}
-        />
-        <div className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${checked ? 'bg-lime-500' : ''}`}>
-          <div
-            className={`absolute w-5 h-5 bg-white rounded-full shadow -left-1 top-0 transition-transform duration-200 ease-in-out ${
-              checked ? 'transform translate-x-5' : ''
-            }`}
-          />
-        </div>
-      </div>
-      <span className="ml-2 text-white">{label}</span>
-    </label>
-  );
+const labelNames = {
+  front_windshield: "1. Front Windshield",
+  front_left_door_glass: "2. Front Left Door Glass",
+  left_side_orvm: "3. Left Side ORVM",
+  rear_left_door_glass: "4. Rear Left Door Glass",
+  rear_left_quarter_glass: "5. Rear Left Quarter Glass",
+  rear_windshield: "6. Rear Windshield",
+  rear_right_quarter_glass: "7. Rear Right Quarter Glass",
+  rear_right_door_glass: "8. Rear Right Door Glass",
+  front_right_door_glass: "9. Front Right Door Glass",
+  right_side_orvm: "10. Right Side ORVM",
+  sunroof_glass: "11. Sunroof Glass",
 };
 
-const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => {
-  const glassPanels = [
-    'frontWindshield', 'frontLeftDoor', 'leftSideORVM', 'rearLeftDoor', 'rearLeftQuarterGlass',
-    'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'rightSideORVM', 'sunroof'
-  ];
+const specialGlassPanels = new Set([
+  "front_windshield",
+  "front_left_door_glass",
+  "rear_left_door_glass",
+  "rear_left_quarter_glass",
+  "rear_windshield",
+  "rear_right_quarter_glass",
+  "rear_right_door_glass",
+  "front_right_door_glass",
+  "sunroof_glass",
+]);
+
+const photoCountForPanel = (panel) => (specialGlassPanels.has(panel) ? 5 : 1);
+
+const Glasses = ({ data = {}, onChange }) => {
+  // Photos state
+  const [photos, setPhotos] = useState(() => {
+    const initialPhotos = {};
+    glassPanels.forEach((panel) => {
+      const expectedCount = photoCountForPanel(panel);
+      const existingPhotos = Array.isArray(data[`${panel}_imageUrls`]) ? data[`${panel}_imageUrls`] : [];
+      initialPhotos[panel] = [
+        ...existingPhotos.slice(0, expectedCount),
+        ...Array(Math.max(0, expectedCount - existingPhotos.length)).fill(null),
+      ];
+    });
+    return initialPhotos;
+  });
+
+  // Brand state
+  const [brand, setBrand] = useState(() => {
+    const initial = {};
+    glassPanels.forEach((p) => {
+      initial[p] = data[`${p}_brand`] || "";
+    });
+    return initial;
+  });
+
+  // Manufacturing date state
+  const [manufacturingDate, setManufacturingDate] = useState(() => {
+    const initial = {};
+    glassPanels.forEach((p) => {
+      initial[p] = data[`${p}_manufacturingDate`] || "";
+    });
+    return initial;
+  });
+
+  // Condition/issue state
+  const [condition, setCondition] = useState(() => {
+    const initial = {};
+    glassPanels.forEach((p) => {
+      initial[p] = data[`${p}_issues`] || "None";
+    });
+    return initial;
+  });
 
   const videoRefs = useRef({});
   const [streamStates, setStreamStates] = useState({});
   const [isCameraActive, setIsCameraActive] = useState({});
-  const [photos, setPhotos] = useState({});
   const [showDropdown, setShowDropdown] = useState(null);
-  const [brand, setBrand] = useState({});
-  const [manufacturingDate, setManufacturingDate] = useState({});
-  const [condition, setCondition] = useState({});
+  const [showPhoto, setShowPhoto] = useState(null);
 
-  useEffect(() => {
-    const initMaps = glassPanels.reduce((acc, id) => {
-      const photoCount = ['frontWindshield', 'frontLeftDoor', 'rearLeftDoor', 'rearLeftQuarterGlass', 'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'sunroof'].includes(id) ? 5 : 1;
-      acc.streamStates[id] = Array(photoCount).fill(null);
-      acc.isCameraActive[id] = Array(photoCount).fill(false);
-      acc.photos[id] = Array(photoCount).fill(null);
-      acc.brand[id] = '';
-      acc.manufacturingDate[id] = '';
-      acc.condition[id] = 'None';
-      return acc;
-    }, { streamStates: {}, isCameraActive: {}, photos: {}, brand: {}, manufacturingDate: {}, condition: {} });
-
-    setStreamStates(initMaps.streamStates);
-    setIsCameraActive(initMaps.isCameraActive);
-    setPhotos(initMaps.photos);
-    setBrand(initMaps.brand);
-    setManufacturingDate(initMaps.manufacturingDate);
-    setCondition(initMaps.condition);
-  }, []);
-
+  // Cleanup video streams on unmount
   useEffect(() => {
     return () => {
-      Object.values(streamStates).forEach(streamArr => {
-        streamArr.forEach(s => s?.getTracks().forEach(t => t.stop()));
+      Object.values(streamStates).forEach((stream) => {
+        if (stream) stream.getTracks().forEach((track) => track.stop());
       });
     };
   }, [streamStates]);
 
-  const handleCameraClick = async (id, idx) => {
-    const activeArr = [...(isCameraActive[id] || Array(photos[id]?.length || 1).fill(false))];
-    const stateArr = [...(streamStates[id] || Array(photos[id]?.length || 1).fill(null))];
+  // Toggle dropdown visibility for photo slot
+  const toggleDropdown = (slotKey) => {
+    setShowDropdown((curr) => (curr === slotKey ? null : slotKey));
+  };
 
-    if (!activeArr[idx]) {
+  // Your original handleFileUpload logic preserved
+  const handleFileUpload = async (e, panel, index) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stateArr[idx] = stream;
-        activeArr[idx] = true;
-        if (videoRefs.current[`${id}-${idx}`]) {
-          videoRefs.current[`${id}-${idx}`].srcObject = stream;
+        const uploadedData = await FileUploaderService.uploadFileToServer(file, panel);
+        const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
+        if (imageUrl) {
+          setPhotos((prev) => {
+            const newPhotos = [...(prev[panel] || Array(photoCountForPanel(panel)).fill(null))];
+            newPhotos[index] = imageUrl;
+            onChange && onChange(`${panel}_imageUrls`, newPhotos);
+            return { ...prev, [panel]: newPhotos };
+          });
+          setShowDropdown(null);
         }
-      } catch (err) {
-        console.error('Error accessing camera:', err);
-        alert('Camera access denied. Please allow camera permissions.');
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        alert("Failed to upload image. Please try again.");
       }
     } else {
-      takePhoto(id, idx, stateArr[idx]);
-      stateArr[idx]?.getTracks().forEach(t => t.stop());
-      activeArr[idx] = false;
-      stateArr[idx] = null;
-    }
-
-    setStreamStates(prev => ({ ...prev, [id]: stateArr }));
-    setIsCameraActive(prev => ({ ...prev, [id]: activeArr }));
-  };
-
-  const takePhoto = (id, idx, stream) => {
-    const video = videoRefs.current[`${id}-${idx}`];
-    if (!video) return;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    const image = canvas.toDataURL('image/png');
-    const arr = [...(photos[id] || Array(photos[id]?.length || 1).fill(null))];
-    arr[idx] = image;
-    setPhotos(prev => ({ ...prev, [id]: arr }));
-    setGlassDetails(prev => ({ ...prev, [id]: arr }));
-    setShowDropdown(null);
-  };
-
-  const handleFileUpload = (e, id, idx) => {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const arr = [...(photos[id] || Array(photos[id]?.length || 1).fill(null))];
-        arr[idx] = reader.result;
-        setPhotos(prev => ({ ...prev, [id]: arr }));
-        setGlassDetails(prev => ({ ...prev, [id]: arr }));
-        setShowDropdown(null);
-      };
-      reader.readAsDataURL(file);
+      alert("Please select a valid image file.");
     }
   };
 
-  const toggleDropdown = (id, idx) => {
-    setShowDropdown(curr => (curr === `${id}-${idx}` ? null : `${id}-${idx}`));
+  // Handle taking photo from camera
+  const handleCameraClick = (panel, index) => {
+    const slotKey = `${panel}-${index}`;
+    FileUploaderService.handleCameraClick(
+      slotKey,
+      setStreamStates,
+      setIsCameraActive,
+      () =>
+        FileUploaderService.takePhoto(
+          slotKey,
+          (photo) => {
+            setPhotos((prev) => {
+              const newPhotos = [...(prev[panel] || Array(photoCountForPanel(panel)).fill(null))];
+              newPhotos[index] = photo;
+              onChange && onChange(`${panel}_imageUrls`, newPhotos);
+              return { ...prev, [panel]: newPhotos };
+            });
+            setShowDropdown(null);
+            setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
+          },
+          setIsCameraActive,
+          () => setShowPhoto(null)
+        )
+    );
   };
 
-  const handlePlusClick = (id, idx) => {
-    if (photos[id]?.[idx]) {
-      setShowPhoto(photos[id][idx]);
-    } else {
-      toggleDropdown(id, idx);
-    }
+  // Generic input change handler for brand, manufacturingDate etc.
+  const handleInputChange = (field, panel, setter) => (e) => {
+    const value = e.target.value;
+    setter((prev) => {
+      const updated = { ...prev, [panel]: value };
+      if (onChange) onChange(`${panel}_${field}`, value);
+      return updated;
+    });
   };
 
-  const handleInputChange = (setter) => (e) => {
-    const scrollY = window.scrollY;
-    setter(e.target.value);
-    window.scrollTo(0, scrollY);
-  };
-
+  // Capitalize first word utility
   const capitalizeFirstWord = (str) => {
     if (!str) return str;
-    const words = str.trim().split(' ');
+    const words = str.trim().split(" ");
     if (words.length === 0) return str;
     words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-    return words.join(' ');
+    return words.join(" ");
   };
-
-  if (!photos || Object.keys(photos).length === 0) {
-    return <div className="text-white">Loading glass panel data...</div>;
-  }
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Glass Panels</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Glass Panels</h2>
+
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {glassPanels.map((id, idx) => {
-          const isGlassSpecial = ['frontWindshield', 'frontLeftDoor', 'rearLeftDoor', 'rearLeftQuarterGlass', 'rearWindshield', 'rearRightQuarterGlass', 'rearRightDoor', 'frontRightDoor', 'sunroof'].includes(id);
-          const photoCount = isGlassSpecial ? 5 : 1;
+        {glassPanels.map((panel) => {
+          const isSpecial = specialGlassPanels.has(panel);
+          const photoCount = photoCountForPanel(panel);
+          const photosArr = photos[panel] || Array(photoCount).fill(null);
 
           return (
-            <div key={id} className="flex flex-col w-full">
-              <label className="text-md text-white font-medium text-left mb-2">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1'))}`}</label>
+            <div key={panel} className="flex flex-col w-full">
+              <label className="text-md text-white font-medium mb-2 text-left">
+                {labelNames[panel] || capitalizeFirstWord(panel.replace(/_/g, " "))}
+              </label>
 
-              {isGlassSpecial && (
+              {isSpecial && (
                 <>
                   <div className="mb-4">
-                    <label className="text-md text-white font-medium text-left mb-2">Brand</label>
+                    <label className="text-md text-white font-medium mb-2">Brand</label>
                     <input
                       type="text"
-                      value={brand[id] || ''}
-                      onChange={(e) => handleInputChange((value) => setBrand(prev => ({ ...prev, [id]: value })))(e)}
-                      className="p-2 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
+                      value={brand[panel] || ""}
+                      onChange={handleInputChange("brand", panel, setBrand)}
+                      className="p-2 bg-transparent text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       placeholder="Enter brand"
                     />
                   </div>
+
                   <div className="mb-4">
-                    <label className="text-md text-white font-medium text-left mb-2">Manufacturing MM/YY</label>
+                    <label className="text-md text-white font-medium mb-2">Manufacturing MM/YY</label>
                     <input
                       type="text"
-                      value={manufacturingDate[id] || ''}
-                      onChange={(e) => handleInputChange((value) => setManufacturingDate(prev => ({ ...prev, [id]: value })))(e)}
-                      className="p-2 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
+                      value={manufacturingDate[panel] || ""}
+                      onChange={handleInputChange("manufacturingDate", panel, setManufacturingDate)}
+                      className="p-2 bg-transparent text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       placeholder="MM/YY"
                     />
                   </div>
@@ -200,10 +220,17 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
               )}
 
               <div className="mb-4">
-                <label className="text-md text-white font-medium text-left mb-2">Issues</label>
+                <label className="text-md text-white font-medium mb-2">Issue</label>
                 <select
-                  value={condition[id] || 'None'}
-                  onChange={e => setCondition(prev => ({ ...prev, [id]: e.target.value }))}
+                  value={condition[panel] || "None"}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCondition((prev) => {
+                      const updated = { ...prev, [panel]: val };
+                      if (onChange) onChange(`${panel}_issues`, val);
+                      return updated;
+                    });
+                  }}
                   className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                 >
                   <option>None</option>
@@ -213,58 +240,62 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
                 </select>
               </div>
 
-              {condition[id] !== 'None' && (
-                <div className="mt-2 flex flex-col items-center">
-                  <div className="mt-2 flex flex-wrap gap-4 justify-center">
-                    {Array.from({ length: photoCount }).map((_, i) => (
-                      <div key={i} className="relative">
-                        {photos[id]?.[i] ? (
+              {condition[panel] !== "None" && (
+                <div className="mt-2 flex flex-wrap gap-4 justify-center">
+                  {photosArr.map((photoUrl, i) => {
+                    const slotKey = `${panel}-${i}`;
+                    return (
+                      <div key={slotKey} className="relative">
+                        {photoUrl ? (
                           <img
-                            src={photos[id][i]}
-                            alt={`Photo ${i + 1} for ${id}`}
+                            src={photoUrl}
+                            alt={`${labelNames[panel]} photo ${i + 1}`}
                             className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                            onClick={() => setShowPhoto(photos[id][i])}
+                            onClick={() => setShowPhoto(photoUrl)}
                           />
                         ) : (
                           <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
                             <button
-                              onClick={() => handlePlusClick(id, i)}
+                              onClick={() => toggleDropdown(slotKey)}
                               className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
-                              title={photos[id]?.[i] ? "View Photo" : "Add Photo"}
+                              title="Add Photo"
                             >
                               <AiOutlinePlus className="text-xl" />
                             </button>
                           </div>
                         )}
 
-                        {showDropdown === `${id}-${i}` && (
-                          <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
+                        {showDropdown === slotKey && (
+                          <div
+                            className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <button
-                              onClick={() => handleCameraClick(id, i)}
-                              className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 w-full text-left"
+                              onClick={() => handleCameraClick(panel, i)}
+                              className="flex items-center px-4 py-3 w-full text-left text-white hover:bg-gray-700"
                             >
                               <AiOutlineCamera className="mr-2" /> Take Photo
                             </button>
-                            <label className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
+                            <label className="flex items-center px-4 py-3 w-full text-white hover:bg-gray-700 cursor-pointer">
                               <AiOutlineUpload className="mr-2" /> Upload Photo
                               <input
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => handleFileUpload(e, id, i)}
+                                onChange={(e) => handleFileUpload(e, panel, i)}
                               />
                             </label>
                           </div>
                         )}
 
                         <video
-                          ref={el => (videoRefs.current[`${id}-${i}`] = el)}
+                          ref={(el) => (videoRefs.current[slotKey] = el)}
                           autoPlay
-                          className={isCameraActive[id]?.[i] ? 'w-24 h-24 rounded-md' : 'hidden'}
+                          className={isCameraActive[slotKey] ? "w-24 h-24 rounded-md" : "hidden"}
                         />
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -272,23 +303,7 @@ const Glasses = ({ glassDetails, setGlassDetails, showPhoto, setShowPhoto }) => 
         })}
       </div>
 
-      {showPhoto && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
-          <div className="relative max-w-screen max-h-screen p-4">
-            <img
-              src={showPhoto}
-              alt="Full View"
-              className="max-w-screen max-h-screen object-contain rounded-md"
-            />
-            <button
-              onClick={() => setShowPhoto(null)}
-              className="absolute top-4 right-4 text-white bg-red-500 rounded-full p-2 hover:bg-red-600"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      {showPhoto && <FullScreenPhotoViewer photo={showPhoto} onClose={() => setShowPhoto(null)} />}
     </div>
   );
 };

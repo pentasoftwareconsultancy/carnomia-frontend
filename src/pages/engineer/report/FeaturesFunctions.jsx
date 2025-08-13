@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 const ToggleButton = ({ checked, onChange, label }) => {
-  const handleChange = (e) => {
-    const scrollY = window.scrollY;
-    onChange(e);
+  const handleChange = () => {
+    const scrollY = window.scrollY; 
+    onChange();
     window.scrollTo(0, scrollY);
   };
 
@@ -15,101 +15,151 @@ const ToggleButton = ({ checked, onChange, label }) => {
           checked={checked}
           onChange={handleChange}
           className="sr-only"
-          autoFocus={false}
         />
-        <div className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${checked ? 'bg-lime-500' : ''}`}>
+        <div
+          className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${
+            checked ? "bg-lime-500" : ""
+          }`}
+        >
           <div
             className={`absolute w-5 h-5 bg-white rounded-full shadow -left-1 top-0 transition-transform duration-200 ease-in-out ${
-              checked ? 'transform translate-x-5' : ''
+              checked ? "transform translate-x-5" : ""
             }`}
           />
         </div>
       </div>
-      <span className="mt-1 text-white text-sm">{label}</span>
+      {label && <span className="mt-1 text-white text-sm">{label}</span>}
     </label>
   );
 };
 
-const FeaturesFunctions = ({ featuresFunctionsDetails, setFeaturesFunctionsDetails }) => {
+// resetTrigger: a value (number or string) that changes when parent wants to reset toggles
+const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
+  // List of features exactly matching backend schema
   const featurePanels = [
-    'parkingSensorsFront', 'parkingSensorsRear', 'frontViewCamera', 'rearViewCamera',
-    '360 Camera', 'touchScreen', 'speakers', 'electricORVM', 'autoDimmingIRVM',
-    'ventilatedSeatDriverSide', 'ventilatedSeatCo-DriverSide', 'ventilatedSeatRear'
+    "feature_parking_sensors_front",
+    "feature_parking_sensors_rear",
+    "feature_front_view_camera",
+    "feature_rear_view_camera",
+    "feature_camera_360",
+    "feature_touch_screen",
+    "feature_speakers",
+    "feature_electric_orvm",
+    "feature_auto_dimming_irvm",
+    "feature_ventilated_seat_driver",
+    "feature_ventilated_seat_codriver",
+    "feature_ventilated_seat_rear",
   ];
 
-  // Initialize toggleStates with default values to prevent blank screen
-  const [toggleStates, setToggleStates] = useState(
-    featurePanels.reduce((acc, id) => {
-      acc[id] = { available: false, issueObserved: false };
-      return acc;
-    }, {})
-  );
-
-  useEffect(() => {
-    // Log props and state for debugging
-    console.log('Props:', { featuresFunctionsDetails, setFeaturesFunctionsDetails });
-    console.log('Initial toggleStates:', toggleStates);
-
-    // Sync initial state with parent
-    if (typeof setFeaturesFunctionsDetails === 'function') {
-      setFeaturesFunctionsDetails(toggleStates);
-    } else {
-      console.error('setFeaturesFunctionsDetails is not a function');
-    }
-  }, []); // Run only once on mount
-
-  const handleToggleChange = (id, type) => {
-    setToggleStates(prev => {
-      const newState = {
-        ...prev,
-        [id]: {
-          ...prev[id],
-          [type]: !prev[id][type]
-        }
+  // Initialize toggle state: available = true by default, issueObserved = false
+  const getInitialState = () => {
+    const initState = {};
+    featurePanels.forEach((key) => {
+      initState[key] = {
+        available: true,
+        issueObserved: false,
       };
-      // Sync with parent
-      if (typeof setFeaturesFunctionsDetails === 'function') {
-        setFeaturesFunctionsDetails(newState);
-      } else {
-        console.error('setFeaturesFunctionsDetails is not a function');
-      }
-      console.log('Updated toggleStates:', newState);
-      return newState;
+    });
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        if (initState[key]) {
+          initState[key] = {
+            ...initState[key],
+            ...data[key],
+          };
+        }
+      });
+    }
+    return initState;
+  };
+
+  const [toggleStates, setToggleStates] = useState(getInitialState);
+
+  // Only reset toggles when resetTrigger changes
+  const prevReset = useRef(resetTrigger);
+  useEffect(() => {
+    if (resetTrigger !== undefined && prevReset.current !== resetTrigger) {
+      setToggleStates(getInitialState());
+      prevReset.current = resetTrigger;
+    }
+    // eslint-disable-next-line
+  }, [resetTrigger]);
+
+  // Sync with data prop if it changes (but don't reset on every render)
+  const prevData = useRef(data);
+  useEffect(() => {
+    if (data && data !== prevData.current) {
+      setToggleStates((prev) => {
+        const updated = { ...prev };
+        Object.keys(data).forEach((key) => {
+          if (updated[key]) {
+            updated[key] = {
+              ...updated[key],
+              ...data[key],
+            };
+          }
+        });
+        return updated;
+      });
+      prevData.current = data;
+    }
+  }, [data]);
+
+  // Sync changes upwards when toggleStates change
+  // useEffect(() => {
+  //   if (typeof setFeaturesFunctionsDetails === "function") {
+  //     setFeaturesFunctionsDetails(toggleStates);
+  //   }
+  // }, [toggleStates, setFeaturesFunctionsDetails]);
+
+  // Toggle available or issueObserved state for given feature
+  const handleToggleChange = (key, type) => {
+    setToggleStates((prev) => {
+      const updated = {
+        ...prev,
+        [key]: {
+          ...prev[key],
+          [type]: !prev[key][type],
+        },
+      };
+      return updated;
     });
   };
 
-  const capitalizeFirstWord = (str) => {
-    if (!str) return str;
-    const words = str.trim().split(' ');
-    if (words.length === 0) return str;
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-    return words.join(' ');
-  };
-
-  // Log toggleStates before render for debugging
-  console.log('Rendering with toggleStates:', toggleStates);
-
-  // Fallback UI if toggleStates is empty or undefined
-  if (!toggleStates || Object.keys(toggleStates).length === 0) {
-    return <div className="text-white">Loading features and functions data...</div>;
-  }
+  // Format keys to readable labels
+  const formatLabel = (key) =>
+    key
+      .replace(/^feature_/, "")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .replace("360", "360°");
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Features & Functions</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">
+        Features & Functions
+      </h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-6">
-        {featurePanels.map((id, idx) => (
-          <div key={id} className="flex flex-col w-full">
-            <label className="text-md text-white font-medium mb-2 text-left">{`${idx + 1}. ${capitalizeFirstWord(id.replace(/([A-Z])/g, ' $1')).replace('360', '360°')}`}</label>
+        {featurePanels.map((key, idx) => (
+          <div key={key} className="flex flex-col w-full">
+            <label className="text-md text-white font-medium mb-2 text-left">
+              {`${idx + 1}. ${formatLabel(key)}`}
+            </label>
             <div className="flex justify-center items-center gap-18">
               <ToggleButton
-                checked={toggleStates[id]?.available || false}
-                onChange={() => handleToggleChange(id, 'available')}
+                checked={!!toggleStates[key]?.available}
+                onChange={() => {
+                  handleToggleChange(key, "available");
+                  if (typeof onChange === "function") onChange(key, "available", toggleStates);
+                }}
                 label="Available"
               />
               <ToggleButton
-                checked={toggleStates[id]?.issueObserved || false}
-                onChange={() => handleToggleChange(id, 'issueObserved')}
+                checked={!!toggleStates[key]?.issueObserved}
+                onChange={() => {
+                  handleToggleChange(key, "issueObserved");
+                  if (typeof onChange === "function") onChange(key, "issueObserved", toggleStates);
+                }}
                 label="Issue Observed"
               />
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
 import ToggleButton from "../report/ToggleButton";
 import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
@@ -8,22 +8,32 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
   const videoRefs = useRef({
     vinNumber: null,
     engineNumber: null,
-    ODO: null,
+    odo: null,
     keys: null,
   });
   const [streamStates, setStreamStates] = useState({
     vinNumber: null,
     engineNumber: null,
-    ODO: null,
+    odo: null,
     keys: null,
   });
   const [isCameraActive, setIsCameraActive] = useState({
     vinNumber: false,
     engineNumber: false,
-    ODO: false,
+    odo: false,
     keys: false,
   });
   const [isEngineNumberEnabled, setIsEngineNumberEnabled] = useState(true);
+
+  // Photos state keys renamed to match backend
+  const [photos, setPhotos] = useState({
+    vinNumber_imageUrl: data.vinNumber_imageUrl || null,
+    engineNumber_imageUrl: data.engineNumber_imageUrl || null,
+    odo_imageUrl: data.odo_imageUrl || null,
+    keys_imageUrl: data.keys_imageUrl || null,
+  });
+
+  const [showDropdown, setShowDropdown] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -35,13 +45,9 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    onChange((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    onChange(name, type === "checkbox" ? checked : value);
   };
 
-  // Updated handleFileUpload to use your FileUploaderService
   const handleFileUpload = async (e, field) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -50,10 +56,13 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
           file,
           field
         );
-        // Assuming your API returns the URL at uploadedData.files[0].fileUrl (adjust if needed)
         const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
         if (imageUrl) {
-          onChange((prev) => ({ ...prev, [`${field}Photo`]: imageUrl }));
+          // field is e.g. vinNumber, photo key is vinNumber_imageUrl
+          const photoKey = field + "_imageUrl";
+          setPhotos((prev) => ({ ...prev, [photoKey]: imageUrl }));
+          if (onChange) onChange(photoKey, imageUrl);
+          setShowDropdown(null);
         }
       } catch (error) {
         console.error("Image upload failed:", error);
@@ -64,7 +73,6 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
     }
   };
 
-  // Camera related functions should call the service methods
   const handleCameraClick = (field) =>
     FileUploaderService.handleCameraClick(
       field,
@@ -74,21 +82,29 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
         FileUploaderService.takePhoto(
           field,
           (photo) => {
-            onChange((prev) => ({ ...prev, [`${field}Photo`]: photo }));
+            const photoKey = field + "_imageUrl";
+            setPhotos((prev) => ({ ...prev, [photoKey]: photo }));
+            if (onChange) onChange(photoKey, photo);
+            setShowDropdown(null);
           },
           setIsCameraActive,
           () => setShowPhoto(null)
         )
     );
 
+  const toggleDropdown = (field) => {
+    setShowDropdown(showDropdown === field ? null : field);
+  };
+
   return (
-    <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl text-white">
+    <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl text-white relative">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">
         Basic Details
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+
         {/* VIN Number */}
-        <div className="flex flex-col animate-fade-in">
+        <div className="flex flex-col animate-fade-in relative">
           <label className="text-md text-white font-medium">VIN Number</label>
           <div className="mt-2 flex flex-col">
             <input
@@ -99,49 +115,57 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
               className="p-3 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
               placeholder="Enter VIN Number"
             />
-            <div className="mt-2 flex items-center">
-              {data.vinNumberPhoto && (
+            <div className="mt-2 flex items-center relative">
+              {photos.vinNumber_imageUrl ? (
+                <img
+                  src={photos.vinNumber_imageUrl}
+                  alt="VIN Number Photo"
+                  className="w-16 h-16 rounded-md cursor-pointer mr-2"
+                  onClick={() => setShowPhoto(photos.vinNumber_imageUrl)}
+                />
+              ) : (
                 <button
-                  onClick={() => setShowPhoto(data.vinNumberPhoto)}
-                  className="px-3 py-1 text-sm bg-lime-500 text-white rounded-md hover:bg-lime-600 mr-2"
+                  onClick={() => toggleDropdown("vinNumber")}
+                  className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80 mr-2"
+                  aria-label="Add VIN Photo"
                 >
-                  View Photo
+                  <AiOutlinePlus className="text-xl" />
                 </button>
               )}
-              <div className="ml-auto flex space-x-2">
-                <label className="cursor-pointer p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80">
-                  <AiOutlineUpload className="text-xl" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, "vinNumber")}
-                  />
-                </label>
-                <button
-                  onClick={() => handleCameraClick("vinNumber")}
-                  className={`p-2 rounded-full ${
-                    isCameraActive.vinNumber ? "bg-green-500" : "bg-gray-500"
-                  } text-white hover:bg-opacity-80`}
-                >
-                  <AiOutlineCamera className="text-xl" />
-                </button>
-              </div>
+
+              {showDropdown === "vinNumber" && (
+                <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-md shadow-lg z-10 w-40">
+                  <button
+                    onClick={() => handleCameraClick("vinNumber")}
+                    className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 w-full text-left"
+                  >
+                    <AiOutlineCamera className="mr-2" /> Take Photo
+                  </button>
+                  <label className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
+                    <AiOutlineUpload className="mr-2" /> Upload Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "vinNumber")}
+                    />
+                  </label>
+                </div>
+              )}
+
+              <video
+                ref={(el) => (videoRefs.current.vinNumber = el)}
+                autoPlay
+                className={isCameraActive.vinNumber ? "w-24 h-24 rounded-md ml-2" : "hidden"}
+              />
             </div>
           </div>
-          <video
-            ref={(el) => (videoRefs.current.vinNumber = el)}
-            autoPlay
-            className="hidden"
-          />
         </div>
 
         {/* Engine Number */}
-        <div className="flex flex-col animate-fade-in">
+        <div className="flex flex-col animate-fade-in relative">
           <div className="flex items-center justify-between">
-            <label className="text-md text-white font-medium">
-              Engine Number
-            </label>
+            <label className="text-md text-white font-medium">Engine Number</label>
             <ToggleButton
               checked={isEngineNumberEnabled}
               onChange={() => setIsEngineNumberEnabled(!isEngineNumberEnabled)}
@@ -160,104 +184,126 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
               placeholder="Enter Engine Number"
               disabled={!isEngineNumberEnabled}
             />
-            <div className="mt-2 flex items-center">
-              {data.engineNumberPhoto && (
+            <div className="mt-2 flex items-center relative">
+              {photos.engineNumber_imageUrl ? (
+                <img
+                  src={photos.engineNumber_imageUrl}
+                  alt="Engine Number Photo"
+                  className="w-16 h-16 rounded-md cursor-pointer mr-2"
+                  onClick={() => setShowPhoto(photos.engineNumber_imageUrl)}
+                />
+              ) : (
                 <button
-                  onClick={() => setShowPhoto(data.engineNumberPhoto)}
-                  className="px-3 py-1 text-sm bg-lime-500 text-white rounded-md hover:bg-lime-600 mr-2"
+                  onClick={() => toggleDropdown("engineNumber")}
+                  className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80 mr-2"
+                  aria-label="Add Engine Number Photo"
+                  style={{
+                    opacity: isEngineNumberEnabled ? 1 : 0.5,
+                    pointerEvents: isEngineNumberEnabled ? "auto" : "none",
+                  }}
                 >
-                  View Photo
+                  <AiOutlinePlus className="text-xl" />
                 </button>
               )}
-              <div className="ml-auto flex space-x-2">
-                <label
-                  className="cursor-pointer p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
+
+              {showDropdown === "engineNumber" && (
+                <div
+                  className="absolute top-full left-0 mt-2 bg-gray-800 rounded-md shadow-lg z-10 w-40"
                   style={{
                     opacity: isEngineNumberEnabled ? 1 : 0.5,
                     pointerEvents: isEngineNumberEnabled ? "auto" : "none",
                   }}
                 >
-                  <AiOutlineUpload className="text-xl" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, "engineNumber")}
-                  />
-                </label>
-                <button
-                  onClick={() => handleCameraClick("engineNumber")}
-                  className={`p-2 rounded-full ${
-                    isCameraActive.engineNumber ? "bg-green-500" : "bg-gray-500"
-                  } text-white hover:bg-opacity-80`}
-                  style={{
-                    opacity: isEngineNumberEnabled ? 1 : 0.5,
-                    pointerEvents: isEngineNumberEnabled ? "auto" : "none",
-                  }}
-                >
-                  <AiOutlineCamera className="text-xl" />
-                </button>
-              </div>
+                  <button
+                    onClick={() => handleCameraClick("engineNumber")}
+                    className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 w-full text-left"
+                  >
+                    <AiOutlineCamera className="mr-2" /> Take Photo
+                  </button>
+                  <label className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
+                    <AiOutlineUpload className="mr-2" /> Upload Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "engineNumber")}
+                      disabled={!isEngineNumberEnabled}
+                    />
+                  </label>
+                </div>
+              )}
+
+              <video
+                ref={(el) => (videoRefs.current.engineNumber = el)}
+                autoPlay
+                className={isCameraActive.engineNumber ? "w-24 h-24 rounded-md ml-2" : "hidden"}
+              />
             </div>
           </div>
-          <video
-            ref={(el) => (videoRefs.current.engineNumber = el)}
-            autoPlay
-            className="hidden"
-          />
         </div>
 
         {/* ODO and Keys */}
         <div className="flex flex-col animate-fade-in sm:col-span-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col">
+            <div className="flex flex-col relative">
               <label className="text-md text-white font-medium">ODO</label>
               <div className="mt-2 flex flex-col">
                 <input
                   type="number"
-                  name="ODO"
-                  value={data.ODO || ""}
+                  name="odo"
+                  value={data.odo || ""}
                   onChange={handleInputChange}
                   className="p-3 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   placeholder="Enter ODO"
                 />
-                <div className="mt-2 flex items-center">
-                  {data.ODOPhoto && (
+                <div className="mt-2 flex items-center relative">
+                  {photos.odo_imageUrl ? (
+                    <img
+                      src={photos.odo_imageUrl}
+                      alt="ODO Photo"
+                      className="w-16 h-16 rounded-md cursor-pointer mr-2"
+                      onClick={() => setShowPhoto(photos.odo_imageUrl)}
+                    />
+                  ) : (
                     <button
-                      onClick={() => setShowPhoto(data.ODOPhoto)}
-                      className="px-3 py-1 text-sm bg-lime-500 text-white rounded-md hover:bg-lime-600 mr-2"
+                      onClick={() => toggleDropdown("odo")}
+                      className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80 mr-2"
+                      aria-label="Add ODO Photo"
                     >
-                      View Photo
+                      <AiOutlinePlus className="text-xl" />
                     </button>
                   )}
-                  <div className="ml-auto flex space-x-2">
-                    <label className="cursor-pointer p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80">
-                      <AiOutlineUpload className="text-xl" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, "ODO")}
-                      />
-                    </label>
-                    <button
-                      onClick={() => handleCameraClick("ODO")}
-                      className={`p-2 rounded-full ${
-                        isCameraActive.ODO ? "bg-green-500" : "bg-gray-500"
-                      } text-white hover:bg-opacity-80`}
-                    >
-                      <AiOutlineCamera className="text-xl" />
-                    </button>
-                  </div>
+
+                  {showDropdown === "odo" && (
+                    <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-md shadow-lg z-10 w-40">
+                      <button
+                        onClick={() => handleCameraClick("odo")}
+                        className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 w-full text-left"
+                      >
+                        <AiOutlineCamera className="mr-2" /> Take Photo
+                      </button>
+                      <label className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
+                        <AiOutlineUpload className="mr-2" /> Upload Photo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, "odo")}
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  <video
+                    ref={(el) => (videoRefs.current.odo = el)}
+                    autoPlay
+                    className={isCameraActive.odo ? "w-24 h-24 rounded-md ml-2" : "hidden"}
+                  />
                 </div>
               </div>
-              <video
-                ref={(el) => (videoRefs.current.ODO = el)}
-                autoPlay
-                className="hidden"
-              />
             </div>
-            <div className="flex flex-col">
+
+            <div className="flex flex-col relative">
               <label className="text-md text-white font-medium">Keys</label>
               <div className="mt-2 flex flex-col">
                 <input
@@ -268,6 +314,50 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
                   className="p-3 bg-transparent text-white border border-green-200 shadow-inner rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   placeholder="Enter Keys Info"
                 />
+                <div className="mt-2 flex items-center relative">
+                  {photos.keys_imageUrl ? (
+                    <img
+                      src={photos.keys_imageUrl}
+                      alt="Keys Photo"
+                      className="w-16 h-16 rounded-md cursor-pointer mr-2"
+                      onClick={() => setShowPhoto(photos.keys_imageUrl)}
+                    />
+                  ) : (
+                    <button
+                      onClick={() => toggleDropdown("keys")}
+                      className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80 mr-2"
+                      aria-label="Add Keys Photo"
+                    >
+                      <AiOutlinePlus className="text-xl" />
+                    </button>
+                  )}
+
+                  {showDropdown === "keys" && (
+                    <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-md shadow-lg z-10 w-40">
+                      <button
+                        onClick={() => handleCameraClick("keys")}
+                        className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 w-full text-left"
+                      >
+                        <AiOutlineCamera className="mr-2" /> Take Photo
+                      </button>
+                      <label className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
+                        <AiOutlineUpload className="mr-2" /> Upload Photo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, "keys")}
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  <video
+                    ref={(el) => (videoRefs.current.keys = el)}
+                    autoPlay
+                    className={isCameraActive.keys ? "w-24 h-24 rounded-md ml-2" : "hidden"}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -279,8 +369,8 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
           <div className="ml-auto flex items-center">
             <input
               type="checkbox"
-              name="dealerPDI"
-              checked={data.dealerPDI || false}
+              name="dealer_pdi"
+              checked={data.dealer_pdi || false}
               onChange={handleInputChange}
               className="h-5 w-5 text-lime-600 focus:ring-lime-500 border-gray-300 rounded mr-2"
             />

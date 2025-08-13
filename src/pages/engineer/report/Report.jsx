@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import VehicleInfo from "./VehicleInfo";
 import BasicDetails from "./BasicDetails";
 import ProfilePhotos from "./ProfilePhotos";
@@ -20,21 +20,23 @@ import OtherObservations from "./OtherObservations";
 import Tyres from "./Tyres";
 import ApiService from "../../../core/services/api.service";
 import ServerUrl from "../../../core/constants/serverUrl.constant";
+import { APPLICATION_CONSTANTS } from "../../../core/constants/app.constant";
 import car from "../../../assets/car2.jpg";
 
 export default function Report() {
   const { id } = useParams();
   const stepRefs = useRef([]);
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [imageUrl, setImageUrl] = useState(car);
-  const [showPhoto, setShowPhoto] = useState(null); // <-- add this state here
+  const [showPhoto, setShowPhoto] = useState(null);
 
   const steps = [
-    "Vehicle Info",
+    "Information",
     "Basic Details",
     "Profile Photos",
     "Body Panels",
@@ -84,15 +86,22 @@ export default function Report() {
     }));
   };
 
-  const handleSave = async () => {
+  const query= new URLSearchParams(useLocation().search);
+  const isAdm = query.get("isAdm") === "true";
+
+  const handleSave = async (status = null, finalSubmit = false) => {
     setSaving(true);
     try {
       const payload = { id: formData._id, ...formData };
+      if(status && isAdm) {
+        payload['status'] = status; // set status if provided
+      }
       await new ApiService().apiput(
         `${ServerUrl.API_GET_INSPECTION_UPDATE}/${id}`,
         payload
       );
       alert("Saved successfully");
+      finalSubmit && !isAdm && navigate("/engineer/dashboard/completed-jobs");
       return true;
     } catch (err) {
       console.error("Save failed", err);
@@ -122,7 +131,7 @@ export default function Report() {
   const renderStep = () => {
     const activeTab = steps[step];
     switch (activeTab) {
-      case "Vehicle Info":
+      case "Information":
         return <VehicleInfo data={formData} onChange={handleChange} />;
       case "Basic Details":
         return (
@@ -193,7 +202,7 @@ export default function Report() {
         </div>
 
         {/* Stepper */}
-        <div className="flex overflow-x-auto whitespace-nowrap gap-1 p-1 rounded-full scrollbar-hide mb-8 w-full max-w-3xl bg-white/30 shadow-md backdrop-blur-md">
+        <div className="flex overflow-x-auto whitespace-nowrap overflow-y-scroll [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden gap-1 p-1 rounded-full scrollbar-hide mb-8 w-full max-w-3xl bg-white/30 shadow-md backdrop-blur-md">
           {steps.map((label, index) => (
             <button
               key={label}
@@ -226,7 +235,7 @@ export default function Report() {
             <div />
           )}
 
-          {step < steps.length - 1 && (
+          {step < steps.length - 1 ? (
             <button
               onClick={handleNextWithSaveConfirm}
               disabled={saving}
@@ -234,9 +243,31 @@ export default function Report() {
             >
               {saving ? "Saving..." : "Next"}
             </button>
+          ) : (
+            <button
+              onClick={() => handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL, true)}
+              disabled={saving}
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg transform hover:scale-105 transition-all"
+            >
+              {saving ? "Submitting..." : "Submit"}
+            </button>
           )}
         </div>
       </div>
+
+      {/* Photo Viewer */}
+      {showPhoto && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setShowPhoto(null)}
+        >
+          <img
+            src={showPhoto}
+            alt="Inspection Photo"
+            className="max-w-full max-h-full object-contain cursor-pointer"
+          />
+        </div>
+      )}
     </div>
   );
 }

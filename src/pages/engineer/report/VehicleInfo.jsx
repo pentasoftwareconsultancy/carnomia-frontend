@@ -4,7 +4,7 @@ export default function VehicleInfo({ data }) {
   const inspectionTime = data?.date ? new Date(data.date).toLocaleTimeString() : "-";
 
   const fields = [
-    { label: "Customer Name", value: data?.name || "-" },
+    { label: "Customer Name", value: data?.customerName || "-" },
     { label: "Engineer Name", value: data?.engineer_name || "-" },
     { label: "Location", value: data?.address || "-" },
     { label: "Inspection Date", value: inspectionDate },
@@ -21,7 +21,7 @@ export default function VehicleInfo({ data }) {
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl text-white">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">
-        Vehicle Information
+        Information
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

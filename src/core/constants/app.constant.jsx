@@ -9,10 +9,11 @@ export const APPLICATION_CONSTANTS = {
   REQUEST_STATUS: {
       NEW: "NEW",                            // 1. New request created
       ASSIGNED_ENGINEER: "ASSIGNED_ENGINEER", // 2. Admin assigned engineer
-      ADMIN_REJECTED: "ADMIN_REJECTED",    // 2. Admin rejected
       IN_PROGRESS: "IN_PROGRESS",           // 3. Engineer accepted and working
-      ENGINEER_REJECTED: "ENGINEER_REJECTED", // 3. Engineer rejected
-      SUBMITTED: "SUBMITTED",               // 4. Engineer submitted PDI investigation
+      WAITING_FOR_APPROVAL:"WAITING_FOR_APPROVAL", // 2. Waiting for admin review
+      ADMIN_APPROVED: "APPROVED",      // 2. Admin approved
+      ADMIN_REJECTED: "ADMIN_REJECTED",    // 2. Admin rejected
+      // SUBMITTED: "SUBMITTED",               // 4. Engineer submitted PDI investigation
       ADMIN_REVIEW_REJECTED: "ADMIN_REVIEW_REJECTED", // 5. Admin rejected after review
       ADMIN_REVIEW_APPROVED: "ADMIN_REVIEW_APPROVED", // 5 & 6. Admin approved after review
       ADMIN_REVIEW_CUSTOMIZED: "ADMIN_REVIEW_CUSTOMIZED", // 5 & 6. Admin customized
