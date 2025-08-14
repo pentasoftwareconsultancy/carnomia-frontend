@@ -104,7 +104,7 @@ export default function CityDropdown() {
                     }}
                     className={`px-3 py-2 rounded-lg cursor-pointer text-sm ${
                       selectedCity === city
-                        ? "bg-green-100 text-green-800 font-semibold"
+                        ? "bg-green-100 text-green-800 font-body"
                         : "hover:bg-green-50"
                     }`}
                   >

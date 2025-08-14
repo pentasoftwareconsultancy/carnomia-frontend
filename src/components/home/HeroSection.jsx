@@ -30,7 +30,7 @@ export default function HeroSection() {
       />
 
       <div className="absolute inset-0 flex flex-col justify-between items-center text-center px-4 py-10">
-        <h1 className="text-white text-2xl md:text-4xl font-semibold italic">
+        <h1 className="text-white text-2xl md:text-4xl font-body italic">
           We Inspect Before You Invest!
         </h1>
 
@@ -68,7 +68,7 @@ export default function HeroSection() {
           <div className="button-bg rounded-full p-[2px] mb-6 hover:scale-105 transition duration-300 active:scale-100">
             <button
               onClick={handleBookPDI}
-              className="bg-[#81da5b] hover:bg-[#88cc6b] text-white px-6 py-3 rounded-full text-lg font-medium w-full transition duration-300"
+              className="bg-button hover:bg-[#88cc6b] text-white px-6 py-3 rounded-full text-lg font-medium w-full transition duration-300"
             >
               Book Your PDI
             </button>

@@ -13,44 +13,86 @@ const ContactSupport = () => {
   const [animateForm, setAnimateForm] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const sendEmail = (e) => {
+  // Validate Indian mobile number
+  const validateMobile = (number) => /^[6-9]\d{9}$/.test(number);
+
+  const sendEmailAndSave = async (e) => {
     e.preventDefault();
+    const formData = new FormData(formRef.current);
+
+    const name = formData.get("name")?.trim();
+    const email = formData.get("email")?.trim();
+    const phone = formData.get("phone")?.trim();
+    const message = formData.get("message")?.trim();
+
+    // Check if all fields are filled
+    if (!name || !email || !phone || !message) {
+      toast.error("Please fill in all the fields.", { autoClose: 3000 });
+      return;
+    }
+
+    // Mobile validation
+    if (!validateMobile(phone)) {
+      toast.error("Please enter a valid 10-digit Indian mobile number.", { autoClose: 3000 });
+      return;
+    }
+
     setLoading(true);
 
-    emailjs
-      .sendForm('service_gz4mlz9', 'template_6vp9oxl', formRef.current, 'o2mI_LFMocdw08vI8')
-      .then(() => {
-        toast.success('Inquiry submitted successfully!');
-        formRef.current.reset();
-        setAnimateForm(true);
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
-        setTimeout(() => setAnimateForm(false), 800);
-        setLoading(false);
-      })
-      .catch(() => {
-        toast.error('Failed to send message. Please try again.');
-        setLoading(false);
-      });
+    // Backend object
+    const backendData = {
+      name: name,
+      email: email,
+      phoneNumber: phone,
+      message: message
+    };
+
+    // EmailJS object
+    const emailData = {
+      from_name: name,
+      from_email: email,
+      from_phone: phone,
+      message: message,
+      recipient_name: 'Admin',
+      company_name: 'Carnomia'
+    };
+
+    try {
+
+      // Send email via EmailJS
+      await emailjs.send(
+        'service_gz4mlz9',
+        'template_6vp9oxl',
+        emailData,
+        'o2mI_LFMocdw08vI8'
+      );
+
+      toast.success(result.message || "Inquiry submitted successfully!", { autoClose: 3000 });
+      formRef.current.reset();
+      setAnimateForm(true);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
+      setTimeout(() => setAnimateForm(false), 800);
+
+    } catch (error) {
+      console.error("Error submitting inquiry:", error);
+      toast.error("Server error. Please try again.", { autoClose: 3000 });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 lg:px-12 py-12">
-      <ToastContainer position="top-center" autoClose={3000} />
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick draggable pauseOnHover={false} />
+
       {showConfetti && <Confetti recycle={false} numberOfPieces={250} />}
 
-      <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-start gap-12">
-        {/* LEFT: Contact Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="lg:w-1/2 space-y-6"
-        >
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-green-900 leading-snug">
-            Let’s Connect
-          </h1>
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-start gap-12">
+
+        {/* Contact Info */}
+        <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="lg:w-1/2 space-y-6 order-1 lg:order-1">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-green-900 leading-snug">Let’s Connect</h1>
           <p className="text-base sm:text-lg text-gray-700">
             Have questions before your next car purchase?<br />
             Need a Pre-Delivery Inspection?<br />
@@ -59,52 +101,13 @@ const ContactSupport = () => {
 
           <div className="bg-[#f1f8e9] shadow-xl rounded-2xl p-5 sm:p-6 border border-gray-200 space-y-6">
             {[
-              {
-                icon: <FiPhone className="text-xl sm:text-2xl" />,
-                color: '#16a34a',
-                label: 'Phone/WhatsApp:',
-                value: (
-                  <>
-                    <a href="tel:+917385978109" className="text-blue-600 hover:underline block text-sm">
-                      +91 73859 78109
-                    </a>
-                    <a href="tel:+917378554409" className="text-blue-600 hover:underline block text-sm">
-                      +91 73785 54409
-                    </a>
-                  </>
-                ),
-              },
-              {
-                icon: <FiMail className="text-xl sm:text-2xl" />,
-                color: '#dc2626',
-                label: 'Email:',
-                value: (
-                  <a href="mailto:support@drivesta.com" className="text-blue-600 hover:underline text-sm">
-                    support@drivesta.com
-                  </a>
-                ),
-              },
-              {
-                icon: <FiGlobe className="text-xl sm:text-2xl" />,
-                color: '#7c3aed',
-                label: 'Website:',
-                value: (
-                  <a href="https://www.drivesta.com" className="text-blue-600 hover:underline text-sm">
-                    www.drivesta.com
-                  </a>
-                ),
-              },
-              {
-                icon: <BsClockHistory className="text-xl sm:text-2xl" />,
-                color: '#facc15',
-                label: 'Customer Support Hours:',
-                value: <span className="text-sm">Mon–Sun: 9:30 AM – 6:30 PM</span>,
-              },
+              { icon: <FiPhone className="text-xl sm:text-2xl" />, color: '#16a34a', label: 'Phone/WhatsApp:', value: (<><a href="tel:+917385978109" className="text-blue-600 hover:underline block text-sm">+91 73859 78109</a><a href="tel:+917378554409" className="text-blue-600 hover:underline block text-sm">+91 73785 54409</a></>) },
+              { icon: <FiMail className="text-xl sm:text-2xl" />, color: '#dc2626', label: 'Email:', value: <a href="mailto:support@drivesta.com" className="text-blue-600 hover:underline text-sm">support@drivesta.com</a> },
+              { icon: <FiGlobe className="text-xl sm:text-2xl" />, color: '#7c3aed', label: 'Website:', value: <a href="https://www.drivesta.com" className="text-blue-600 hover:underline text-sm">www.drivesta.com</a> },
+              { icon: <BsClockHistory className="text-xl sm:text-2xl" />, color: '#facc15', label: 'Customer Support Hours:', value: <span className="text-sm">Mon–Sun: 9:30 AM – 6:30 PM</span> },
             ].map((item, idx) => (
               <div className="flex items-start gap-3 sm:gap-4" key={idx}>
-                <motion.div whileHover={{ scale: 1.2, color: item.color }} transition={{ type: 'spring' }}>
-                  {item.icon}
-                </motion.div>
+                <motion.div whileHover={{ scale: 1.2, color: item.color }} transition={{ type: 'spring' }}>{item.icon}</motion.div>
                 <div>
                   <p className="font-semibold text-gray-900 text-sm sm:text-base">{item.label}</p>
                   <div className="text-gray-700">{item.value}</div>
@@ -114,81 +117,32 @@ const ContactSupport = () => {
           </div>
         </motion.div>
 
-        {/* RIGHT: Inquiry Form */}
-        <motion.div
-          key={animateForm.toString()}
-          initial={{ scale: 1 }}
-          animate={animateForm ? { scale: [1, 1.05, 1] } : {}}
-          transition={{ duration: 0.6 }}
-          className="w-full lg:w-1/2 bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 sm:p-8"
-        >
+        {/* Inquiry Form */}
+        <motion.div key={animateForm.toString()} initial={{ scale: 1 }} animate={animateForm ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.6 }} className="w-full lg:w-1/2 bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 sm:p-8 order-2 lg:order-2">
           <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-6">Inquiry Form</h2>
-          <form ref={formRef} onSubmit={sendEmail} className="space-y-4">
+          <form ref={formRef} onSubmit={sendEmailAndSave} className="space-y-4">
             <div>
-              <label className="block font-semibold mb-1 text-sm">Name <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                name="name"
-                required
-                placeholder="Your full name"
-                className="w-full px-4 py-2 sm:py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-400 outline-none text-sm sm:text-base"
-              />
+              <label className="block font-semibold mb-1 text-sm">Name *</label>
+              <input type="text" name="name" required placeholder="Your full name" className="w-full px-4 py-2 rounded-xl border border-gray-300" />
             </div>
-
             <div>
-              <label className="block font-semibold mb-1 text-sm">Email <span className="text-red-500">*</span></label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="you@example.com"
-                className="w-full px-4 py-2 sm:py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-400 outline-none text-sm sm:text-base"
-              />
+              <label className="block font-semibold mb-1 text-sm">Email *</label>
+              <input type="email" name="email" required placeholder="you@example.com" className="w-full px-4 py-2 rounded-xl border border-gray-300" />
             </div>
-
             <div>
-              <label className="block font-semibold mb-1 text-sm">Phone Number</label>
-              <input
-                type="text"
-                name="phone"
-                placeholder="Optional"
-                className="w-full px-4 py-2 sm:py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-400 outline-none text-sm sm:text-base"
-              />
+              <label className="block font-semibold mb-1 text-sm">Phone Number *</label>
+              <input type="text" name="phone" required placeholder="Your phone number" className="w-full px-4 py-2 rounded-xl border border-gray-300" />
             </div>
-
             <div>
-              <label className="block font-semibold mb-1 text-sm">Message</label>
-              <textarea
-                name="message"
-                rows="3"
-                placeholder="Write your message..."
-                className="w-full px-4 py-2 sm:py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-400 outline-none resize-none text-sm sm:text-base"
-              ></textarea>
+              <label className="block font-semibold mb-1 text-sm">Message *</label>
+              <textarea name="message" rows="3" placeholder="Write your message..." className="w-full px-4 py-2 rounded-xl border border-gray-300"></textarea>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-3 rounded-xl font-semibold text-white shadow-md transition-transform hover:scale-[1.02] ${
-                loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-500 to-teal-500 hover:shadow-lg'
-              }`}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" />
-                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Sending...
-                </div>
-              ) : (
-                '✉️ Submit Inquiry'
-              )}
+            <button type="submit" disabled={loading} className="w-full py-3 rounded-xl text-white bg-green-500 hover:bg-green-600">
+              {loading ? "Sending..." : "✉️ Submit Inquiry"}
             </button>
           </form>
         </motion.div>
+
       </div>
     </div>
   );

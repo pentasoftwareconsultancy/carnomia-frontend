@@ -40,10 +40,10 @@ export default function Footer() {
           <ul className="space-y-2">
             {[
               { label: "Instagram", icon: <FaInstagram />, url: "https://instagram.com" },
-              { label: "LinkedIn", icon: <FaLinkedin />, url: "https://linkedin.com" },
-              { label: "Facebook", icon: <FaFacebook />, url: "https://facebook.com" },
-              { label: "YouTube", icon: <FaYoutube />, url: "https://youtube.com" },
-              { label: "Twitter", icon: <FaTwitter />, url: "https://twitter.com" },
+              { label: "LinkedIn", icon: <FaLinkedin />, url: "https://www.linkedin.com/company/108622309/admin/dashboard/ " },
+              { label: "Facebook", icon: <FaFacebook />, url: "https://www.facebook.com/profile.php?id=61579184318790" },
+              { label: "YouTube", icon: <FaYoutube />, url: "https://www.youtube.com/@CarnomiaTechnologies" },
+              { label: "Twitter", icon: <FaTwitter />, url: "https://x.com/carnomia" },
             ].map((item, i) => (
               <li key={i}>
                 <a
@@ -65,7 +65,7 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <h3 className="font-bold mb-4 text-lg">Company</h3>
+          <h3 className="font-heading mb-4 text-lg">Company</h3>
           <ul className="space-y-2">
             {[
               { label: "About Us", to: "/about-us" },
@@ -88,7 +88,7 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h3 className="font-bold mb-4 text-lg">Support</h3>
+          <h3 className="font-heading mb-4 text-lg">Support</h3>
           <ul className="space-y-2">
             <li>
               <Link to="/privacy-policy" className="hover:text-green-400 transition">
@@ -114,7 +114,7 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <h3 className="font-bold mb-4 text-lg">Contact</h3>
+          <h3 className="font-heading mb-4 text-lg">Contact</h3>
           <p className="my-2 hover:text-green-400 transition">+91 7385978109</p>
           <p className="my-2 hover:text-green-400 transition">+91 7378554409</p>
         </motion.div>
@@ -140,7 +140,7 @@ export default function Footer() {
       {/* Copyright */}
       <div className="flex justify-center items-center gap-2 text-xs py-3 border-t border-gray-800 text-gray-400">
         <FaCopyright />
-        <span>2025 Drivesta. All Rights Reserved.</span>
+        <span>2025 Carnomia. All Rights Reserved.</span>
         <div>Developed By Smart Software Solutions Pvt Ltd</div>
       </div>
 

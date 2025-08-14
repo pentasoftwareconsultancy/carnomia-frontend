@@ -1,23 +1,75 @@
 export const APPLICATION_CONSTANTS = {
-  STORAGE: {        
+  STORAGE: {
     TOKEN: "token",
     USER_DETAILS: "user",
-    LANGUAGE: "lang"
+    LANGUAGE: "lang",
   },
   ALLOW_FILES_EXTENSION: "pdf,jpeg,xls",
   CONTENT_TYPES: "application/json",
   REQUEST_STATUS: {
-      NEW: "NEW",                            // 1. New request created
-      ASSIGNED_ENGINEER: "ASSIGNED_ENGINEER", // 2. Admin assigned engineer
-      IN_PROGRESS: "IN_PROGRESS",           // 3. Engineer accepted and working
-      WAITING_FOR_APPROVAL:"WAITING_FOR_APPROVAL", // 2. Waiting for admin review
-      ADMIN_APPROVED: "APPROVED",      // 2. Admin approved
-      ADMIN_REJECTED: "ADMIN_REJECTED",    // 2. Admin rejected
-      // SUBMITTED: "SUBMITTED",               // 4. Engineer submitted PDI investigation
-      ADMIN_REVIEW_REJECTED: "ADMIN_REVIEW_REJECTED", // 5. Admin rejected after review
-      ADMIN_REVIEW_APPROVED: "ADMIN_REVIEW_APPROVED", // 5 & 6. Admin approved after review
-      ADMIN_REVIEW_CUSTOMIZED: "ADMIN_REVIEW_CUSTOMIZED", // 5 & 6. Admin customized
-      CUSTOMER_PAID: "CUSTOMER_PAID",       // 6. Customer paid
-      CLOSED: "CLOSED",                     // 7. Admin approved payment, closed request
-  }
+      NEW: {
+        label: "New",
+        value: "NEW",
+      },
+      ASSIGNED_ENGINEER: {
+        label: "Assigned Engineer",
+        value: "ASSIGNED_ENGINEER",
+      },
+      IN_PROGRESS: {
+        label: "In Progress",
+        value: "IN_PROGRESS",
+      },
+      WAITING_FOR_APPROVAL: {
+        label: "Waiting for Approval",
+        value: "WAITING_FOR_APPROVAL",
+      },
+      ADMIN_APPROVED: {
+        label: "Approved",
+        value: "ADMIN_APPROVED",
+      },
+      ADMIN_REJECTED: {
+        label: "Admin Rejected",
+        value: "ADMIN_REJECTED",
+      },
+      CUSTOMER_PAID: {
+        label: "Customer Paid",
+        value: "CUSTOMER_PAID",
+      },
+      COMEPLETED: {
+        label: "Completed",
+        value: "COMEPLETED",
+      },
+      CLOSED: {
+        label: "Closed",
+        value: "CLOSED",
+      },
+  },
+  PAYMENT_STATUS: {
+    PENDING: {
+      label: "Pending",
+      value: "PENDING",
+    },
+    PAID: {
+      label: "Paid",
+      value: "PAID",
+    },
+  },
+  PAYMENT_METHOD: {
+    CASH: {
+      label: "Cash",
+      value: "CASH",
+    },
+    ONLINE: {
+      label: "Online",
+      value: "ONLINE",
+    },
+    UPI: {
+      label: "UPI",
+      value: "UPI",
+    },
+    CARD: {
+      label: "Card",
+      value: "CARD",
+    },
+  },
 };

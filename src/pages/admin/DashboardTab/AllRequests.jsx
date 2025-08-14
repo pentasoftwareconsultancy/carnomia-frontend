@@ -97,13 +97,13 @@ const AllRequests = ({ setSelectedRequest }) => {
   }
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="w-full">
       <div className="bg-white rounded-2xl shadow-md hover:scale-[1.01] transition-transform">
         <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between flex-col sm:flex-row gap-4 mb-4">
             <Typography
               variant="h6"
-              className="text-green-700 font-bold text-xl flex items-center gap-2"
+              className="text-green-700 font-heading text-xl flex items-center gap-2"
             >
               <FiFileText size={20} />
               All Requests
@@ -118,7 +118,7 @@ const AllRequests = ({ setSelectedRequest }) => {
               <TableHead>
                 <TableRow className="bg-white">
                   {['Booking ID', 'Customer', 'Status', 'address', 'Date', 'Slot', 'Actions'].map((head) => (
-                    <TableCell key={head} align="center" className="text-green-700 font-bold text-sm">
+                    <TableCell key={head} align="center" className="text-green-700 font-heading text-sm">
                       {head}
                     </TableCell>
                   ))}
@@ -133,7 +133,7 @@ const AllRequests = ({ setSelectedRequest }) => {
                     <TableCell align="center" className="text-sm">{req.bookingId}</TableCell>
                     <TableCell align="center" className="text-sm">{req.customerName}</TableCell>
                     <TableCell align="center">
-                    <span className={`px-3 py-1 rounded-full font-semibold text-xs ${statusColors[req.status]?.bg} ${statusColors[req.status]?.text}`}>
+                    <span className={`px-3 py-1 rounded-full font-body text-xs ${statusColors[req.status]?.bg} ${statusColors[req.status]?.text}`}>
                         {req.status}
                       </span>
                     </TableCell>

@@ -30,9 +30,9 @@ const RequestSuccess = () => {
   const { bookingId, brand, model, imageUrl } = data;
 
   return (
-    <div className="min-h-screen bg-[#f1f8e9] flex items-center justify-center font-sans px-4 py-10">
+    <div className="min-h-screen bg-primary flex items-center justify-center font-sans px-4 py-10">
       <div className="bg-white rounded-xl shadow-lg max-w-5xl w-full px-6 py-10 sm:px-10 text-center">
-        <h1 className="text-green-700 text-xl sm:text-2xl font-semibold mb-2">
+        <h1 className="text-green-700 text-xl sm:text-2xl font-body mb-2">
           Congratulations, your PDI is booked successfully!
         </h1>
 
@@ -60,7 +60,7 @@ const RequestSuccess = () => {
         <div className="flex justify-end">
           <button
             onClick={() => navigate("/customer/dashboard")}
-            className="bg-green-800 hover:bg-green-900 text-white font-bold px-6 py-3 rounded-full shadow-lg transition"
+            className="bg-green-800 hover:bg-green-900 text-white font-heading px-6 py-3 rounded-full shadow-lg transition"
           >
             Go to your Dashboard
           </button>

@@ -29,7 +29,7 @@ const LogoSlider = () => {
   const repeatedLogos = [...carLogos, ...carLogos]; // Duplicate for smooth scrolling
 
   return (
-    <div className="w-full overflow-hidden py-12 px-4 bg-[#f1f8e9] ">
+    <div className="w-full overflow-hidden py-12 px-4 bg-primary ">
       <div className="marquee whitespace-nowrap animate-marquee">
         {repeatedLogos.map((logo, index) => (
           <img

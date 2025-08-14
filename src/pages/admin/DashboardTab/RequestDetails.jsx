@@ -276,7 +276,13 @@ export default function RequestDetails({ open, onClose, request, onAssign, setMo
                   <AssignEngineer
                     request={request}
                     onAssign={handleAssign}
+                    selectedRequest={request}
+                    selectedEngineerId={null} // Pass the selected engineer ID if needed
+                    setSelectedEngineerId={() => {}} // Handle engineer selection if needed
+                    setSelectedSlot={() => {}} // Handle slot selection if needed
+                    selectedSlot={null} // Pass the selected slot if needed
                     onBack={() => setStep(1)}
+                    setModalOpen={setModalOpen}
                   />
                 </MotionBox>
               )}

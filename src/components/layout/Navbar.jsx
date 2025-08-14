@@ -215,7 +215,7 @@ export default function Navbar({ onToggleSidebar }) {
   const hideLocationOnDashboard = location.pathname.includes("dashboard");
 
   return (
-    <header className="w-full z-50 bg-[#f1f8e9] py-2 shadow-md">
+    <header className="w-full z-50 bg-primary py-2 shadow-md">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 gap-3">
         {/* Left: Hamburger on mobile */}
         <div className="flex items-center w-full justify-between">
@@ -246,7 +246,7 @@ export default function Navbar({ onToggleSidebar }) {
           >
             <img
               src={drivesta}
-              alt="Drivesta Logo"
+              alt="Carnomia Logo"
               className="h-10 sm:h-16 md:h-12 cursor-pointer object-contain max-h-[80px]"
             />
           </Link>
@@ -257,7 +257,7 @@ export default function Navbar({ onToggleSidebar }) {
           <div className="flex items-center flex-wrap justify-center sm:justify-end gap-3 sm:gap-4">
             {/* Welcome message for dashboards only */}
             {/* {user && location.pathname.includes("dashboard") && (
-              <div className="text-[#81da5b] font-semibold text-base sm:text-lg truncate mt-2 sm:mt-0">
+              <div className="text-[#81da5b] font-body text-base sm:text-lg truncate mt-2 sm:mt-0">
                 Welcome, {user.name || "User"}
               </div>
             )} */}
@@ -270,7 +270,7 @@ export default function Navbar({ onToggleSidebar }) {
                   <button
                     onClick={() => setOpen((o) => !o)}
                     aria-label="Choose city"
-                    className="w-10 h-10 rounded-full bg-[#81da5b] flex items-center justify-center text-white font-bold cursor-pointer hover:bg-[#7db167] transition"
+                    className="w-10 h-10 rounded-full bg-button flex items-center justify-center text-white font-heading cursor-pointer hover:bg-[#7db167] transition"
                   >
                     {selectedCity ? (
                       selectedCity.charAt(0).toUpperCase()
@@ -289,7 +289,7 @@ export default function Navbar({ onToggleSidebar }) {
                     }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setOpen(true)}
-                    className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-[#81da5b] cursor-pointer hover:bg-white hover:text-[#81da5b] border border-green-600 rounded-xl transition relative"
+                    className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-button cursor-pointer hover:bg-white hover:text-[#81da5b] border border-green-600 rounded-xl transition relative"
                   >
                     <span className="truncate">
                       {selectedCity || "Choose Your City"}
@@ -302,7 +302,7 @@ export default function Navbar({ onToggleSidebar }) {
                     </motion.span>
                     {selectedCity && (
                       <motion.span
-                        className="absolute inset-0 bg-[#81da5b] cursor-pointer opacity-0 hover:opacity-20 transition-opacity"
+                        className="absolute inset-0 bg-button cursor-pointer opacity-0 hover:opacity-20 transition-opacity"
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 0.2 }}
                       />
@@ -315,7 +315,7 @@ export default function Navbar({ onToggleSidebar }) {
             {!isLoggedIn ? (
               <Link
                 to="/login"
-                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-[#81da5b] hover:bg-white hover:text-green-700 border border-green-600 rounded-xl transition"
+                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-button hover:bg-white hover:text-green-700 border border-green-600 rounded-xl transition"
               >
                 <FiUser className="text-lg" />
                 <span>Login / Signup</span>
@@ -324,7 +324,7 @@ export default function Navbar({ onToggleSidebar }) {
               <div className="relative">
                 <button
                   onClick={toggleProfile}
-                  className="w-10 h-10 rounded-full bg-[#81da5a] cursor-pointer text-white font-bold flex items-center justify-center hover:bg-[#81da5b] transition"
+                  className="w-10 h-10 rounded-full bg-[#81da5a] cursor-pointer text-white font-heading flex items-center justify-center hover:bg-button transition"
                   aria-label="User Profile"
                 >
                   {(user?.name?.[0] || "U").toUpperCase()}
@@ -378,7 +378,7 @@ export default function Navbar({ onToggleSidebar }) {
                           <div className="w-16 h-16 mx-auto rounded-full bg-[#5A7F3A] text-white flex items-center justify-center text-2xl mb-2">
                             {user?.name?.charAt(0).toUpperCase()}
                           </div>
-                          <div className="font-semibold text-[#3A4A2D] truncate">
+                          <div className="font-body text-[#3A4A2D] truncate">
                             {user?.name}
                           </div>
                           <div className="text-sm text-[#5A7F3A] truncate">
@@ -387,7 +387,7 @@ export default function Navbar({ onToggleSidebar }) {
                         </div>
                         <button
                           onClick={handleEdit}
-                          className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#3A4A2D] hover:bg-[#f1f8e9] rounded-md transition-colors"
+                          className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#3A4A2D] hover:bg-primary rounded-md transition-colors"
                         >
                           <FiEdit2 className="h-4 w-4" />
                           Edit Profile
@@ -395,7 +395,7 @@ export default function Navbar({ onToggleSidebar }) {
                         {shouldShowDashboardButton() && (
                           <button
                             onClick={handleGoToDashboard}
-                            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#3A4A2D] hover:bg-[#f1f8e9] rounded-md transition-colors"
+                            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#3A4A2D] hover:bg-primary rounded-md transition-colors"
                           >
                             <FiGrid className="h-4 w-4" />
                             Go to Dashboard
@@ -453,7 +453,7 @@ export default function Navbar({ onToggleSidebar }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <h2 className="text-2xl font-bold mb-3 text-green-800 flex items-center">
+                    <h2 className="text-2xl font-heading mb-3 text-green-800 flex items-center">
                       <FiMapPin className="mr-2" />
                       Select Your Location
                     </h2>
@@ -535,7 +535,7 @@ export default function Navbar({ onToggleSidebar }) {
                           <span
                             className={`text-sm font-medium text-center transition-colors ${
                               selectedCity === city
-                                ? "text-white font-semibold"
+                                ? "text-white font-body"
                                 : "text-gray-800"
                             }`}
                           >

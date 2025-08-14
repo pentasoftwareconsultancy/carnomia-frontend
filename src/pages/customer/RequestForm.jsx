@@ -27,6 +27,7 @@ const [brands, setBrands] = useState([])
 const [models, setModels] = useState([])
 const [variants, setVariants] = useState([])
 const [pdiDate, setPdiDate] = useState("");
+const [note, setNotes] = useState("");
 const [address, setAddress] = useState("");
 const [dealer, setDealer] = useState("");
 const [selectedImage, setSelectedImage] = useState(jeepImage);
@@ -125,11 +126,15 @@ const handleSubmit = async (e) => {
   const payload = {
     brand: selectedBrand,
     model: selectedModel,
+    address: address,
+    dealerName: dealer,
+    date: pdiDate,
+    notes: note,
     variant: selectedVariant,
-    transmission,
-    fuel,
+    transmissionType: transmission,
+    fuelType: fuel,
     imageUrl:selectedImage,
-    status: carStatus,
+    carStatus: carStatus,
   };
 
   try {
@@ -158,7 +163,7 @@ const handleSubmit = async (e) => {
 
 
   return (
-    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-8 sm:py-10 font-sans">
+    <div className="min-h-screen bg-primary px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-8 sm:py-10 font-sans">
       <div className="mt-12 sm:mt-16 md:mt-20 flex flex-col md:flex-row justify-center items-center md:items-start gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-7xl mx-auto">
         {/* Left side (title & image) */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center text-center">
@@ -166,7 +171,7 @@ const handleSubmit = async (e) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading mb-4 sm:mb-6 md:mb-8"
           >
             Request Vehicle Inspection
           </motion.h2>
@@ -188,7 +193,7 @@ const handleSubmit = async (e) => {
           <motion.a
             whileHover={{ scale: 1.05 }}
             href="#"
-            className="text-blue-600 text-sm sm:text-base md:text-lg mt-6 sm:mt-8 md:mt-10 font-semibold flex items-center gap-2 hover:underline"
+            className="text-blue-600 text-sm sm:text-base md:text-lg mt-6 sm:mt-8 md:mt-10 font-body flex items-center gap-2 hover:underline"
           >
             Download Sample Report <FaDownload />
           </motion.a>
@@ -199,9 +204,9 @@ const handleSubmit = async (e) => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
-          className="w-full max-w-[360px] sm:max-w-[400px] md:max-w-[450px] md:w-1/2 bg-white p-4 sm:p-5 md:p-6 lg:p-8 rounded-2xl shadow-xl shadow-gray-300/60"
+          className="w-full max-w-[360px] sm:max-w-[400px] md:max-w-[450px] md:w-1/2 bg-white border border-button p-4 sm:p-5 md:p-6 lg:p-8 rounded-2xl shadow-xl shadow-gray-300/60"
         >
-          <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 md:mb-4 text-gray-800">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-body mb-3 md:mb-4 text-gray-800">
             Vehicle Details
           </h3>
 
@@ -264,7 +269,7 @@ const handleSubmit = async (e) => {
               required
               value={dealer}
               onChange={(e) => setDealer(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-button"
             />
 
             <input
@@ -273,7 +278,7 @@ const handleSubmit = async (e) => {
               required
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-button"
             />
 
             <SelectField
@@ -291,21 +296,23 @@ const handleSubmit = async (e) => {
               required
               min={today}
               value={pdiDate}
-              onChange={(e) => e.target.value >= today && setPdiDate(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+              onChange={(e) => setPdiDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-button"
             />
 
             <textarea
               placeholder="Notes (optional)"
               rows={2}
-              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+              value={note}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base resize-none focus:outline-none focus:ring-2 focus:ring-button"
             />
 
             <label className="flex items-start gap-2 text-xs sm:text-sm md:text-base text-gray-700">
               <input
                 type="checkbox"
                 required
-                className="mt-0.5 h-4 w-4 text-green-600 rounded focus:ring-green-500"
+                className="mt-0.5 h-4 w-4 text-button rounded focus:ring-button"
               />
               I confirm the above information is accurate.
             </label>
@@ -314,7 +321,7 @@ const handleSubmit = async (e) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-green-600 text-white py-2 sm:py-2.5 md:py-3 text-sm sm:text-base md:text-lg font-bold rounded-xl hover:bg-green-700 transition shadow-md"
+              className="w-full bg-button text-white py-2 sm:py-2.5 md:py-3 text-sm sm:text-base md:text-lg font-heading rounded-xl hover:bg-green-700 transition shadow-md"
             >
               Book PDI Now
             </motion.button>
@@ -344,7 +351,7 @@ const SelectField = ({
         onChange={onChange}
         onFocus={toggle}
         onBlur={() => setTimeout(toggle, 200)}
-        className={`w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 transition ${
+        className={`w-full border border-gray-300 rounded-xl p-2 sm:p-2.5 md:p-3 text-sm sm:text-base appearance-none focus:outline-none focus:ring-2 focus:ring-button transition ${
           disabled ? "bg-gray-50 cursor-not-allowed" : "cursor-pointer"
         }`}
       >

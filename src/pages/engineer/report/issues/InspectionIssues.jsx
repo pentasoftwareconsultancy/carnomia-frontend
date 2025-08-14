@@ -9,7 +9,7 @@ export default function InspectionIssues({ title, fields, data, onDataChange }) 
 
   return (
     <div className="p-4 border rounded bg-white mb-4">
-      <h3 className="text-lg font-semibold mb-3">{title}</h3>
+      <h3 className="text-lg font-body mb-3">{title}</h3>
       <div className="space-y-4">
         {fields.map((field, idx) => {
           if (field.type === "number") {

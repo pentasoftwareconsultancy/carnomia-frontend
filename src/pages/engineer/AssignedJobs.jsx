@@ -78,10 +78,10 @@ const AssignedJobs = () => {
   });
 
   return (
-    <div className="bg-[#f1f8e9] min-h-screen p-4 md:p-6 font-sans">
+    <div className="bg-primary min-h-screen p-4 md:p-6 font-sans">
 
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Engineer Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-heading text-gray-800 mb-3 md:mb-4">Engineer Dashboard</h1>
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="relative flex items-center">
@@ -133,7 +133,7 @@ const AssignedJobs = () => {
       {/* Assigned Jobs */}
       <section className="mb-8 md:mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-green-800 flex items-center">
+          <h2 className="text-xl font-body text-green-800 flex items-center">
             <FiCheckCircle className="mr-2 text-green-600" /> Assigned Jobs
             <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
               {filteredJobs.length} jobs
@@ -157,7 +157,7 @@ const AssignedJobs = () => {
               <div key={job.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
                 <div className="flex-grow">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg text-gray-900">{job.project}</h3>
+                    <h3 className="font-heading text-lg text-gray-900">{job.project}</h3>
                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                       New
                     </span>
@@ -195,7 +195,7 @@ const AssignedJobs = () => {
                 <button
                   onClick={() => navigate("/engineer/dashboard/ongoing-job")}
                   disabled={pdiStatus[job.id]}
-                  className={`w-full py-2.5 rounded-lg font-semibold mt-auto flex items-center justify-center transition-all ${
+                  className={`w-full py-2.5 rounded-lg font-body mt-auto flex items-center justify-center transition-all ${
                     pdiStatus[job.id]
                       ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg'
@@ -221,13 +221,13 @@ const AssignedJobs = () => {
 
       {/* Ongoing Jobs */}
       <section className="mb-8 md:mb-10">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+        <h2 className="text-xl font-body text-gray-700 mb-4 flex items-center">
           <FiClock className="mr-2 text-green-600" /> Ongoing Jobs
         </h2>
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="font-bold text-lg text-gray-900 mb-1">Inventory System – Inspection 1254</h3>
+              <h3 className="font-heading text-lg text-gray-900 mb-1">Inventory System – Inspection 1254</h3>
               <p className="text-gray-700 mb-1 flex items-center">
                 <FaMapMarkerAlt className="text-green-500 mr-1 text-xs" />
                 <span>Sachi Mehra – Kothrud</span>

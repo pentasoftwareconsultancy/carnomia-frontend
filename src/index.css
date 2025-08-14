@@ -33,3 +33,29 @@ will-change: transform;
 animation: marquee 10s linear infinite;
 }
 
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Inter:wght@400;500;700&display=swap');
+
+@theme {
+  /* #f1f8e9 */
+  /* Fonts */
+  --font-heading: "Urbanist", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /*  bg Colors */
+  --color-primary: #f1f8e9;
+  --color-regal-blue: #243c5a;
+
+  /* Letter spacing */
+  --letter-spacing-heading-tight: -0.25px;
+  --letter-spacing-heading-tighter: -0.5px;
+
+  /* Line heights */
+  --line-height-heading: 1.2;
+  --line-height-body: 1.5;
+
+  /* Button color */
+  --color-button: #81da5b;
+}
+

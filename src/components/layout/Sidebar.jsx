@@ -38,7 +38,7 @@ const Sidebar = ({ role, links, mobileOpen, onCloseMobile }) => {
           <div className="flex justify-between items-center mb-4">
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="px-2 py-2 mr-2 bg-[#81da5b] rounded-4xl text-white hover:text-white"
+              className="px-2 py-2 mr-2 bg-button rounded-4xl text-white hover:text-white"
             >
               {collapsed ? <FiArrowRight size={20} /> : <FiArrowLeft size={20} />}
             </button>
@@ -54,7 +54,7 @@ const Sidebar = ({ role, links, mobileOpen, onCloseMobile }) => {
                   className={clsx(
                     "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-400 transition-all",
                     location.pathname === to
-                      ? "bg-green-100 font-semibold text-green-700"
+                      ? "bg-green-100 font-body text-green-700"
                       : "text-white",
                     collapsed && "justify-center"
                   )}

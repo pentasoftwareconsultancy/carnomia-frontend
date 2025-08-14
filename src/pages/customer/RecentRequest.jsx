@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
@@ -27,80 +27,30 @@ import { APPLICATION_CONSTANTS } from "../../core/constants/app.constant";
 
 const Recent = () => {
   const navigate = useNavigate();
-  const [state, setState] = useState({
-    userName: "",
-    sidebarWidth: 0,
-    showPayment: false,
-    showEditModal: false,
-    isPaid: false,
-    showToast: false,
-    formData: {
-      bookingId: "",
-      brand: "",
-      model: "",
-      variant: "",
-      transmissionType: "",
-      fuelType: "",
-      address: "",
-      date: "",
-      notes: "",
-      imageUrl: "",
-      BHPs: "",
-      Airbags: "",
-      Mileage: "",
-      NCAP: "",
-    },
-  });
+  const [state, setState] = useState(null);
+  const [keyMetrics, setKeyMetrics] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchLatestPDIRequest = async () => {
       try {
-        const api = new ApiService();
-        const { data } = await api.apipost(
-          ServerUrl.API_GET_ALLPDIREQUEST_STATUSES,
-          [APPLICATION_CONSTANTS.REQUEST_STATUS.NEW]
-        );
-
-        if (isMounted && Array.isArray(data?.data) && data.data.length > 0) {
-          // Sort by created date (descending) to ensure latest comes first
-          const sortedRequests = [...data.data].sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          );
-
-          const latestRequest = sortedRequests[0];
-
-          setState((prev) => {
-            const updatedState = {
-              ...prev,
-              formData: {
-                bookingId: latestRequest.bookingId || "",
-                brand: latestRequest.brand || "",
-                model: latestRequest.model || "",
-                variant: latestRequest.variant || "",
-                transmissionType: latestRequest.transmissionType || "",
-                fuelType: latestRequest.fuelType || "",
-                address: latestRequest.address || "",
-                date: latestRequest.date || "",
-                notes: latestRequest.notes || "",
-                imageUrl: latestRequest.imageUrl || "",
-                BHPs: latestRequest.BHPs || "",
-                Airbags: latestRequest.Airbags || "",
-                Mileage: latestRequest.Mileage || "",
-                NCAP: latestRequest.NCAP || "",
-              },
-            };
-
-            console.log("Updated State:", updatedState); // ✅ Check what will be set
-            return updatedState;
-          });
+        const response = await new ApiService().apiget(ServerUrl.API_GET_RECENT_REQUEST_BY_CUSTOMER);  
+        if (response?.data?.data && isMounted) {
+          const latestRequest = response.data.data;
+          console.log("Latest PDI Request:", latestRequest);
+          setState((prev) => ({
+            userName: latestRequest.customerName || "User",
+            ...latestRequest,
+          }));
         }
       } catch (error) {
-        console.error("Failed to fetch PDI requests:", error);
+        console.error("Failed to fetch latest PDI request:", error);
+        if (isMounted) {
+          setState(null);
+        }
+
       }
     };
-
     fetchLatestPDIRequest();
 
     return () => {
@@ -108,92 +58,55 @@ const Recent = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchVehicleDetails = async () => {
-      try {
-        const { brand, model, variant } = state.formData;
-        if (!brand || !model || !variant) return;
+  useEffect(() => { 
 
-        const response = await new ApiService().apiget(
-          `${ServerUrl.API_WITHVEHICLE_DATA}?brand=${encodeURIComponent(
-            brand
-          )}&model=${encodeURIComponent(model)}&variant=${encodeURIComponent(
-            variant
-          )}`
-        );
+    if (state) {
+      
+  setKeyMetrics([
+    {
+      icon: <FaCarSide className="text-2xl text-button" />,
+      value: `${state.BHPs || "525"} BHP`,
+      label: "Power",
+    },
+    {
+      icon: <FaShieldAlt className="text-2xl text-button" />,
+      value: `${state.Airbags || "4"} Airbags`,
+      label: "Safety",
+    },
+    {
+      icon: <FaGasPump className="text-2xl text-button" />,
+      value: `${state.Mileage || "25.4"} kmpl`,
+      label: "Mileage",
+    },
+    {
+      icon: <GiCarWheel className="text-2xl text-button" />,
+      value: `${state.NCAP || "5 Star"}`,
+      label: "NCAP Rating",
+    },
+    {
+      icon: <GiGearStick className="text-2xl text-button" />,
+      value: state.transmissionType || "Automatic",
+      label: "Transmission",
+    },
+    {
+      icon: <HiOutlineCalendar className="text-2xl text-button" />,
+      value: state.date
+        ? new Date(state.date).toLocaleDateString()
+        : "Not set",
+      label: "PDI Date",
+    },
+  ]);
+    }
+}, [state])
 
-        if (response?.data?.data) {
-          const vehicleData = response.data.data;
-          console.log("Vehicle details from API:", vehicleData);
-
-          setState((prev) => {
-            const updatedFormData = {
-              ...prev.formData,
-              BHPs: vehicleData.BHPs ?? prev.formData.BHPs,
-              Airbags: vehicleData.Airbags ?? prev.formData.Airbags,
-              Mileage: vehicleData.Mileage ?? prev.formData.Mileage,
-              NCAP: vehicleData.NCAP ?? prev.formData.NCAP,
-              imageUrl: vehicleData.imageUrl ?? prev.formData.imageUrl,
-            };
-
-            console.log("FormData before set:", updatedFormData);
-
-            return {
-              ...prev,
-              userName: vehicleData.userName ?? prev.userName,
-              formData: updatedFormData,
-            };
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch vehicle details:", err);
-      }
-    };
-
-    fetchVehicleDetails();
-  }, [state.formData.brand, state.formData.model, state.formData.variant]);
 
   const handleAssistanceClick = (i) => {
     if (i === 0) navigate("/customer/contact");
     else if (i === 2) handleState("showEditModal", true);
   };
 
-  console.log("form data ", state.formData);
+  // console.log("form data ", state);
 
-  const keyMetrics = [
-    {
-      icon: <FaCarSide className="text-2xl text-green-600" />,
-      value: `${state.formData.BHPs || "525"} BHP`,
-      label: "Power",
-    },
-    {
-      icon: <FaShieldAlt className="text-2xl text-green-600" />,
-      value: `${state.formData.Airbags || "4"} Airbags`,
-      label: "Safety",
-    },
-    {
-      icon: <FaGasPump className="text-2xl text-green-600" />,
-      value: `${state.formData.Mileage || "25.4"} kmpl`,
-      label: "Mileage",
-    },
-    {
-      icon: <GiCarWheel className="text-2xl text-green-600" />,
-      value: `${state.formData.NCAP || "5 Star"}`,
-      label: "NCAP Rating",
-    },
-    {
-      icon: <GiGearStick className="text-2xl text-green-600" />,
-      value: state.formData.transmissionType || "Automatic",
-      label: "Transmission",
-    },
-    {
-      icon: <HiOutlineCalendar className="text-2xl text-green-600" />,
-      value: state.formData.date
-        ? new Date(state.formData.date).toLocaleDateString()
-        : "Not set",
-      label: "PDI Date",
-    },
-  ];
 
   const renderModal = (show, title, content, actions) => (
     <AnimatePresence>
@@ -210,8 +123,8 @@ const Recent = () => {
             exit={{ scale: 0.95, y: 20 }}
             className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
           >
-            <div className="bg-gradient-to-r from-green-600 to-green-800 p-5 text-white text-center">
-              <h3 className="text-xl font-bold flex items-center justify-center">
+            <div className="bg-primary p-5 text-white text-center">
+              <h3 className="text-xl font-heading flex items-center justify-center">
                 {title.icon && <title.icon className="mr-2" />} {title.text}
               </h3>
             </div>
@@ -228,7 +141,9 @@ const Recent = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 md:px-8 py-6 font-sans">
+    <div className="min-h-screen bg-primary px-4 sm:px-6 md:px-8 py-6 font-sans">
+      
+      {state ? (
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.div
@@ -238,23 +153,34 @@ const Recent = () => {
           className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8"
         >
           <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading text-gray-900">
               Welcome back,{" "}
-              <span className="text-green-600">{state.userName}</span>
+              <span className="text-button">{state.userName}</span>
             </h1>
+
+    {state == null ? (
+            <p className="text-gray-600 mt-1 sm:mt-2">
+              You don't have any recent requests yet.
+              </p>) : '' }
+
+    {state && state != null ? (
             <p className="text-gray-600 mt-1 sm:mt-2 flex items-center text-sm sm:text-base">
               Your vehicle booking details
-              <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            </p>
+              <span className="ml-2 w-2 h-2 bg-button rounded-full animate-pulse"></span>
+            </p>) : '' }
+            
           </div>
+
           <button
             onClick={() => navigate("/customer/contact")}
-            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-button text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
           >
             <FaPhoneAlt className="mr-1 sm:mr-2" /> Contact Support
           </button>
         </motion.div>
 
+    
+{/* { state && state != null ? ( */}
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Vehicle Image - Full width on mobile, 2/3 on desktop */}
@@ -262,28 +188,28 @@ const Recent = () => {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="lg:col-span-2 bg-[#f1f8e9] rounded-xl shadow-xl overflow-hidden border border-gray-100"
+            className="lg:col-span-2 bg-primary rounded-xl shadow-xl overflow-hidden border border-gray-100"
           >
             <div className="relative h-48 sm:h-64 md:h-80 w-full">
               <img
                 src={
-                  state.formData.imageUrl ||
+                  state.imageUrl ||
                   "https://via.placeholder.com/800x400?text=No+Image"
                 }
                 alt="Vehicle"
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
-                <h3 className="text-lg sm:text-xl font-bold text-white">
-                  {state.formData.brand} {state.formData.model}
+                <h3 className="text-lg sm:text-xl font-heading text-white">
+                  {state.brand} {state.model}
                 </h3>
                 <p className="text-gray-300 text-xs sm:text-sm">
-                  {state.formData.variant}
+                  {state.variant}
                 </p>
               </div>
               <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium shadow-sm flex items-center">
-                <span className="w-2 h-2 bg-green-500 rounded-full mr-1 sm:mr-2"></span>
-                Booking Confirmed
+                <span className="w-2 h-2 bg-button rounded-full mr-1 sm:mr-2"></span>
+                {APPLICATION_CONSTANTS.REQUEST_STATUS[state['status']].label}
               </div>
             </div>
           </motion.div>
@@ -302,7 +228,7 @@ const Recent = () => {
                 className="bg-gradient-to-br from-white to-green-50 rounded-xl p-3 sm:p-4 shadow-xl border border-gray-100 hover:shadow-md"
               >
                 {item.icon}
-                <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mt-1 sm:mt-2">
+                <div className="text-base sm:text-lg md:text-xl font-heading text-gray-900 mt-1 sm:mt-2">
                   {item.value}
                 </div>
                 <div className="text-xs text-gray-500">{item.label}</div>
@@ -320,15 +246,15 @@ const Recent = () => {
             className="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-200 lg:col-span-2 w-full"
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-[#003C00] flex items-center mb-2 sm:mb-0">
-                <FaCar className="mr-2 text-green-700" /> Booking & Vehicle
+              <h3 className="text-base sm:text-lg font-body text-[#003C00] flex items-center mb-2 sm:mb-0">
+                <FaCar className="mr-2 text-button" /> Booking & Vehicle
                 Details
               </h3>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleState("showEditModal", true)}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-700 text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-button text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
               >
                 <BsPencil className="mr-1 sm:mr-2" /> Edit Details
               </motion.button>
@@ -336,23 +262,23 @@ const Recent = () => {
 
             <div className="space-y-3">
               {[
-                ["Booking ID", state.formData.bookingId],
-                ["Brand", state.formData.brand],
-                ["Model", state.formData.model],
-                ["Variant", state.formData.variant],
-                ["Fuel Type", state.formData.fuelType], // ✅ backend match
-                ["Transmission", state.formData.transmissionType], // ✅ backend match
+                ["Booking ID", state.bookingId],
+                ["Brand", state.brand],
+                ["Model", state.model],
+                ["Variant", state.variant],
+                ["Fuel Type", state.fuelType], // ✅ backend match
+                ["Transmission", state.transmissionType], // ✅ backend match
                 [
                   "PDI Date",
-                  state.formData.date
-                    ? new Date(state.formData.date).toLocaleDateString()
+                  state.date
+                    ? new Date(state.date).toLocaleDateString()
                     : "Not specified",
                 ],
                 [
                   "Location",
-                  <span className="text-blue-600 flex items-center text-sm sm:text-base">
+                  <span className="text-button flex items-center text-sm sm:text-base">
                     <HiOutlineLocationMarker className="mr-1" />{" "}
-                    {state.formData.address}
+                    {state.address}
                   </span>,
                 ],
               ].map(([label, value], i) => (
@@ -375,47 +301,49 @@ const Recent = () => {
             className="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-lg p-4 sm:p-6 text-black flex flex-col justify-between w-full"
           >
             <div>
-              <h3 className="text-base sm:text-lg font-bold mb-4">
+              <h3 className="text-base sm:text-lg font-heading mb-4">
                 Booking Status
               </h3>
               <div className="mb-6 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-green-600 text-sm sm:text-base">
+                  <span className="text-button text-sm sm:text-base">
                     Booking Fee
                   </span>
-                  <span className="font-bold text-sm sm:text-base">₹2,500</span>
+                  <span className="font-heading text-sm sm:text-base">₹2,500</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-green-600 text-sm sm:text-base">
+                  <span className="text-button text-sm sm:text-base">
                     Payment Status
                   </span>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-bold ${
+                    className={`px-2 py-1 rounded-full text-xs font-heading ${
                       state.isPaid
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {state.isPaid ? "Paid" : "Pending"}
+                    {/* {state['paymentStatus']} */}
+                    {APPLICATION_CONSTANTS.PAYMENT_STATUS[state['paymentStatus'] ? state['paymentStatus'] : APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value].label}
                   </span>
                 </div>
               </div>
 
-              {!state.isPaid ? (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleState("showPayment", true)}
-                  className="w-full bg-white text-green-800 font-bold py-2 sm:py-3 rounded-lg shadow-md hover:bg-gray-100 text-sm sm:text-base"
-                >
-                  Complete Payment
-                </motion.button>
+              { state['paymentStatus'] != APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value ? (
+                <span>Payment not done yet</span> 
+                // <motion.button
+                //   whileHover={{ scale: 1.02 }}
+                //   whileTap={{ scale: 0.98 }}
+                //   onClick={() => handleState("showPayment", true)}
+                //   className="w-full bg-white text-green-800 font-heading py-2 sm:py-3 rounded-lg shadow-md hover:bg-gray-100 text-sm sm:text-base"
+                // >
+                //   Complete Payment
+                // </motion.button>
               ) : (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   // onClick={handleDownloadReport}
-                  className="w-full bg-white text-green-800 font-bold py-2 sm:py-3 rounded-lg shadow-md hover:bg-gray-100 text-sm sm:text-base"
+                  className="w-full bg-white text-green-800 font-heading py-2 sm:py-3 rounded-lg shadow-md hover:bg-gray-100 text-sm sm:text-base"
                 >
                   Download Car Report
                 </motion.button>
@@ -423,7 +351,7 @@ const Recent = () => {
             </div>
 
             <div className="mt-6 pt-4 border-t border-green-500/30">
-              <h4 className="text-xs sm:text-sm font-bold mb-3">
+              <h4 className="text-xs sm:text-sm font-heading mb-3">
                 Need assistance?
               </h4>
               {[
@@ -437,7 +365,7 @@ const Recent = () => {
                   className="bg-white/10 hover:bg-white/20 p-3 rounded-lg transition cursor-pointer mb-2"
                 >
                   <p className="font-medium text-xs sm:text-sm">{item}</p>
-                  <p className="text-green-600 text-xs">
+                  <p className="text-button text-xs">
                     {i === 0
                       ? "Get immediate help via email or chat"
                       : i === 1
@@ -449,7 +377,6 @@ const Recent = () => {
             </div>
           </motion.div>
         </div>
-
         {/* Additional Notes Section */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -457,15 +384,16 @@ const Recent = () => {
           transition={{ delay: 0.8 }}
           className="bg-gradient-to-br from-white to-green-50 rounded-xl shadow-xl p-4 sm:p-6 border border-gray-100 mb-6 sm:mb-8"
         >
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">
+          <h3 className="text-base sm:text-lg font-heading text-gray-900 mb-2 sm:mb-3">
             Additional Notes
           </h3>
           <div className="bbg-gradient-to-br from-white to-green-50 rounded-lg p-3 sm:p-4 text-gray-700 text-sm sm:text-base">
-            {state.formData.notes ||
+            {state.notes ||
               "No additional notes were provided for this booking."}
           </div>
         </motion.div>
-      </div>
+
+
 
       {/* Edit Modal */}
       {renderModal(
@@ -490,7 +418,7 @@ const Recent = () => {
               {field === "notes" ? (
                 <textarea
                   name={field}
-                  value={state.formData[field]}
+                  value={state[field]}
                   onChange={(e) => handleFormData(field, e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 text-xs sm:text-sm transition focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white"
                   rows={3}
@@ -499,7 +427,7 @@ const Recent = () => {
                 <input
                   type={field.includes("Date") ? "date" : "text"}
                   name={field}
-                  value={state.formData[field]}
+                  value={state[field]}
                   onChange={(e) => handleFormData(field, e.target.value)}
                   disabled={["brand", "model", "bookingId"].includes(field)}
                   className={`w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 text-xs sm:text-sm transition focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent ${
@@ -527,16 +455,18 @@ const Recent = () => {
             onClick={() => {
               localStorage.setItem(
                 "recentBooking",
-                JSON.stringify(state.formData)
+                JSON.stringify(state)
               );
               handleState("showEditModal", false);
             }}
-            className="px-4 sm:px-6 py-1.5 sm:py-2 text-white bg-green-600 rounded-lg font-medium hover:bg-green-700 shadow-md text-xs sm:text-sm"
+            className="px-4 sm:px-6 py-1.5 sm:py-2 text-white bg-button rounded-lg font-medium hover:bg-green-700 shadow-md text-xs sm:text-sm"
           >
             Save Changes
           </motion.button>
         </>
       )}
+
+  
 
       {/* Payment Modal */}
       {renderModal(
@@ -551,7 +481,7 @@ const Recent = () => {
           </div>
           <div className="flex justify-between items-center mb-4 sm:mb-6">
             <span className="text-gray-700 text-sm sm:text-base">Amount:</span>
-            <span className="text-xl sm:text-2xl font-bold text-green-600">
+            <span className="text-xl sm:text-2xl font-heading text-button">
               ₹2,500
             </span>
           </div>
@@ -575,7 +505,7 @@ const Recent = () => {
               className={`w-full py-2 sm:py-3 rounded-lg font-medium flex items-center justify-center text-xs sm:text-base ${
                 state.isPaid
                   ? "bg-green-100 text-green-800 cursor-not-allowed"
-                  : "bg-green-600 text-white hover:bg-green-700 shadow-md"
+                  : "bg-button text-white hover:bg-green-700 shadow-md"
               }`}
             >
               {state.isPaid ? (
@@ -610,10 +540,10 @@ const Recent = () => {
           >
             <div className="flex items-center p-3 sm:p-4">
               <div className="bg-green-100 p-2 sm:p-3 rounded-full mr-2 sm:mr-3">
-                <BsCheck className="text-green-600 text-lg sm:text-xl" />
+                <BsCheck className="text-button text-lg sm:text-xl" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 text-sm sm:text-base">
+                <h4 className="font-heading text-gray-900 text-sm sm:text-base">
                   Payment Successful!
                 </h4>
                 <p className="text-gray-600 text-xs sm:text-sm">
@@ -624,6 +554,14 @@ const Recent = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      </div>
+
+      
+      ) : (
+        <p className="text-center text-gray-700">No recent requests found.</p>
+      )}
+
     </div>
   );
 };

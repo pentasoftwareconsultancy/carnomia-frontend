@@ -14,7 +14,7 @@ export default function CarBody() {
   ];
 
   return (
-    <div className="bg-[#f1f8e9] min-h-screen py-10 font-sans">
+    <div className="bg-primary min-h-screen py-10 font-sans">
       <div className="mx-4 sm:mx-6 md:mx-12 lg:mx-16">
         {panels.map((name, idx) => (
           <BodyPanelCard key={idx} index={idx + 1} label={name} />
@@ -106,12 +106,12 @@ function BodyPanelCard({ index, label }) {
 
   return (
     <section
-      className={`border border-gray-400 rounded-xl p-5 bg-[#f1f8e9] 
+      className={`border border-gray-400 rounded-xl p-5 bg-primary 
       ${
         index > 1 ? "mt-8" : ""
       }`}
     >
-      {index === 1 && <h2 className="text-lg font-bold mb-4">Body Panels</h2>}
+      {index === 1 && <h2 className="text-lg font-heading mb-4">Body Panels</h2>}
 
       <h3 className="font-medium mb-3">
         {index}. {label}
@@ -228,7 +228,7 @@ function BodyPanelCard({ index, label }) {
             className="max-w-full max-h-full rounded-lg shadow-lg"
           />
           <button
-            className="absolute top-4 right-4 text-white text-4xl font-bold"
+            className="absolute top-4 right-4 text-white text-4xl font-heading"
             onClick={() => setPreviewIdx(null)}
           >
             &times;

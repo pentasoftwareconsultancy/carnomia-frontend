@@ -26,11 +26,11 @@ const InspectionReport = () => {
     const fetchReports = async () => {
       try {
         const payload = [
-          APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL,
-          APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED,
-          APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_REJECTED
+          APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value,
+          APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value,
+          APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_REJECTED.value
         ];
-        const res = await new ApiService().apipost(ServerUrl.API_GET_ALLPDIREQUEST_STATUSES, payload);
+        const res = await new ApiService().apipost(ServerUrl.API_GET_ALL_PDIREQUEST_STATUSES, payload);
         setReports(res.data?.data || []);
       } catch (err) {
         console.error("Error fetching reports:", err);
@@ -96,7 +96,7 @@ const InspectionReport = () => {
 
   return (
     <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen font-sans">
-      <h1 className="text-xl sm:text-2xl font-bold text-green-900 mb-6 flex items-center gap-2">
+      <h1 className="text-xl sm:text-2xl font-heading text-green-900 mb-6 flex items-center gap-2">
         <span className="p-2 bg-green-100 rounded-full"><FiEye size={20} className="text-green-700" /></span>
         Inspection Reports Management
       </h1>
@@ -107,13 +107,13 @@ const InspectionReport = () => {
           <table className="w-full min-w-[700px]">
             <thead className="bg-green-50">
               <tr>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Booking ID</th>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Customer Name</th>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Engineer Name</th>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Brand Modal</th>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Date / Time</th>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Status</th>
-                <th className="p-3 text-left text-sm font-semibold text-green-900">Actions</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Booking ID</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Customer Name</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Engineer Name</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Brand Modal</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Date / Time</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Status</th>
+                <th className="p-3 text-left text-sm font-body text-green-900">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -163,7 +163,7 @@ const InspectionReport = () => {
       {openDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div ref={modalRef} className="bg-white rounded-xl p-6 w-full max-w-3xl shadow-lg">
-            <h2 className="text-lg font-semibold mb-4">Review Report - {modifiedReport.bookingId}</h2>
+            <h2 className="text-lg font-body mb-4">Review Report - {modifiedReport.bookingId}</h2>
             {/* Modal content goes here */}
             <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md" onClick={() => setOpenDialog(false)}>Close</button>
           </div>

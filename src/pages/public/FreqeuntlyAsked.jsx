@@ -12,11 +12,11 @@ import { Link } from 'react-router-dom';
 
 const faqData = [
   {
-    category: 'About Drivesta & PDI Services',
+    category: 'About Carnomia & PDI Services',
     questions: [
       {
-        q: 'What is Drivesta?',
-        a: 'Drivesta is a professional car inspection service offering PDI for new and used vehicles across India. We perform detailed checks so you can buy with confidence.',
+        q: 'What is Carnomia?',
+        a: 'Carnomia is a professional car inspection service offering PDI for new and used vehicles across India. We perform detailed checks so you can buy with confidence.',
         icon: <FaQuestionCircle />
       },
       {
@@ -50,7 +50,7 @@ const faqData = [
     category: 'Booking & Process',
     questions: [
       {
-        q: 'How do I book a PDI with Drivesta?',
+        q: 'How do I book a PDI with Carnomia?',
         a: "It's simple:\n• Visit www.drivesta.com\n• Call/WhatsApp: +91-9723280710\n• Choose your slot and share car details\n• We'll inspect the car at the location you choose",
         icon: <FaQuestionCircle />
       },
@@ -71,7 +71,7 @@ const faqData = [
       },
       {
         q: 'Can I share the report with the seller?',
-        a: 'Yes. You can, if you wish to. Drivesta reports are private and shared only with the booking customer.',
+        a: 'Yes. You can, if you wish to. Carnomia reports are private and shared only with the booking customer.',
         icon: <PiChatCircleTextFill />
       },
     ],
@@ -80,7 +80,7 @@ const faqData = [
     category: 'Pricing and Payment',
     questions: [
       {
-        q: 'How much does a Drivesta inspection cost?',
+        q: 'How much does a Carnomia inspection cost?',
         a: 'Our pricing is flat for brand cars. Contact us or visit the website for details.',
         icon: <FaRupeeSign />
       },
@@ -115,7 +115,7 @@ const faqData = [
         icon: <FaBan />
       },
       {
-        q: 'Is my data safe with Drivesta?',
+        q: 'Is my data safe with Carnomia?',
         a: 'Absolutely. We respect your privacy. Your personal and vehicle data is never shared without consent. Read Privacy Policy.',
         icon: <FaClipboardList />
       },
@@ -134,7 +134,7 @@ const FreqeuntlyAsked = () => {
   })).filter(section => section.questions.length > 0);
 
   return (
-    <div className="bg-[#f1f8e9] min-h-screen font-sans">
+    <div className="bg-primary min-h-screen font-sans">
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -142,7 +142,7 @@ const FreqeuntlyAsked = () => {
         className="w-full bg-black text-center py-12 px-4"
       >
         <h3 className="text-gray-300 text-sm">FAQs</h3>
-        <h1 className="text-green-400 text-3xl md:text-4xl font-bold mt-2">Ask us anything</h1>
+        <h1 className="text-green-400 text-3xl md:text-4xl font-heading mt-2">Ask us anything</h1>
         <p className="text-white mt-2">Have any questions?</p>
 
         <div className="mt-6 relative w-72 md:w-96 mx-auto">
@@ -174,7 +174,7 @@ const FreqeuntlyAsked = () => {
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-1 border-green-300">{section.category}</h2>
+              <h2 className="text-xl font-heading text-gray-800 mb-4 border-b pb-1 border-green-300">{section.category}</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {section.questions.map((item, index) => {
                   const globalIndex = faqData
@@ -191,7 +191,7 @@ const FreqeuntlyAsked = () => {
                         <span className="text-white bg-green-600 p-2 rounded-full text-xl">
                           {item.icon}
                         </span>
-                        <span className="font-semibold">Q{globalIndex}.</span>
+                        <span className="font-body">Q{globalIndex}.</span>
                       </div>
                       <div className="text-md font-medium text-gray-900 mb-1">{item.q}</div>
                       <p className="text-sm text-gray-700 whitespace-pre-line">{item.a}</p>
@@ -212,7 +212,7 @@ const FreqeuntlyAsked = () => {
       >
         <div className="bg-black text-white rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold">Still have questions?</h3>
+            <h3 className="text-lg font-body">Still have questions?</h3>
             <p className="text-sm text-gray-400">
               Can’t find the answer you’re looking for? Please chat to our friendly team.
             </p>

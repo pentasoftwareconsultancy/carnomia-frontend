@@ -28,6 +28,8 @@ import CompletedRequest from "../pages/customer/CompletedRequest";
 import RequestForm from "../pages/customer/RequestForm";
 import CustomerSupport from "../pages/customer/ContactSupport";
 import RequestSuccess from "../pages/customer/RequestSuccess";
+import CompletedRequests from "../pages/customer/CompletedRequest";
+import AllCustomerRequests from "../pages/customer/AllCustomerRequest";
 
 // Engineer Pages
 import AssignedJobs from "../pages/engineer/AssignedJobs";
@@ -119,7 +121,8 @@ const AppRoutes = () => {
           <Route path="/customer/dashboard" element={<DashboardLayout role="customer" />}>
             <Route index element={<Navigate to="recent-request" replace />} />
             <Route path="recent-request" element={<RecentRequest />} />
-            <Route path="completed-request" element={<CompletedRequest />} />
+            <Route path="all-request" element={<AllCustomerRequests />} />
+            <Route path="completed-request" element={<CompletedRequests/>} />
             <Route path="contact-support" element={<CustomerSupport />} />
           </Route>
         </Route>

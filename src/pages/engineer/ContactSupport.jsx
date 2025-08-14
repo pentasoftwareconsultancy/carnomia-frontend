@@ -28,7 +28,7 @@ const ContactSupport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 lg:px-20 py-12 font-sans">
+    <div className="min-h-screen bg-primary px-4 sm:px-6 lg:px-20 py-12 font-sans">
       <ToastContainer position="top-center" autoClose={3000} />
       {showConfetti && <Confetti recycle={false} numberOfPieces={250} />}
 
@@ -98,7 +98,7 @@ const ContactSupport = () => {
                   {item.icon}
                 </motion.div>
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm sm:text-base">{item.label}</p>
+                  <p className="font-body text-gray-900 text-sm sm:text-base">{item.label}</p>
                   <div className="text-gray-700">{item.value}</div>
                 </div>
               </div>
@@ -114,10 +114,10 @@ const ContactSupport = () => {
           transition={{ duration: 0.6 }}
           className="w-full lg:w-1/2 bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 sm:p-8"
         >
-          <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-6">Inquiry Form</h2>
+          <h2 className="text-xl sm:text-2xl font-heading text-green-900 mb-6">Inquiry Form</h2>
           <form ref={formRef} onSubmit={sendEmail} className="space-y-4">
             <div>
-              <label className="block font-semibold mb-1 text-sm">
+              <label className="block font-body mb-1 text-sm">
                 Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -130,7 +130,7 @@ const ContactSupport = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-sm">
+              <label className="block font-body mb-1 text-sm">
                 Email <span className="text-red-500">*</span>
               </label>
               <input
@@ -143,7 +143,7 @@ const ContactSupport = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-sm">Phone Number</label>
+              <label className="block font-body mb-1 text-sm">Phone Number</label>
               <input
                 type="text"
                 name="phone"
@@ -153,7 +153,7 @@ const ContactSupport = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-sm">Message</label>
+              <label className="block font-body mb-1 text-sm">Message</label>
               <textarea
                 name="message"
                 rows="3"
@@ -165,7 +165,7 @@ const ContactSupport = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-xl font-semibold text-white shadow-md transition-transform hover:scale-[1.02] ${
+              className={`w-full py-3 rounded-xl font-body text-white shadow-md transition-transform hover:scale-[1.02] ${
                 loading
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-gradient-to-r from-green-500 to-teal-500 hover:shadow-lg'

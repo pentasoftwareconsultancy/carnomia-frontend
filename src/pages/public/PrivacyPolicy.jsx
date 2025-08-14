@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 
 const PrivacyPolicy = () => {
 return (
-<div className="bg-[#f1f8e9] min-h-screen font-sans text-gray-800">
+<div className="bg-primary min-h-screen font-sans text-gray-800">
 {/* Header */}
 <motion.div
 className="bg-black py-12 px-4 text-center"
@@ -12,7 +12,7 @@ initial={{ opacity: 0, y: -30 }}
 animate={{ opacity: 1, y: 0 }}
 transition={{ duration: 0.6 }}
 >
-<h1 className="text-green-400 text-3xl md:text-4xl font-bold">Privacy Policy</h1>
+<h1 className="text-green-400 text-3xl md:text-4xl font-heading">Privacy Policy</h1>
 <p className="text-white mt-2 text-sm md:text-base">Last updated: July 2025</p>
 </motion.div>
 
@@ -25,7 +25,7 @@ transition={{ duration: 0.6 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <strong>At Drivesta</strong>, we value your privacy and are committed to protecting your personal information.
+        <strong>At Carnomia</strong>, we value your privacy and are committed to protecting your personal information.
         This Privacy Policy outlines how we collect, use, store, and protect your data when you interact with our
         website, services, or customer support.
       </motion.p>
@@ -57,7 +57,7 @@ animate={inView ? { opacity: 1, y: 0 } : {}}
 transition={{ duration: 0.6, delay }}
 className="bg-white p-6 rounded-md shadow-md border border-gray-300"
 >
-<h2 className="text-base md:text-lg font-semibold text-gray-800 mb-2">{number}</h2>
+<h2 className="text-base md:text-lg font-body text-gray-800 mb-2">{number}</h2>
 <p className="text-gray-700 text-sm md:text-base mb-3">{content}</p>
 {list && (
 <ul className="list-disc pl-5 space-y-1 text-sm md:text-base text-gray-700">

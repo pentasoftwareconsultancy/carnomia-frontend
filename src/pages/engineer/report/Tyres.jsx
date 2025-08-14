@@ -98,7 +98,7 @@ const TyreCard = ({
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] rounded-2xl p-4 sm:p-6 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full">
-      <h3 className="text-lg sm:text-xl font-bold mb-4 text-white text-left">
+      <h3 className="text-lg sm:text-xl font-heading mb-4 text-white text-left">
         {`${idx + 1}. ${tyreName}`}
       </h3>
 
@@ -387,7 +387,7 @@ const Tyres = ({ data = {}, onChange }) => {
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Tyres</h2>
+      <h2 className="text-2xl sm:text-3xl font-heading mb-6 sm:mb-8 text-white text-left">Tyres</h2>
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
         {tyreKeys.map((key, idx) => (
           <React.Fragment key={key}>

@@ -18,10 +18,10 @@ image:
 
 export default function ServicesCard() {
 return (
-<div className="bg-[#f1f8e9] py-16 px-4 sm:px-6 lg:px-8">
+<div className="bg-primary py-16 px-4 sm:px-6 lg:px-8">
 <div className="max-w-7xl mx-auto">
 
-<h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
+<h2 className="text-3xl md:text-4xl font-heading text-center mb-10 text-gray-800">
 Our Services
 </h2>
 
@@ -34,10 +34,10 @@ Our Services
           style={{ backgroundImage: `url(${service.image})` }}
         >
           <div className="absolute inset-0 bg-black/50 p-8 flex flex-col justify-end text-white">
-            <h3 className="text-2xl font-semibold mb-4">{service.title}</h3>
+            <h3 className="text-2xl font-body mb-4">{service.title}</h3>
             <Link
               to={service.path}
-              className="bg-[#81da5b] cursor-pointer text-white px-6 py-2 rounded-md w-fit text-sm font-medium transition"
+              className="bg-button cursor-pointer text-white px-6 py-2 rounded-md w-fit text-sm font-body transition"
               aria-label={`Book ${service.title}`}
             >
               Book Your PDI Now

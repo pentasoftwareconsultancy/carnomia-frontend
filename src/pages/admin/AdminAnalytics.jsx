@@ -132,7 +132,7 @@ const AdminAnalytics = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Pune Vehicle Inspection Analytics</h1>
+            <h1 className="text-3xl font-heading text-gray-900">Pune Vehicle Inspection Analytics</h1>
             <p className="text-gray-600 mt-2">
               {format(startDate, 'MMM dd, yyyy')} - {format(endDate, 'MMM dd, yyyy')}
             </p>
@@ -216,7 +216,7 @@ const AdminAnalytics = () => {
                         <p className="text-sm font-medium text-gray-500">
                           {type === 'total' ? 'Total' : type.charAt(0).toUpperCase() + type.slice(1)}
                         </p>
-                        <h3 className="text-3xl font-bold text-gray-900 mt-1">
+                        <h3 className="text-3xl font-heading text-gray-900 mt-1">
                           {filteredData.summary?.[type] || 0}
                         </h3>
                         {type !== 'total' && (
@@ -296,7 +296,7 @@ const AdminAnalytics = () => {
 
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Inspections</h3>
+                <h3 className="text-lg font-body text-gray-900">Recent Inspections</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -335,7 +335,7 @@ const AdminAnalytics = () => {
 
 const ChartCard = ({ title, children }) => (
   <div className="bg-white p-6 rounded-xl shadow-md">
-    <h3 className="text-lg font-semibold text-gray-900 mb-6">{title}</h3>
+    <h3 className="text-lg font-body text-gray-900 mb-6">{title}</h3>
     <div className="h-80">{children}</div>
   </div>
 );

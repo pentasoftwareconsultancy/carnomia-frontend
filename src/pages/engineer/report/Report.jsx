@@ -86,22 +86,22 @@ export default function Report() {
     }));
   };
 
-  const query= new URLSearchParams(useLocation().search);
+  const query = new URLSearchParams(useLocation().search);
   const isAdm = query.get("isAdm") === "true";
 
   const handleSave = async (status = null, finalSubmit = false) => {
     setSaving(true);
     try {
       const payload = { id: formData._id, ...formData };
-      if(status && isAdm) {
-        payload['status'] = status; // set status if provided
+      if ((status || isAdm)) {
+        payload["status"] = status ? status : formData.status; // set status if provided
       }
       await new ApiService().apiput(
         `${ServerUrl.API_GET_INSPECTION_UPDATE}/${id}`,
         payload
       );
       alert("Saved successfully");
-      finalSubmit && !isAdm && navigate("/engineer/dashboard/completed-jobs");
+      finalSubmit && !isAdm && navigate("/engineer/dashboard/completed-job");
       return true;
     } catch (err) {
       console.error("Save failed", err);
@@ -123,6 +123,24 @@ export default function Report() {
       }
     }
   };
+
+  // const handleStatusChange = async (newStatus) => {
+  //   try {
+  //     setSaving(true);
+  //     const payload = { status: newStatus };
+  //     await new ApiService().apiput(
+  //       `${ServerUrl.API_GET_INSPECTION_UPDATE}/${id}`,
+  //       payload
+  //     );
+  //     alert(`Status updated to ${newStatus}`);
+  //     navigate("/admin/dashboard/inspection-report");
+  //   } catch (err) {
+  //     console.error("Status update failed", err);
+  //     alert("Failed to update status");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
   const goBack = () => {
     if (step > 0) setStep(step - 1);
@@ -183,7 +201,7 @@ export default function Report() {
   if (error) return <div className="text-red-600">{error}</div>;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F1FFE0]">
+    <div className="relative min-h-screen overflow-x-hidden bg-primary">
       {/* Background */}
       <div
         className="fixed inset-0 z-0 bg-no-repeat bg-cover bg-center"
@@ -195,8 +213,34 @@ export default function Report() {
 
       {/* Foreground */}
       <div className="relative z-10 w-full flex flex-col items-center px-4 sm:px-6 md:px-12 py-8 sm:py-12">
+        {isAdm && 
+            (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) &&  
+         (
+          <div className="flex justify-end gap-2 w-full max-w-4xl mb-4 ml-auto">
+            <button
+              onClick={() =>
+                handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value)
+              }
+              className="bg-button hover:bg-green-700 text-white px-4 py-2 rounded-2xl"
+            >
+              Approve
+            </button>
+            <button
+              onClick={() =>
+                handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_REJECTED.value)
+              }
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-2xl"
+            >
+              Reject
+            </button>
+          </div>
+        )}
+
         <div className="text-center mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">
+          <h2 className="text-2xl sm:text-3xl font-heading text-white">
             Pre-Delivery Inspection Form
           </h2>
         </div>
@@ -208,7 +252,7 @@ export default function Report() {
               key={label}
               ref={(el) => (stepRefs.current[index] = el)}
               onClick={() => setStep(index)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-heading transition-all duration-300 ${
                 step === index
                   ? "bg-gradient-to-r from-lime-300 to-green-300 text-white shadow-md"
                   : "bg-white/30 text-gray-700 hover:bg-white/40"
@@ -235,22 +279,32 @@ export default function Report() {
             <div />
           )}
 
-          {step < steps.length - 1 ? (
+          {step < steps.length - 1 ?  (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) ? (
             <button
               onClick={handleNextWithSaveConfirm}
               disabled={saving}
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-lime-400 to-green-500 hover:from-lime-500 hover:to-green-600 text-white font-semibold shadow-lg transform hover:scale-105 transition-all"
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-lime-400 to-green-500 hover:from-lime-500 hover:to-green-600 text-white font-body shadow-lg transform hover:scale-105 transition-all"
             >
               {saving ? "Saving..." : "Next"}
             </button>
-          ) : (
+           ) : '' : (
+            (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
+        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) 
+        ? 
             <button
-              onClick={() => handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL, true)}
+              onClick={() => 
+                handleSave( isAdm ? null: APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value, true)}
               disabled={saving}
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg transform hover:scale-105 transition-all"
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-body shadow-lg transform hover:scale-105 transition-all"
             >
               {saving ? "Submitting..." : "Submit"}
             </button>
+            : ''
           )}
         </div>
       </div>

@@ -167,10 +167,10 @@ export default Customize
 //       animate={{ opacity: 1 }}
 //       className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10"
 //     >
-//       <h2 className="text-2xl font-bold mb-6 text-center">Add New Car</h2>
+//       <h2 className="text-2xl font-heading mb-6 text-center">Add New Car</h2>
 //       <form onSubmit={handleSubmit} className="space-y-4">
 //         <div>
-//           <label className="block font-semibold">Brand Name</label>
+//           <label className="block font-body">Brand Name</label>
 //           <input
 //             type="text"
 //             name="brand"
@@ -181,7 +181,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Model</label>
+//           <label className="block font-body">Model</label>
 //           <input
 //             type="text"
 //             name="model"
@@ -192,7 +192,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Variant</label>
+//           <label className="block font-body">Variant</label>
 //           <input
 //             type="text"
 //             name="variant"
@@ -203,7 +203,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Transmission</label>
+//           <label className="block font-body">Transmission</label>
 //           <input
 //             type="text"
 //             name="transmissionType"
@@ -214,7 +214,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Fuel Type</label>
+//           <label className="block font-body">Fuel Type</label>
 //           <input
 //             type="text"
 //             name="fuelType"
@@ -225,7 +225,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">BHPs</label>
+//           <label className="block font-body">BHPs</label>
 //           <input
 //             type="text"
 //             name="BHPs"
@@ -236,7 +236,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Airbags</label>
+//           <label className="block font-body">Airbags</label>
 //           <input
 //             type="text"
 //             name="Airbags"
@@ -247,7 +247,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Mileage</label>
+//           <label className="block font-body">Mileage</label>
 //           <input
 //             type="text"
 //             name="Mileage"
@@ -258,7 +258,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">NCAP</label>
+//           <label className="block font-body">NCAP</label>
 //           <input
 //             type="text"
 //             name="NCAP"
@@ -269,7 +269,7 @@ export default Customize
 //           />
 //         </div>
 //         <div>
-//           <label className="block font-semibold">Upload Image</label>
+//           <label className="block font-body">Upload Image</label>
 //           <input
 //             type="file"
 //             accept="image/*"

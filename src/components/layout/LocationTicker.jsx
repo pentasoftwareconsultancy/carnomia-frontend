@@ -28,7 +28,7 @@ export default function LocationTicker() {
   const allLocations = [...cityList, ...cityList];
 
   return (
-    <div className="w-full bg-[#f1f8e9] overflow-hidden text-sm text-black py-2">
+    <div className="w-full bg-primary overflow-hidden text-sm text-black py-2">
       <div className="location-marquee whitespace-nowrap flex space-x-6 px-6 animate-marquee">
         {allLocations.map((loc, index) => (
           <span key={index} className="inline-block px-2">

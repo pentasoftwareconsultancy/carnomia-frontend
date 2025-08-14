@@ -3,17 +3,17 @@ import { FaCamera, FaUpload, FaPlus, FaUser, FaTimes } from "react-icons/fa";
 
 export default function Report() {
   return (
-    <div className="bg-[#f1f8e9] min-h-screen py-10 font-sans">
+    <div className="bg-primary min-h-screen py-10 font-sans">
       <div className="px-4 sm:px-6 md:px-12 lg:px-16">
         <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6">
-          <h1 className="text-xl font-semibold">Drivesta</h1>
+          <h1 className="text-xl font-body">Carnomia</h1>
           <div className="flex items-center gap-4">
             <p className="text-sm text-gray-700">PDI Date: 03/07/2025</p>
             <FaUser className="text-xl" />
           </div>
         </header>
 
-        <h2 className="text-lg font-bold mb-4">PDI Report</h2>
+        <h2 className="text-lg font-heading mb-4">PDI Report</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <InfoCard
             data={{
@@ -37,7 +37,7 @@ export default function Report() {
           />
         </div>
 
-        <h2 className="text-lg font-bold mb-2">Profile Photos</h2>
+        <h2 className="text-lg font-heading mb-2">Profile Photos</h2>
         {["Front Left", "Rear Left", "Front Right", "Rear Right"].map((title, i) => (
           <PhotoCard key={i} heading={`${i + 1}. ${title}`} isLast={i === 3} />
         ))}
@@ -123,7 +123,7 @@ function PhotoCard({ heading, isLast }) {
 
   return (
     <section
-      className={`border border-gray-400 rounded-xl p-4 bg-[#f1f8e9]
+      className={`border border-gray-400 rounded-xl p-4 bg-primary
      ${
         !isLast ? "mb-6" : ""
       }`}
@@ -211,7 +211,7 @@ function PhotoCard({ heading, isLast }) {
             className="max-w-full max-h-full rounded-lg shadow-lg"
           />
           <button
-            className="absolute top-4 right-4 text-white text-4xl font-bold"
+            className="absolute top-4 right-4 text-white text-4xl font-heading"
             onClick={() => setPreviewIdx(null)}
           >
             &times;

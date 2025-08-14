@@ -14,7 +14,7 @@ const TermsPopup = ({ onClose, onAgree }) => {
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}
-          className="bg-[#f1f8e9] rounded-lg px-6 pt-5 pb-4 text-left shadow-xl w-full max-w-lg sm:p-6"
+          className="bg-primary rounded-lg px-6 pt-5 pb-4 text-left shadow-xl w-full max-w-lg sm:p-6"
         >
           <div className="text-center">
             <h3 className="text-lg font-medium text-gray-900">Terms & Conditions</h3>
@@ -25,15 +25,15 @@ const TermsPopup = ({ onClose, onAgree }) => {
               <br />
               <p className="mb-4">
 
-                Welcome to Drivesta.com. By accessing or using our website and services, you agree to the terms outlined below. Please read them carefully.
+                Welcome to Carnomia.com. By accessing or using our website and services, you agree to the terms outlined below. Please read them carefully.
 
               </p>
               <h4 className="font-medium mb-2">1. Service Overview</h4>
-              <p className="mb-4">Drivesta offers Pre-Delivery Inspection (PDI) services for new and used cars across selected cities in India. Our services include on-site inspections, digital reports, and consultation before a vehicle is purchased.</p>
+              <p className="mb-4">Carnomia offers Pre-Delivery Inspection (PDI) services for new and used cars across selected cities in India. Our services include on-site inspections, digital reports, and consultation before a vehicle is purchased.</p>
 
               <h4 className="font-medium mb-2">2. Booking & Scheduling</h4>
               <p className="mb-4">• Users must provide accurate information about the vehicle, seller location, and preferred inspection time.<br />
-                • Drivesta reserves the right to reschedule or cancel a booking due to unforeseen circumstances (e.g., weather, unavailability, etc.).<br />
+                • Carnomia reserves the right to reschedule or cancel a booking due to unforeseen circumstances (e.g., weather, unavailability, etc.).<br />
                 • On-site inspections depend on access being granted by the vehicle owner or dealership.</p>
 
               <h4 className="font-medium mb-2">3. Payment Terms</h4>
@@ -43,7 +43,7 @@ const TermsPopup = ({ onClose, onAgree }) => {
                 • No refund is applicable once the report is delivered unless there is a proven error in the service.</p>
 
               <h4 className="font-medium mb-2">4. Scope of Inspection</h4>
-              <p className="mb-4">• Drivesta inspections are visual and tool-based checks. We do not dismantle or open parts of the vehicle.<br />
+              <p className="mb-4">• Carnomia inspections are visual and tool-based checks. We do not dismantle or open parts of the vehicle.<br />
                 • The report is advisory in nature and is not a certification of the car's legal ownership, insurance status, or registration.<br />
                 • Our findings are based on the vehicle condition at the time of inspection only.
               </p><br/>
@@ -51,17 +51,17 @@ const TermsPopup = ({ onClose, onAgree }) => {
               <h4 className="font-medium mb-2">5. User Responsibilities</h4>
               <p>• You are responsible for ensuring access to the vehicle at the scheduled time.<br />
                 • You must ensure the vehicle is located in a safe and accessible environment for inspection.<br />
-                • Drivesta is not responsible for any delays or incomplete checks due to denied access.<br />
+                • Carnomia is not responsible for any delays or incomplete checks due to denied access.<br />
                 • If car is not available for inspection within 30 minutes from the scheduled time then you have to paid Rs.500 visiting charges and engineer will move forward to next location.
               </p><br/>
 
               <h4 className="font-medium mb-2">6. Liability Disclaimer</h4>
-              <p>• Drivesta is not liable for any loss, damage, or costs incurred as a result of using our inspection service or relying solely on the report.<br/>
+              <p>• Carnomia is not liable for any loss, damage, or costs incurred as a result of using our inspection service or relying solely on the report.<br/>
                 • We do not guarantee the future performance of the vehicle or detect faults that are intermittent or concealed at the time of inspection.
               </p><br/>
 
               <h4 className="font-medium mb-2">7. Intellectual Property</h4>
-              <p>All content on Drivesta.com - including text, images, logos, reports, and software - is the property of Drivesta and cannot be used or reproduced without permission.
+              <p>All content on Carnomia.com - including text, images, logos, reports, and software - is the property of Carnomia and cannot be used or reproduced without permission.
               </p><br/>
 
               <h4 className="font-medium mb-2">8. Changes to Terms</h4>

@@ -8,7 +8,7 @@ import CarLogoSlider from "../../components/home/LogoSlider";
 
 export default function Home() {
   return (
-    <main className="bg-[#f1f8e9] min-h-screen">
+    <main className="bg-primary min-h-screen">
       <HeroSection />
 
       <ServicesCard />

@@ -18,7 +18,6 @@ const BodyPanels = ({ data, onChange }) => {
 
     'front_left_door',
     "front_left_door_issue",
-    "front_left_door_issue",
     "front_left_door_ORVM_issue",
     "front_left_door_cladding_issue",
 
@@ -185,13 +184,14 @@ const BodyPanels = ({ data, onChange }) => {
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl text-white mx-auto">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Body Panels</h2>
+      <h2 className="text-2xl sm:text-3xl font-heading mb-6 sm:mb-8 text-left">Body Panels</h2>
 
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
         {labels.map((issueKey) => {
           // Map issueKey to imageKey for photo arrays
           const imageKey = imageUrlKeysMap[issueKey];
-          const photosArr = getPhotos(imageKey);
+          if(!imageKey) return null; // Skip if no mapping found
+          const photosArr = imageKey ? getPhotos(imageKey) : [];
 
           // Your existing 'hasIssue' logic — unchanged
           const hasIssue =

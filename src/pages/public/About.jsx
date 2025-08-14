@@ -59,31 +59,31 @@ const About = () => {
     <div className="bg-[#f1ffe0] text-gray-800">
       {/* Header */}
       <div className="text-center bg-black text-white py-12">
-        <h1 className="text-4xl font-bold tracking-wider">ABOUT US</h1>
+        <h1 className="text-4xl font-heading tracking-wider">ABOUT US</h1>
       </div>
 
       {/* Intro Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16 flex flex-col lg:flex-row gap-10">
         <div className="lg:w-1/2 space-y-6">
-          <h2 className="text-4xl font-bold text-green-800 leading-tight">
+          <h2 className="text-4xl font-heading text-green-800 leading-tight">
             WE'RE REVOLUTIONIZING VEHICLE INSPECTION & SERVICES
           </h2>
           <p className="text-lg leading-relaxed">
-            Drivesta transforms the way vehicle owners access inspections & services.
+            Carnomia transforms the way vehicle owners access inspections & services.
             With certified technicians and on-demand tech, we simplify inspections from
             pre-delivery to periodic maintenance.
           </p>
           <div className="flex gap-6">
             <div className="text-center p-4 shadow border rounded-xl bg-white">
-              <p className="text-3xl font-bold text-green-700">30+</p>
+              <p className="text-3xl font-heading text-green-700">30+</p>
               <p className="text-sm mt-1">Vehicle Services</p>
             </div>
             <div className="text-center p-4 shadow border rounded-xl bg-white">
-              <p className="text-3xl font-bold text-green-700">300+</p>
+              <p className="text-3xl font-heading text-green-700">300+</p>
               <p className="text-sm mt-1">Certified Technicians</p>
             </div>
             <div className="text-center p-4 shadow border rounded-xl bg-white">
-              <p className="text-3xl font-bold text-green-700">40+</p>
+              <p className="text-3xl font-heading text-green-700">40+</p>
               <p className="text-sm mt-1">Cities Covered</p>
             </div>
           </div>
@@ -94,13 +94,13 @@ const About = () => {
           </Link>
         </div>
         <div className="lg:w-1/2 flex justify-center">
-          <img src={about} alt="Drivesta" className="rounded-xl max-w-md w-full" />
+          <img src={about} alt="Carnomia" className="rounded-xl max-w-md w-full" />
         </div>
       </section>
 
       {/* Services */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16">
-        <h2 className="text-3xl font-bold text-center mb-10">What We Do</h2>
+        <h2 className="text-3xl font-heading text-center mb-10">What We Do</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((item, i) => (
             <div
@@ -116,9 +116,9 @@ const About = () => {
 
       {/* Inspection Importance */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16">
-        <h2 className="text-3xl font-bold text-center mb-6">Why New Cars Need Inspection Too</h2>
+        <h2 className="text-3xl font-heading text-center mb-6">Why New Cars Need Inspection Too</h2>
         <p className="text-center text-lg max-w-2xl mx-auto mb-10">
-          Drivesta helps you catch hidden flaws before you drive off.
+          Carnomia helps you catch hidden flaws before you drive off.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {issues.map((item, i) => (
@@ -128,7 +128,7 @@ const About = () => {
               style={{ backgroundImage: `url(${item.img})` }}
             >
               <div className="absolute inset-0 bg-black/50 group-hover:bg-black/70 transition duration-300 rounded-xl" />
-              <div className="absolute bottom-14 left-4 right-4 text-white text-base font-semibold z-10">
+              <div className="absolute bottom-14 left-4 right-4 text-white text-base font-body z-10">
                 {item.title}
               </div>
               <div className="absolute bottom-4 left-4 right-4 text-white text-sm opacity-0 group-hover:opacity-100 transition z-10">
@@ -149,7 +149,7 @@ const About = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <FaBullseye className="text-green-700 text-2xl" />
-                <h3 className="text-2xl font-bold">Our Mission</h3>
+                <h3 className="text-2xl font-heading">Our Mission</h3>
               </div>
               <p className="text-lg">
                 To deliver reliable and tech-enabled vehicle services that redefine transparency and
@@ -159,7 +159,7 @@ const About = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <FaEye className="text-green-700 text-2xl" />
-                <h3 className="text-2xl font-bold">Our Vision</h3>
+                <h3 className="text-2xl font-heading">Our Vision</h3>
               </div>
               <p className="text-lg">
                 To become India's most trusted mobility brand through innovation, excellence, and
@@ -172,13 +172,13 @@ const About = () => {
 
       {/* Availability */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16">
-        <h2 className="text-3xl font-bold flex items-center justify-center gap-2 mb-8">
+        <h2 className="text-3xl font-heading flex items-center justify-center gap-2 mb-8">
           <FaMapMarkedAlt className="text-green-700" /> Our Availability
         </h2>
         <div className="flex flex-col lg:flex-row gap-10 items-center">
           <div className="lg:w-1/2 space-y-4">
-            <h4 className="text-xl font-bold text-green-700">Currently Serving</h4>
-            <p className="text-lg font-semibold">Pune, Maharashtra — <span className="text-green-700">Expanding Fast</span></p>
+            <h4 className="text-xl font-heading text-green-700">Currently Serving</h4>
+            <p className="text-lg font-body">Pune, Maharashtra — <span className="text-green-700">Expanding Fast</span></p>
             <div className="space-y-3 mt-4">
               <div className="flex items-center gap-3 text-lg">
                 <FaPhoneAlt className="text-green-700" /> +91 98765 43210

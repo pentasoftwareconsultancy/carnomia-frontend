@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, Grid, useMediaQuery, useTheme } from '@mui/material';
 import { Person, CheckCircle, Badge, CalendarToday, Engineering, Assignment } from '@mui/icons-material';
 import { mockEngineers, mockRequests } from './DashboardTab/mockData';
@@ -11,7 +11,11 @@ import ScheduleCalendar from './DashboardTab/ScheduleCalendar';
 import RequestDetails from './DashboardTab/RequestDetails';
 import EditRequestForm from './DashboardTab/EditRequestForm';
 import Modal from './DashboardTab/Modal';
+import ApiService from '../../core/services/api.service';
+import ServerUrl from '../../core/constants/serverUrl.constant';  
+import { APPLICATION_CONSTANTS } from '../../core/constants/app.constant';
 
+// Mock data for initial state
 export default function AdminDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -22,6 +26,7 @@ export default function AdminDashboard() {
   const [viewMode, setViewMode] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [assignedJobsFilter, setAssignedJobsFilter] = useState('assigned');
+  const [statusCards, setStatusCards] = useState([]);
 
   const newRequestsRef = useRef(null);
   const assignedJobsRef = useRef(null);
@@ -76,57 +81,74 @@ export default function AdminDashboard() {
     }
   };
 
-  const statusCards = [
-    {
-      label: 'New Requests',
-      count: requests.filter((r) => r.status === 'NEW').length,
-      icon: <Assignment fontSize="medium" />,
-      ref: newRequestsRef,
-      description: 'Requests awaiting assignment',
-    },
-    {
-      label: 'Assigned Jobs',
-      count: requests.filter((r) => r.status === 'assigned').length,
-      icon: <Engineering fontSize="medium" />,
-      ref: assignedJobsRef,
-      description: 'Jobs in progress',
-    },
-    {
-      label: 'Completed Jobs',
-      count: requests.filter((r) => r.status === 'completed').length,
-      icon: <CheckCircle fontSize="medium" />,
-      ref: completedJobsRef,
-      description: 'Jobs completed',
-    },
-    {
-      label: 'All Requests',
-      count: requests.length,
-      icon: <Badge fontSize="medium" />,
-      ref: allRequestsRef,
-      description: 'Total service requests',
-    },
-    {
-      label: 'Active Engineers',
-      count: engineers.filter((e) => e.active).length,
-      icon: <Person fontSize="medium" />,
-      ref: engineersRef,
-      description: 'Engineers available',
-    },
-    {
-      label: 'Upcoming Schedule',
-      count: requests.filter((r) => new Date(r.date) > new Date()).length,
-      icon: <CalendarToday fontSize="medium" />,
-      ref: calendarRef,
-      description: 'Scheduled appointments',
-    },
-  ];
+  useEffect(() => {
+  const fetchRequestCounts = async () => {
+    try {
+      const response = await new ApiService().apipost(ServerUrl.API_GET_REQUEST_COUNT);
+      if (response?.data?.data) {
+        const c = response.data.data;
+        setStatusCards([
+          {
+            label: 'New Requests',
+            count: c.newRequests,
+            icon: <Assignment fontSize="medium" />,
+            ref: newRequestsRef,
+            description: 'Requests awaiting assignment',
+          },
+          {
+            label: 'Assigned Jobs',
+            count: c.assignedJobs,
+            icon: <Engineering fontSize="medium" />,
+            ref: assignedJobsRef,
+            description: 'Jobs in progress',
+          },
+          {
+            label: 'Completed Jobs',
+            count: c.completedJobs,
+            icon: <CheckCircle fontSize="medium" />,
+            ref: completedJobsRef,
+            description: 'Jobs completed',
+          },
+          {
+            label: 'All Requests',
+            count: c.allRequests,
+            icon: <Badge fontSize="medium" />,
+            ref: allRequestsRef,
+            description: 'Total service requests',
+          },
+          {
+            label: 'Active Engineers',
+            count: c.activeEngineers,
+            icon: <Person fontSize="medium" />,
+            ref: engineersRef,
+            description: 'Engineers available',
+          },
+          {
+            label: 'Upcoming Schedule',
+            count: c.upcomingSchedule,
+            icon: <CalendarToday fontSize="medium" />,
+            ref: calendarRef,
+            description: 'Scheduled appointments',
+          },
+        ]);
+      } else {
+        console.error('Failed to fetch request counts');
+      }
+    } catch (error) {
+      console.error('Error fetching request counts:', error);
+    }
+  };
+  fetchRequestCounts();
+}, []);
+
+
 
     return (
     <div className="bg-[#F1FFE0] min-h-screen p-2 sm:p-3">
       <Typography
         variant="h4"
         component="h1"
-        className="font-semibold mb-4 text-center text-[#2E7D32]"
+        className="font-body mb-4 text-center text-[#2E7D32]"
       >
       </Typography>
 
@@ -146,7 +168,7 @@ export default function AdminDashboard() {
                 </div>
                 <Typography
                   variant="h4"
-                  className="font-bold text-[#2E7D32] text-2xl"
+                  className="font-heading text-[#2E7D32] text-2xl"
                 >
                   {card.count}
                 </Typography>
@@ -154,7 +176,7 @@ export default function AdminDashboard() {
               <div className="mt-auto">
                 <Typography
                   variant="h6"
-                  className="font-semibold text-gray-800 text-lg mb-1"
+                  className="font-body text-gray-800 text-lg mb-1"
                 >
                   {card.label}
                 </Typography>

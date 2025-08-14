@@ -77,12 +77,26 @@ const NewRequests = ({ setViewMode }) => {
   useEffect(() => {
     let isMounted = true; // prevents state updates after unmount
 
-    const fetchPDIRequests = async () => {
+    fetchPDIRequests(isMounted);
+
+    return () => {
+      isMounted = false; // cleanup on unmount
+    };
+  }, []);
+
+
+  useEffect(() => {
+    if(!modalOpen) {
+      fetchPDIRequests(true);
+    }
+  },[modalOpen]);
+
+   const fetchPDIRequests = async (isMounted) => {
       try {
         setLoading(true); // optional: show loader
 
         const api = new ApiService();
-        const { data } = await api.apipost(ServerUrl.API_GET_ALLPDIREQUEST_STATUSES,[APPLICATION_CONSTANTS.REQUEST_STATUS.NEW]);
+        const { data } = await api.apipost(ServerUrl.API_GET_ALL_PDIREQUEST_STATUSES,[APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value]);
 
         if (isMounted && Array.isArray(data?.data)) {
           setRequests(data.data);
@@ -99,14 +113,6 @@ const NewRequests = ({ setViewMode }) => {
         }
       }
     };
-
-    fetchPDIRequests();
-
-    return () => {
-      isMounted = false; // cleanup on unmount
-    };
-  }, []);
-
 
   const handleAssignClick = (request) => {
     setSelectedRequest(request);

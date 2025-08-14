@@ -16,6 +16,7 @@ FiLogOut,
 export const sidebarLinks = {
   customer: [
     { label: "Recent Requests", to: "recent-request", icon: FiFileText },
+    { label: "All Requests", to: "all-request", icon: FiCheckCircle },
     { label: "Completed Requests", to: "completed-request", icon: FiCheckCircle },
     { label: "Contact Support", to: "contact-support", icon: FiMessageCircle },
   ],

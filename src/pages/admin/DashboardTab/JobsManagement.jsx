@@ -283,7 +283,7 @@ const JobsManagement = ({
             (r) => (
               <>
                 <StyledTableCell>{r.bookingId}</StyledTableCell>
-                <StyledTableCell>{r.name}</StyledTableCell>
+                <StyledTableCell>{r.customerName}</StyledTableCell>
                 {assignedJobsFilter === "assigned" ? (
                   <>
                     <StyledTableCell>

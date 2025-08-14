@@ -75,7 +75,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 // import React, { useState, useEffect } from "react";
 
-const AssignEngineer = ({ request, onAssign, onBack }) => {
+const AssignEngineer = ({ request, onAssign, onBack, setModalOpen }) => {
   const [engineers, setEngineers] = useState([]);
   const [selectedEngineer, setSelectedEngineer] = useState(null);
   const [locationFilter, setLocationFilter] = useState([]);
@@ -145,6 +145,7 @@ const AssignEngineer = ({ request, onAssign, onBack }) => {
 
         if (response.data) {
           alert('Engineer assigned successfully!');
+          setModalOpen(false);
           // setModalOpen(false);
           // if (onAssign) onAssign(payload);
         } else {

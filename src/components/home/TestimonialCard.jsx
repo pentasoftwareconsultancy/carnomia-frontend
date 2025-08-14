@@ -20,7 +20,7 @@ function TestimonialCard() {
     {
       name: "Onkar Basawane",
       feedback:
-        "Quick booking, on-time visit, and a full report by evening. I'd definitely recommend Drivesta to anyone buying a new car.",
+        "Quick booking, on-time visit, and a full report by evening. I'd definitely recommend Carnomia to anyone buying a new car.",
       stars: 5,
       img: "https://randomuser.me/api/portraits/men/55.jpg",
     },
@@ -34,7 +34,7 @@ function TestimonialCard() {
     {
       name: "Anjali Patil",
       feedback:
-        "Drivesta made my first car purchase stress-free. Their attention to detail is unmatched. Highly recommended!",
+        "Carnomia made my first car purchase stress-free. Their attention to detail is unmatched. Highly recommended!",
       stars: 5,
       img: "https://randomuser.me/api/portraits/women/65.jpg",
     },
@@ -62,7 +62,7 @@ function TestimonialCard() {
   ];
 
   const Testimonials = ({ item }) => (
-    <div className="p-4 rounded-2xl mx-4 shadow hover:shadow-lg transition-all duration-200 w-72 shrink-0 bg-[#eefcdf] border border-[#81da5b]">
+    <div className="p-4 rounded-2xl mx-4 shadow hover:shadow-lg transition-all duration-200 w-72 shrink-0 bg-primary border border-button">
       <div className="flex gap-2 items-center">
         <img
           className="size-11 rounded-full border-2 border-white ring-2 ring-yellow-400"
@@ -70,7 +70,7 @@ function TestimonialCard() {
           alt="User"
         />
         <div className="flex flex-col">
-          <p className="font-medium text-gray-800">{item.name}</p>
+          <p className="font-body text-gray-800">{item.name}</p>
           <div className="text-yellow-500 text-sm">
             {"★".repeat(item.stars)}
             {"☆".repeat(5 - item.stars)}
@@ -96,8 +96,8 @@ function TestimonialCard() {
         }
       `}</style>
 
-      <section className="bg-[#f1f8e9] py-12">
-        <h2 className="text-2xl  font-bold text-center mb-10 text-gray-800">
+      <section className="bg-primary py-12">
+        <h2 className="text-2xl  font-heading text-center mb-10 text-gray-800">
           What Our Customers Say
         </h2>
 

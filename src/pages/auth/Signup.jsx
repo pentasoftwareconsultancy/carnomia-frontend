@@ -74,14 +74,14 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-[#f1f8e9] px-4 py-10">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-primary px-4 py-10">
       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div className="text-center md:text-left px-2 sm:px-6">
           <h1 className="text-3xl font-extrabold leading-snug">
             We Inspect Before You Invest!, <br />
             <span className="text-green-500">Certified insights for your next car.!</span>
           </h1>
-          <p className="mt-2 text-xl font-semibold">Go Beyond Checklists!</p>
+          <p className="mt-2 text-xl font-body">Go Beyond Checklists!</p>
           <p className="text-gray-600 text-sm">
             Beyond Visual Assessment | 3700+ Sensing Areas
           </p>
@@ -89,7 +89,7 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-white p-6 rounded-2xl shadow-md mx-auto">
-          <h2 className="text-3xl font-bold text-green-700 text-center">Signup</h2>
+          <h2 className="text-3xl font-heading text-green-700 text-center">Signup</h2>
 
           <input
             type="text"
@@ -149,7 +149,7 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={() => setShowTerms(true)}
-                className="font-semibold text-black underline"
+                className="font-body text-black underline"
               >
                 Terms & Conditions
               </button>
@@ -159,7 +159,7 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-500 text-white font-semibold py-2 rounded hover:bg-green-600"
+            className="w-full bg-green-500 text-white font-body py-2 rounded hover:bg-green-600"
           >
             {loading ? "Processing..." : "Proceed"}
           </button>
@@ -251,20 +251,20 @@ export default Signup;
 //   };
 
 //   return (
-//     <div className="min-h-screen flex flex-col justify-center items-center bg-[#f1f8e9] px-4 py-10">
+//     <div className="min-h-screen flex flex-col justify-center items-center bg-primary px-4 py-10">
 //       <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 //         <div className="text-center md:text-left px-2 sm:px-6">
 //           <h1 className="text-3xl font-extrabold leading-snug">
 //             We Inspect Before You Invest!, <br />
 //             <span className="text-green-500">Certified insights for your next car.!</span>
 //           </h1>
-//           <p className="mt-2 text-xl font-semibold">Go Beyond Checklists!</p>
+//           <p className="mt-2 text-xl font-body">Go Beyond Checklists!</p>
 //           <p className="text-gray-600 text-sm">Beyond Visual Assessment | 3700+ Sensing Areas</p>
 //           <img src={Car} alt="Car" className="mt-2 max-w-[500px] mx-auto" />
 //         </div>
 
 //         <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-[#f9fcf4] p-6 rounded-2xl shadow-md mx-auto">
-//           <h2 className="text-3xl font-bold text-green-700 text-center">Signup</h2>
+//           <h2 className="text-3xl font-heading text-green-700 text-center">Signup</h2>
 
 //           <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} required className="w-full border rounded px-4 py-2" />
 
@@ -285,14 +285,14 @@ export default Signup;
 //             <input type="checkbox" id="agree" checked={agreed} onChange={() => setAgreed(!agreed)} className="mt-1" />
 //             <label htmlFor="agree" className="text-sm text-gray-600">
 //               I agree to the{" "}
-//               <button type="button" onClick={() => setShowTerms(true)} className="font-semibold text-black underline">
+//               <button type="button" onClick={() => setShowTerms(true)} className="font-body text-black underline">
 //                 Terms & Conditions
 //               </button>
 //             </label>
 //           </div>
 //           {errors.agreed && <p className="text-red-500 text-sm">{errors.agreed}</p>}
 
-//           <button type="submit" className="w-full bg-green-500 text-white font-semibold py-2 rounded hover:bg-green-600">
+//           <button type="submit" className="w-full bg-green-500 text-white font-body py-2 rounded hover:bg-green-600">
 //             {loading ? "Processing..." : "Proceed"}
 //           </button>
 
