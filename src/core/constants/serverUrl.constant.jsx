@@ -34,13 +34,13 @@ class ServerUrl {
     static API_GET_ALLPDIREQUEST = ServerUrl.API_MODULE_PDI + "/request";
     static API_GET_REQUEST_BY_ID = ServerUrl.API_MODULE_PDI + "/request-by-id";
     static API_GET_INSPECTION_UPDATE = ServerUrl.API_MODULE_PDI + "/request/updateInspectionById";
-    static API_GET_ALL_PDIREQUEST_STATUSES = ServerUrl.API_MODULE_PDI + "/requests/statuses";
     static API_GET_ALL_REQUESTS_BY_ENGINEER = ServerUrl.API_MODULE_PDI + "/request-by-engineer";
     static API_ASSIGN_ENGINEER = ServerUrl.API_MODULE_PDI + "/request/assign";
     static API_WITHVEHICLE_DATA = ServerUrl.API_MODULE_PDI + "/PDIRequestwithvehicledata";
     static API_GET_REQUEST_COUNT = ServerUrl.API_MODULE_PDI + "/requests/requests-count";
     static API_GET_RECENT_REQUEST_BY_CUSTOMER = ServerUrl.API_MODULE_PDI + "/customer/recent";
-    static API_UPDATE_PAYMENT_STATUS = ServerUrl.API_MODULE_PDI + "/request";
+    static API_GET_ALL_PDIREQUEST_STATUSES = ServerUrl.API_MODULE_PDI + "/requests/statuses";
+    static API_UPDATE_PAYMENT_STATUS = ServerUrl.API_MODULE_PDI + "/request/payment-status";
 
 }
 export default ServerUrl;

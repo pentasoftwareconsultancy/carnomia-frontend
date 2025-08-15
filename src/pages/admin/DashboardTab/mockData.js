@@ -134,3 +134,17 @@ export const timeSlots = [
   "1:00 PM - 4:00 PM",
   "4:00 PM - 7:00 PM"
 ];
+
+
+  // const updatePaymentStatus = async (payment) => {
+  //   const bookingId = payment._id;
+  //   await new ApiService().apiput(ServerUrl.API_UPDATE_PAYMENT_STATUS + '/' + bookingId + '/payment-status', { paymentStatus: APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value })
+  //   alert('Payment status updated successfully');
+  // };
+
+  //   // setPayments(payments.map(p => p.bookingId === bookingId ? { ...p, paymentStatus: 'Paid' } : p));
+
+  //   (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
+  //       formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
+  //       formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
+  //       formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value )

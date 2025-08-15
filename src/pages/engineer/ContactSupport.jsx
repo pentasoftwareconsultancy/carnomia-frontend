@@ -114,7 +114,7 @@ const ContactSupport = () => {
           transition={{ duration: 0.6 }}
           className="w-full lg:w-1/2 bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 sm:p-8"
         >
-          <h2 className="text-xl sm:text-2xl font-heading text-green-900 mb-6">Inquiry Form</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-6">Inquiry Form</h2>
           <form ref={formRef} onSubmit={sendEmail} className="space-y-4">
             <div>
               <label className="block font-body mb-1 text-sm">

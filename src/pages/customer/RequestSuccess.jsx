@@ -60,7 +60,7 @@ const RequestSuccess = () => {
         <div className="flex justify-end">
           <button
             onClick={() => navigate("/customer/dashboard")}
-            className="bg-green-800 hover:bg-green-900 text-white font-heading px-6 py-3 rounded-full shadow-lg transition"
+            className="bg-green-800 hover:bg-green-900 text-white font-bold px-6 py-3 rounded-full shadow-lg transition"
           >
             Go to your Dashboard
           </button>

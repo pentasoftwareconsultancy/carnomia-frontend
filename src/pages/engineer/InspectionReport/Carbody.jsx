@@ -111,7 +111,7 @@ function BodyPanelCard({ index, label }) {
         index > 1 ? "mt-8" : ""
       }`}
     >
-      {index === 1 && <h2 className="text-lg font-heading mb-4">Body Panels</h2>}
+      {index === 1 && <h2 className="text-lg font-bold mb-4">Body Panels</h2>}
 
       <h3 className="font-medium mb-3">
         {index}. {label}
@@ -228,7 +228,7 @@ function BodyPanelCard({ index, label }) {
             className="max-w-full max-h-full rounded-lg shadow-lg"
           />
           <button
-            className="absolute top-4 right-4 text-white text-4xl font-heading"
+            className="absolute top-4 right-4 text-white text-4xl font-bold"
             onClick={() => setPreviewIdx(null)}
           >
             &times;

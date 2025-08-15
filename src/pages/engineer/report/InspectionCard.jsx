@@ -27,7 +27,7 @@ const InspectionCard = ({
 }) => {
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full">
-      <h3 className="text-lg sm:text-xl font-heading mb-4 text-white text-left">
+      <h3 className="text-lg sm:text-xl font-bold mb-4 text-white text-left">
         {`${index + 1}. ${capitalizeFirstWord(title.replace(/([A-Z])/g, ' $1'))}`}
       </h3>
       

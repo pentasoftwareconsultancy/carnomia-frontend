@@ -1,56 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { jsPDF } from 'jspdf';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { FiEye, FiDownload, FiCheck, FiX } from "react-icons/fi"; // Feather icons
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import ApiService from "../../core/services/api.service";
 import ServerUrl from "../../core/constants/serverUrl.constant";
-import { APPLICATION_CONSTANTS } from '../../core/constants/app.constant';
+import { APPLICATION_CONSTANTS } from "../../core/constants/app.constant";
 
+// Invoice generator
 const generateInvoicePdf = (payment) => {
+  if (!payment) return;
+
   const doc = new jsPDF();
-
-  const invoiceGreen = [60, 184, 120]; // #3cb878
-  const darkBlue = [27, 43, 75]; // #1b2b4b
+  const invoiceGreen = [60, 184, 120];
+  const darkBlue = [27, 43, 75];
   const textGray = [100, 100, 100];
-  const accentBlue = [70, 130, 180]; // #4682b4 for subtle gradient effect
+  const newGreen = [125, 217, 87];
 
-  // Header with gradient effect
+  // Header
   doc.setFillColor(...darkBlue);
   doc.rect(0, 0, 210, 50, "F");
-  doc.setFillColor(...accentBlue);
-  doc.rect(0, 45, 210, 5, "F"); // Subtle accent line
 
-  doc.setFillColor(...invoiceGreen);
-  doc.triangle(150, 0, 210, 0, 210, 30);
-
-  // Logo (increased size)
+  // Logo
   try {
-    const logo = '/carnomia.png';
-    doc.addImage(logo, 'PNG', 15, 8, 35, 35); // Increased width from 25 to 35, height adjusted
+    doc.addImage("/carnomia.png", "PNG", 6, 1, 70, 37);
   } catch {
     doc.setFillColor(...invoiceGreen);
-    doc.circle(32.5, 25.5, 17.5, "F"); // Adjusted for larger logo
+    doc.circle(35, 25, 20, "F");
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18); // Slightly larger for visibility
+    doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("C", 29, 28);
+    doc.text("C", 33, 28);
   }
 
-  // Company Name and Tagline
-  doc.setFont("times", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(255, 255, 255);
-  doc.text("Carnomia", 55, 22);
+  // Slogan
   doc.setFont("times", "italic");
-  doc.setFontSize(11);
-  doc.text("We Inspect Before We Invest", 55, 30);
+  doc.setFontSize(16);
+  doc.setTextColor(...newGreen);
+  doc.text("We Inspect Before We Invest", 8, 35);
 
-  // INVOICE title
+  // Invoice title
   doc.setFont("times", "bold");
-  doc.setFontSize(28); // Slightly smaller for elegance
+  doc.setFontSize(28);
   doc.setTextColor(...invoiceGreen);
-  doc.text("INVOICE", 195, 30, { align: "right" });
+  doc.text("INVOICE", 195, 27, { align: "right" });
 
-  // Separator line
+  // Separator
   doc.setDrawColor(...textGray);
   doc.setLineWidth(0.5);
   doc.line(15, 55, 195, 55);
@@ -60,85 +55,92 @@ const generateInvoicePdf = (payment) => {
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
   doc.text(`Booking ID: ${payment.bookingId}`, 195, 65, { align: "right" });
-  doc.text(`PDI Date: ${payment.pdiDate || 'N/A'}`, 195, 72, { align: "right" });
+  doc.text(`PDI Date: ${payment.pdiDate || "N/A"}`, 195, 72, {
+    align: "right",
+  });
 
-  // Invoice To & From
-  const startY = 85; // Increased spacing for better separation
-
+  // Invoice To
+  const startY = 85;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(...invoiceGreen);
   doc.text("Invoice To:", 15, startY);
 
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.text(payment.customerName, 15, startY + 10);
-
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...textGray);
   doc.text(`Phone: ${payment.customerMobile}`, 15, startY + 18);
-  doc.text(`Address: ${payment.address || 'N/A'}`, 15, startY + 26);
+  doc.text(`Address: ${payment.address || "N/A"}`, 15, startY + 26);
 
+  // Invoice From
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(...invoiceGreen);
   doc.text("Invoice From:", 195, startY, { align: "right" });
 
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.text("Carnomia", 195, startY + 10, { align: "right" });
-
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...textGray);
-  doc.text("Managing Director, Company Ltd.", 195, startY + 18, { align: "right" });
-  doc.text("Phone: +123 4567 8910", 195, startY + 26, { align: "right" });
-  doc.text("Email: example@email.com", 195, startY + 34, { align: "right" });
+  doc.text("Managing Director, Company Ltd.", 195, startY + 18, {
+    align: "right",
+  });
+  doc.text("Phone: +91 7385978109", 195, startY + 26, { align: "right" });
+  doc.text("Email: example@carnomia.com", 195, startY + 34, { align: "right" });
 
-  // Vehicle and Payment Details Table
-  const tableStartY = startY + 50; // Increased spacing
-  const tableData = [[
-    `${payment.brand || '-'} ${payment.model || '-'} ${payment.variant || '-'}`,
-    `₹${payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-    payment.paymentStatus || 'N/A'
-  ]];
-
+  // Vehicle table
+  const tableStartY = startY + 50;
   autoTable(doc, {
     startY: tableStartY,
-    head: [['Vehicle', 'Amount', 'Payment Status']],
-    body: tableData,
-    theme: 'grid',
+    head: [["Vehicle", "Amount", "Payment Status"]],
+    body: [
+      [
+        `${payment.brand || "-"} ${payment.model || "-"} ${
+          payment.variant || "-"
+        }`,
+        `₹${payment.amount.toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`,
+        payment.paymentStatus || "N/A",
+      ],
+    ],
+    theme: "grid",
     headStyles: {
       fillColor: invoiceGreen,
       textColor: [255, 255, 255],
-      fontStyle: 'bold',
-      fontSize: 11, // Slightly larger for clarity
-      cellPadding: { top: 10, bottom: 10, left: 6, right: 6 }
+      fontStyle: "bold",
+      fontSize: 11,
     },
-    bodyStyles: {
-      textColor: [0, 0, 0],
-      fontSize: 10,
-      cellPadding: { top: 8, bottom: 8, left: 6, right: 6 }
-    },
+    bodyStyles: { textColor: [0, 0, 0], fontSize: 10 },
     columnStyles: {
-      0: { cellWidth: 80, halign: 'left' },
-      1: { cellWidth: 50, halign: 'right' },
-      2: { cellWidth: 45, halign: 'center' }
+      0: { cellWidth: 90 },
+      1: { cellWidth: 45, halign: "center" },
+      2: { cellWidth: 45, halign: "center" },
     },
-    alternateRowStyles: { fillColor: [245, 245, 245] }, // Softer alternate row color
-    margin: { left: 15, right: 15 }
+    margin: { left: 15, right: 15 },
   });
 
   // Total
-  const finalY = doc.lastAutoTable.finalY + 20; // Increased spacing
+  const finalY = doc.lastAutoTable.finalY + 10;
   doc.setFillColor(...invoiceGreen);
-  doc.rect(125, finalY - 5, 70, 14, "F"); // Background for total
+  doc.rect(195 - 45, finalY, 45, 10, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(255, 255, 255);
-  doc.text("Total:", 130, finalY + 5);
-  doc.text(`₹${payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 190, finalY + 5, { align: "right" });
+  doc.text(
+    `Total: ₹${payment.amount.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`,
+    195 - 42,
+    finalY + 7
+  );
 
   // Footer
   doc.setFont("helvetica", "italic");
@@ -150,198 +152,196 @@ const generateInvoicePdf = (payment) => {
 };
 
 const PaymentManagement = () => {
+  const { id } = useParams();
   const [payments, setPayments] = useState([]);
-  const [filteredPayments, setFilteredPayments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedPayment, setSelectedPayment] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
 
-  // Fetch data from backend
+  // Fetch payments
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const res = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
-        const data = res?.data?.data || [];
-        // Map backend data to match required fields
-        const mappedData = data.map(item => ({
-          ...item,
-          pdiDate: item.pdiDate || 'N/A', 
-        }));
-        setPayments(mappedData);
-        setFilteredPayments(mappedData);
+        const url = id
+          ? `${ServerUrl.API_GET_REQUEST_BY_ID}/${id}`
+          : ServerUrl.API_GET_ALLPDIREQUEST;
+        const res = await new ApiService().apiget(url);
+        const data = id ? [res.data.data] : res.data.data || [];
+
+        const mapped = data
+
+          .map((item) => ({
+            id: item._id,
+            bookingId: item.bookingId || "N/A",
+            customerName: item.customerName || "Unknown",
+            customerMobile: item.customerMobile || "N/A",
+            address: item.address || item.address || "N/A",
+            brand: item.brand || "-",
+            model: item.model || "-",
+            variant: item.variant || "-",
+            amount: item.amount || 0,
+            pdiDate: item.date || "N/A",
+            status: item.status?.toUpperCase() || "PENDING", // normalize status
+            paymentStatus: item.paymentStatus || "Unpaid",
+            paymentMode: item.paymentMode || "N/A",
+          }))
+
+          .filter(
+            (p) => p.status === "ADMIN_APPROVED" || p.status === "COMPLETED"
+          );
+
+        setPayments(mapped);
       } catch (err) {
-        console.error('Error fetching payments:', err);
+        console.error("Error fetching payments:", err);
         setPayments([]);
-        setFilteredPayments([]);
       }
     };
+
     fetchPayments();
-  }, []);
+  }, [id]);
 
-  // Filter payments based on search
-  useEffect(() => {
-    const term = searchTerm.toLowerCase();
-    const results = payments.filter(p =>
-      p.bookingId.toLowerCase().includes(term) ||
-      p.customerName.toLowerCase().includes(term) ||
-      p.customerMobile.includes(term)
-    );
-    setFilteredPayments(results);
-  }, [searchTerm, payments]);
+  const filteredPayments = payments.filter(
+    (p) =>
+      p.bookingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.customerMobile.includes(searchTerm)
+  );
 
+  // Update payment & request status
   const updatePaymentStatus = async (payment) => {
-    const bookingId = payment._id;
-    await new ApiService().apiput(ServerUrl.API_UPDATE_PAYMENT_STATUS + '/' + bookingId + '/payment-status', { paymentStatus: APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value })
-    alert('Payment status updated successfully');
-    setPayments(payments.map(p => p.bookingId === bookingId ? { ...p, paymentStatus: 'Paid' } : p));
-  };
-
-  const fetchPayments = async () => {
     try {
-      const res = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
-      const data = res?.data?.data || [];
-      const mappedData = data.map(item => ({
-        bookingId: item.bookingId || 'N/A',
-        customerName: item.name || 'Unknown',
-        customerMobile: item.customerMobile || 'N/A',
-        address: item.address || item.address || 'N/A',
-        brand: item.brand || '-',
-        model: item.model || '-',
-        variant: item.variant || '-',
-        amount: item.amount || 0,
-        pdiDate: item.pdiDate || 'N/A',
-        paymentStatus: item.status === 'completed' ? 'Paid' : 'Unpaid'
-      }));
-      setPayments(mappedData);
-      setFilteredPayments(mappedData);
+      const requestId = payment.id;
+
+      // Determine new request status
+      const newRequestStatus =
+        payment.status ===
+        APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value
+          ? APPLICATION_CONSTANTS.REQUEST_STATUS.COMPLETED.value
+          : payment.status; // keep current if not ADMIN_APPROVED
+
+      // Call backend API to update both paymentStatus and request status
+      const res = await new ApiService().apiput(
+        `${ServerUrl.API_UPDATE_PAYMENT_STATUS}/${requestId}`,
+        {
+          paymentStatus: APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value,
+          status: newRequestStatus,
+        }
+      );
+
+      if (res.data && res.data.data) {
+        alert("Payment and request status updated successfully");
+
+        // Update local state for table
+        setPayments((prev) =>
+          prev.map((p) =>
+            p.id === requestId
+              ? {
+                  ...p,
+                  paymentStatus:
+                    APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value,
+                  status: newRequestStatus,
+                }
+              : p
+          )
+        );
+
+        // Update local state for modal if open
+        if (selectedPayment?.id === requestId) {
+          setSelectedPayment((prev) => ({
+            ...prev,
+            paymentStatus: APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value,
+            status: newRequestStatus,
+          }));
+        }
+
+        console.log(
+          `Payment marked as PAID and request status updated to ${newRequestStatus}`
+        );
+      } else {
+        alert("Failed to update payment/request status");
+      }
     } catch (err) {
-      console.error('Error fetching payments:', err);
-      setPayments([]);
-      setFilteredPayments([]);
+      console.error("Error updating payment/request status:", err);
+      alert("Failed to update payment/request status");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#f1f8e9] p-4 sm:p-6 md:p-8">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-800 mb-6">
+      <h1 className="text-3xl font-bold text-green-800 mb-6">
         Payment Management
       </h1>
 
-      <div className="bg-white rounded-lg shadow-lg mb-6">
-        <div className="flex flex-col sm:flex-row items-center p-4 gap-4">
-          <div className="relative w-full sm:flex-1">
-            <input
-              type="text"
-              placeholder="Search payments..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <button
-            onClick={() => fetchPayments()}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-          >
-            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5m6 0h5v-5m-5 5v5h-5" />
-            </svg>
-            Refresh
-          </button>
-        </div>
+      <div className="mb-6 flex flex-col sm:flex-row items-center gap-4">
+        <input
+          type="text"
+          placeholder="Search payments..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
         <table className="w-full text-left text-sm sm:text-base">
           <thead className="bg-green-50">
             <tr>
-              <th className="p-3 sm:p-4">Customer Details</th>
-              <th className="p-3 sm:p-4">Booking ID</th>
-              <th className="p-3 sm:p-4">Vehicle</th>
-              <th className="p-3 sm:p-4">Amount</th>
-              <th className="p-3 sm:p-4">Payment Status</th>
-              <th className="p-3 sm:p-4">Actions</th>
+              <th className="p-3">Customer</th>
+              <th className="p-3">Booking ID</th>
+              <th className="p-3">Vehicle</th>
+              <th className="p-3">Amount</th>
+              <th className="p-3">Payment Status</th>
+              <th className="p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredPayments.map((payment) => (
-              <tr key={payment.bookingId} className="border-b hover:bg-gray-50">
-                <td className="p-3 sm:p-4">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-600 text-white rounded-full flex items-center justify-center mr-3">
-                      {payment.customerName ? payment.customerName.charAt(0) : ''}
-                    </div>
-                    <div>
-                      <p className="font-medium">{payment.customerName}</p>
-                      <p className="text-gray-500 text-xs sm:text-sm">{payment.customerMobile}</p>
-                    </div>
+            {filteredPayments.map((p) => (
+              <tr key={p.id} className="border-b hover:bg-gray-50">
+                <td className="p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center">
+                    {p.customerName.charAt(0)}
+                  </div>
+                  <div>
+                    <p>{p.customerName}</p>
+                    <p className="text-gray-500 text-sm">{p.customerMobile}</p>
                   </div>
                 </td>
-                <td className="p-3 sm:p-4">{payment.bookingId}</td>
-                <td className="p-3 sm:p-4">
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{payment.brand}</span>
-                    <span className="text-gray-600 text-sm">{payment.model}</span>
-                    <span className="text-gray-500 text-sm">{payment.variant}</span>
-                  </div>
+                <td className="p-3">{p.bookingId}</td>
+                <td className="p-3">
+                  {p.brand} {p.model} {p.variant}
                 </td>
-                <td className="p-3 sm:p-4">₹{payment.amount}</td>
-                <td className="p-3 sm:p-4">
+                <td className="p-3">₹{p.amount.toLocaleString("en-IN")}</td>
+                <td className="p-3">
                   <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                      payment.paymentStatus === APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                      p.paymentStatus === "Paid"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {payment.paymentStatus === APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value ? (
-                      <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01" />
-                      </svg>
-                    )}
-                    {/* {payment.paymentStatus} */}
-                    {APPLICATION_CONSTANTS.PAYMENT_STATUS[payment.paymentStatus ? payment.paymentStatus : APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value].label }
+                    {p.paymentStatus}
                   </span>
                 </td>
-                <td className="p-3 sm:p-4">
-                  <div className="flex space-x-2">
+                <td className="p-3 flex space-x-2">
+                  <button
+                    onClick={() => setSelectedPayment(p)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                   <FiEye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => generateInvoicePdf(p)}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                  <FiDownload className="w-5 h-5" />
+                  </button>
+                  {p.paymentStatus !== "Paid" && (
                     <button
-                      onClick={() => {
-                        setSelectedPayment(payment);
-                        setOpenDialog(true);
-                      }}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => generateInvoicePdf(payment)}
-                      className="text-gray-600 hover:text-gray-800"
-                    >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => updatePaymentStatus(payment)}
+                      onClick={() => updatePaymentStatus(p)}
                       className="text-green-600 hover:text-green-800"
                     >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                      </svg>
+                    <FiCheck className="w-5 h-5" />
                     </button>
-                  </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -349,116 +349,65 @@ const PaymentManagement = () => {
         </table>
       </div>
 
-     {selectedPayment && openDialog && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-    {/* Blurred & dimmed background */}
-    <div className="absolute inset-0 bg-black/20 backdrop-blur-lg"></div>
-
-    {/* Modal content */}
-    <div className="relative bg-white rounded-lg max-w-lg w-full shadow-xl z-10">
-      {/* Header */}
-      <div className="bg-green-800 text-white p-4 rounded-t-lg">
-        <h2 className="text-lg sm:text-xl font-bold">Payment Details</h2>
-      </div>
-
-      {/* Body */}
-      <div className="p-6 space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">
-            {selectedPayment.customerName} - {selectedPayment.bookingId}
-          </h3>
-          <p className="text-sm text-gray-500">Invoice #: {selectedPayment.bookingId}</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium text-gray-700">Customer Name:</p>
-            <p className="text-sm text-gray-600">{selectedPayment.customerName}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Mobile:</p>
-            <p className="text-sm text-gray-600">{selectedPayment.customerMobile}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Booking ID:</p>
-            <p className="text-sm text-gray-600">{selectedPayment.bookingId}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Address:</p>
-            <p className="text-sm text-gray-600">{selectedPayment.address}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Vehicle:</p>
-            <p className="text-sm text-gray-600">{`${selectedPayment.brand} ${selectedPayment.model} ${selectedPayment.variant}`}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Amount:</p>
-            <p className="text-sm text-gray-600">₹{selectedPayment.amount.toLocaleString('en-IN')}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">PDI Date:</p>
-            <p className="text-sm text-gray-600">{selectedPayment.pdiDate}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Payment Status:</p>
-            <span
-              className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${
-                selectedPayment.paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-              }`}
-            >
-              {selectedPayment.paymentStatus === 'Paid' ? (
-                <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01" />
-                </svg>
+      {selectedPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+          <div className="relative bg-white rounded-lg max-w-lg w-full shadow-xl z-10 p-6">
+            <h2 className="text-lg font-bold mb-4">
+              {selectedPayment.customerName} - {selectedPayment.bookingId}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <p>
+                <strong>Mobile:</strong> {selectedPayment.customerMobile}
+              </p>
+              <p>
+                <strong>Address:</strong> {selectedPayment.address}
+              </p>
+              <p>
+                <strong>Vehicle:</strong> {selectedPayment.brand}{" "}
+                {selectedPayment.model} {selectedPayment.variant}
+              </p>
+              <p>
+                <strong>Amount:</strong> ₹
+                {selectedPayment.amount.toLocaleString("en-IN")}
+              </p>
+              <p>
+                <strong>PDI Date:</strong> {selectedPayment.date}
+              </p>
+              <p>
+                <strong>Payment Status:</strong> {selectedPayment.paymentStatus}
+              </p>
+              <p>
+                <strong>Request Status:</strong> {selectedPayment.status}
+              </p>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => generateInvoicePdf(selectedPayment)}
+                className="px-4 py-2 bg-green-600 text-white rounded-md"
+              >
+              <FiDownload className="w-5 h-5" />
+              </button>
+              {selectedPayment.paymentStatus !==
+                APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value && (
+                <button
+                  onClick={() => updatePaymentStatus(selectedPayment)}
+                  className="px-4 py-2 border border-green-600 text-green-600 rounded-md flex items-center"
+                >
+                <FiCheck className="w-5 h-5" />
+                  Mark as Paid
+                </button>
               )}
-              {selectedPayment.paymentStatus}
-            </span>
+              <button
+                onClick={() => setSelectedPayment(null)}
+                className="px-4 py-2 border text-gray-600 rounded-md"
+              >
+               <FiX className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Actions */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => generateInvoicePdf(selectedPayment)}
-            className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-          >
-            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Download Invoice
-          </button>
-          <button
-            onClick={() => {
-              updatePaymentStatus(selectedPayment);
-              setOpenDialog(false);
-            }}
-            className="flex items-center justify-center px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50 transition"
-          >
-            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Mark as Paid
-          </button>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="p-4 border-t bg-gray-50">
-        <button
-          onClick={() => setOpenDialog(false)}
-          className="w-full px-4 py-2 text-gray-600 rounded-md hover:bg-gray-100 transition"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+      )}
     </div>
   );
 };

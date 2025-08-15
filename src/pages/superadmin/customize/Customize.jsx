@@ -167,7 +167,7 @@ export default Customize
 //       animate={{ opacity: 1 }}
 //       className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10"
 //     >
-//       <h2 className="text-2xl font-heading mb-6 text-center">Add New Car</h2>
+//       <h2 className="text-2xl font-bold mb-6 text-center">Add New Car</h2>
 //       <form onSubmit={handleSubmit} className="space-y-4">
 //         <div>
 //           <label className="block font-body">Brand Name</label>

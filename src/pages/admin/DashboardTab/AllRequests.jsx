@@ -103,7 +103,7 @@ const AllRequests = ({ setSelectedRequest }) => {
           <div className="flex justify-between flex-col sm:flex-row gap-4 mb-4">
             <Typography
               variant="h6"
-              className="text-green-700 font-heading text-xl flex items-center gap-2"
+              className="text-green-700 font-bold text-xl flex items-center gap-2"
             >
               <FiFileText size={20} />
               All Requests
@@ -118,7 +118,7 @@ const AllRequests = ({ setSelectedRequest }) => {
               <TableHead>
                 <TableRow className="bg-white">
                   {['Booking ID', 'Customer', 'Status', 'address', 'Date', 'Slot', 'Actions'].map((head) => (
-                    <TableCell key={head} align="center" className="text-green-700 font-heading text-sm">
+                    <TableCell key={head} align="center" className="text-green-700 font-bold text-sm">
                       {head}
                     </TableCell>
                   ))}

@@ -12,7 +12,7 @@ export default function AboutUs() {
         }
       `}</style>
 
-      <h2 className="text-2xl  font-heading text-center mb-10 text-gray-800">
+      <h2 className="text-2xl  font-bold text-center mb-10 text-gray-800">
           About Us
       </h2>
 

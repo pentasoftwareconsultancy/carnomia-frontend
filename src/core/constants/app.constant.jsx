@@ -35,9 +35,9 @@ export const APPLICATION_CONSTANTS = {
         label: "Customer Paid",
         value: "CUSTOMER_PAID",
       },
-      COMEPLETED: {
+      COMPLETED: {
         label: "Completed",
-        value: "COMEPLETED",
+        value: "COMPLETED",
       },
       CLOSED: {
         label: "Closed",

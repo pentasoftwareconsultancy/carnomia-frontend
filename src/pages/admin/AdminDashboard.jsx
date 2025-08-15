@@ -168,7 +168,7 @@ export default function AdminDashboard() {
                 </div>
                 <Typography
                   variant="h4"
-                  className="font-heading text-[#2E7D32] text-2xl"
+                  className="font-bold text-[#2E7D32] text-2xl"
                 >
                   {card.count}
                 </Typography>

@@ -70,7 +70,7 @@ const EngineerManagement = () => {
               {columns.map((column) => (
                 <TableCell
                   key={column}
-                  className="text-green-800 font-heading text-center text-sm md:text-base"
+                  className="text-green-800 font-bold text-center text-sm md:text-base"
                 >
                   {column}
                 </TableCell>
@@ -86,7 +86,7 @@ const EngineerManagement = () => {
     <Box className="w-full p-0 bg-[#F1FFE0]">
       <div className="bg-white rounded-2xl shadow-lg w-full transition-all duration-300 hover:scale-[1.01] hover:shadow-xl">
         <div className="p-4 sm:p-6 md:p-8">
-          <h2 className="text-green-800 font-heading text-xl sm:text-2xl mb-4 animate-fadeIn">
+          <h2 className="text-green-800 font-bold text-xl sm:text-2xl mb-4 animate-fadeIn">
             Engineers Management
           </h2>
 

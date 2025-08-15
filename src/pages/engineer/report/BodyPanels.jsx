@@ -1,64 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
-import ToggleButton from "../report/ToggleButton";
 import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
 
 const BodyPanels = ({ data, onChange }) => {
-
   const labels = [
-    'bonnet',
-    "bonnet_issue",
-    
-    "bumper",
-    "bumper_issue",
-    
-    'front_left_fender',
-    "front_left_fender_issue",
-
-    'front_left_door',
-    "front_left_door_issue",
-    "front_left_door_ORVM_issue",
-    "front_left_door_cladding_issue",
-
-    'rear_left_door',
-    "rear_left_door_issue",
-    "rear_left_door_cladding_issue",
-    
-    'rear_left_quarter_panel',
-    "rear_left_quarter_panel_issue",
-    "rear_left_quarter_panel_cladding_issue",
-
-    "boot",
-    "boot_issue",
-    "boot_tailLightLeft_issue",
-    "boot_tailLightRight_issue",
-
-
-
-    "rear_bumper",
-    "rear_bumper_issue",
-
-    "rear_right_quarter_panel",
-    "rear_right_quarter_panel_issue",
-    "rear_right_quarter_panel_cladding_issue",
-
-    "rear_right_door",
-    "rear_right_door_issue",
-    "rear_right_door_cladding_issue",
-
-    "front_right_door",
-    "front_right_door_issue",
-    "front_right_door_ORVM_issue",
-    "front_right_door_cladding_issue",
-
-    "front_right_fender",
-    "front_right_fender_issue",
-    "front_right_fender_cladding_issue",
-
-    "roof",
-    "roof_issue",
-    
+    "bonnet_issue", "bumper_issue", "front_left_fender_issue", "front_left_door_issue",
+    "rear_left_door_issue", "rear_left_quarter_panel_issue", "boot_issue",
+    "rear_bumper_issue", "rear_right_quarter_panel_issue", "rear_right_door_issue",
+    "front_right_door_issue", "front_right_fender_issue", "roof_issue",
   ];
 
   const labelNames = {
@@ -77,10 +27,6 @@ const BodyPanels = ({ data, onChange }) => {
     roof_issue: "13. Roof",
   };
 
-  // Number of photos per panel
-  const photoCount = 5;
-
-  // Map panel issue key to corresponding imageUrls key
   const imageUrlKeysMap = {
     bonnet_issue: "bonnet_imageUrls",
     bumper_issue: "bumper_imageUrls",
@@ -97,68 +43,83 @@ const BodyPanels = ({ data, onChange }) => {
     roof_issue: "roof_imageUrls",
   };
 
-  // Initialize photos state with arrays from data, or empty arrays
-  const [photos, setPhotos] = useState(() => {
-    const initialPhotos = {};
-    Object.entries(imageUrlKeysMap).forEach(([issueKey, imageKey]) => {
-      initialPhotos[imageKey] = Array.isArray(data?.[imageKey]) ? data[imageKey] : Array(photoCount).fill(null);
-    });
-    return initialPhotos;
-  });
+  const photoCount = 5;
 
-  // Refs and camera states
-  const videoRefs = useRef({});
-  const [streamStates, setStreamStates] = useState({});
-  const [isCameraActive, setIsCameraActive] = useState({});
+  // Local state for panel values and photos
+  const [panelValues, setPanelValues] = useState({});
+  const [photos, setPhotos] = useState({});
   const [showDropdown, setShowDropdown] = useState(null);
   const [showPhoto, setShowPhoto] = useState(null);
+  const [isCameraActive, setIsCameraActive] = useState({});
+  const [streamStates, setStreamStates] = useState({});
+  const videoRefs = useRef({});
 
-  // Cleanup streams on unmount
+  // Sync local state with incoming data
+  useEffect(() => {
+    const initialPanelValues = {};
+    labels.forEach(key => {
+      initialPanelValues[key] = {
+        issue: data[key] || "None",
+        paintThickness: data[`${key}_paintThickness`] || "",
+      };
+    });
+    setPanelValues(initialPanelValues);
+
+    const initialPhotos = {};
+    Object.entries(imageUrlKeysMap).forEach(([_, key]) => {
+      initialPhotos[key] = Array.isArray(data?.[key]) ? data[key] : Array(photoCount).fill(null);
+    });
+    setPhotos(initialPhotos);
+  }, [data]);
+
+  // Stop all camera streams on unmount
   useEffect(() => {
     return () => {
-      Object.values(streamStates).forEach((stream) => {
-        if (stream) stream.getTracks().forEach((track) => track.stop());
+      Object.values(streamStates).forEach(stream => {
+        if (stream) stream.getTracks().forEach(track => track.stop());
       });
     };
   }, [streamStates]);
 
-  // Get photos array safely for a panel imageKey
-  const getPhotos = (imageKey) => photos[imageKey] || Array(photoCount).fill(null);
-
-  // Toggle dropdown per slot
-  const toggleDropdown = (slotKey) => {
-    setShowDropdown((curr) => (curr === slotKey ? null : slotKey));
+  // Handle input changes (issue or paint thickness)
+  const handleInputChange = (key, field, value) => {
+    setPanelValues(prev => {
+      const newValues = { ...prev, [key]: { ...prev[key], [field]: value } };
+      // Sync with parent
+      if (onChange) {
+        if (field === "issue") onChange(key, value);
+        else onChange(`${key}_paintThickness`, value);
+      }
+      return newValues;
+    });
   };
 
-  // Handle file upload for panel imageKey and photo index
+  // Handle file upload
   const handleFileUpload = async (e, imageKey, index) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      try {
-        const uploadedData = await FileUploaderService.uploadFileToServer(file, imageKey);
-        const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
-        if (imageUrl) {
-          setPhotos((prev) => {
-            const newPhotos = [...(prev[imageKey] || Array(photoCount).fill(null))];
-            newPhotos[index] = imageUrl;
-            // Propagate to parent
-            onChange && onChange(imageKey, newPhotos);
-            return { ...prev, [imageKey]: newPhotos };
-          });
-          setShowDropdown(null);
-        }
-      } catch (error) {
-        console.error("Image upload failed:", error);
-        alert("Failed to upload image. Please try again.");
+    if (!file || !file.type.startsWith("image/")) return alert("Select a valid image file");
+
+    try {
+      const uploaded = await FileUploaderService.uploadFileToServer(file, imageKey);
+      const imageUrl = uploaded.files?.[0]?.fileUrl || null;
+      if (imageUrl) {
+        setPhotos(prev => {
+          const arr = prev[imageKey] ? [...prev[imageKey]] : Array(photoCount).fill(null);
+          arr[index] = imageUrl;
+          if (onChange) onChange(imageKey, arr); // send updated array to parent
+          return { ...prev, [imageKey]: arr };
+        });
+        setShowDropdown(null);
       }
-    } else {
-      alert("Please select a valid image file.");
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Failed to upload image");
     }
   };
 
-  // Handle camera capture for panel imageKey and photo index
-  const handleCameraClick = (imageKey, index) => {
-    const slotKey = `${imageKey}-${index}`;
+  // Handle camera click
+  const handleCameraClick = (key, index) => {
+    const slotKey = `${key}-${index}`;
     FileUploaderService.handleCameraClick(
       slotKey,
       setStreamStates,
@@ -166,15 +127,15 @@ const BodyPanels = ({ data, onChange }) => {
       () =>
         FileUploaderService.takePhoto(
           slotKey,
-          (photo) => {
-            setPhotos((prev) => {
-              const newPhotos = [...(prev[imageKey] || Array(photoCount).fill(null))];
+          photo => {
+            setPhotos(prev => {
+              const newPhotos = [...prev[key]];
               newPhotos[index] = photo;
-              onChange && onChange(imageKey, newPhotos);
-              return { ...prev, [imageKey]: newPhotos };
+              if (onChange) onChange(imageUrlKeysMap[key], newPhotos);
+              return { ...prev, [key]: newPhotos };
             });
             setShowDropdown(null);
-            setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
+            setIsCameraActive(prev => ({ ...prev, [slotKey]: false }));
           },
           setIsCameraActive,
           () => setShowPhoto(null)
@@ -182,48 +143,41 @@ const BodyPanels = ({ data, onChange }) => {
     );
   };
 
+  const toggleDropdown = slotKey => setShowDropdown(curr => (curr === slotKey ? null : slotKey));
+
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl text-white mx-auto">
-      <h2 className="text-2xl sm:text-3xl font-heading mb-6 sm:mb-8 text-left">Body Panels</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Body Panels</h2>
 
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {labels.map((issueKey) => {
-          // Map issueKey to imageKey for photo arrays
+        {labels.map(issueKey => {
           const imageKey = imageUrlKeysMap[issueKey];
-          if(!imageKey) return null; // Skip if no mapping found
-          const photosArr = imageKey ? getPhotos(imageKey) : [];
-
-          // Your existing 'hasIssue' logic — unchanged
-          const hasIssue =
-            data[issueKey] !== "None" ||
-            (issueKey === "boot_issue" &&
-              (data["boot_tailLightLeft"] !== "None" || data["boot_tailLightRight"] !== "None")) ||
-            (data[`${issueKey}_clad`] && data[`${issueKey}_clad_issue`] !== "None");
+          if (!imageKey) return null;
+          const photosArr = photos[imageKey] || [];
+          const { issue, paintThickness } = panelValues[issueKey] || {};
 
           return (
             <div key={issueKey} className="flex flex-col w-full">
-              <label className="text-md text-white font-medium text-left mb-2">
-                {labelNames[issueKey] || issueKey}
-              </label>
+              <label className="text-md text-white font-medium text-left mb-2">{labelNames[issueKey]}</label>
 
-              {/* Paint Thickness Input */}
+              {/* Paint Thickness */}
               <div className="mb-4">
                 <label className="text-md text-white font-medium mb-2">Paint Thickness</label>
                 <input
                   type="number"
-                  value={data[`${issueKey}_paintThickness`] || ""}
-                  onChange={(e) => onChange(`${issueKey}_paintThickness`, e.target.value)}
+                  value={paintThickness || ""}
+                  onChange={e => handleInputChange(issueKey, "paintThickness", e.target.value)}
                   className="p-2 bg-transparent text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                   placeholder="Enter thickness (mm)"
                 />
               </div>
 
-              {/* Issue select */}
+              {/* Issue Dropdown */}
               <div className="mb-4">
                 <label className="text-md text-white font-medium mb-2">Issue</label>
                 <select
-                  value={data[issueKey] || "None"}
-                  onChange={(e) => onChange(issueKey, e.target.value)}
+                  value={issue || "None"}
+                  onChange={e => handleInputChange(issueKey, "issue", e.target.value)}
                   className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                 >
                   <option>None</option>
@@ -234,15 +188,12 @@ const BodyPanels = ({ data, onChange }) => {
                 </select>
               </div>
 
-              {/* Boot tail lights, cladding toggles, etc. — keep your existing code here unchanged */}
-
-              {/* Photo upload & display */}
-              {hasIssue && (
+              {/* Photos */}
+              {issue !== "None" && (
                 <div className="mt-2 flex flex-wrap gap-4 justify-center">
                   {Array.from({ length: photoCount }).map((_, i) => {
                     const slotKey = `${imageKey}-${i}`;
                     const photoUrl = photosArr[i];
-
                     return (
                       <div key={slotKey} className="relative">
                         {photoUrl ? (
@@ -277,14 +228,14 @@ const BodyPanels = ({ data, onChange }) => {
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => handleFileUpload(e, imageKey, i)}
+                                onChange={e => handleFileUpload(e, imageKey, i)}
                               />
                             </label>
                           </div>
                         )}
 
                         <video
-                          ref={(el) => (videoRefs.current[slotKey] = el)}
+                          ref={el => (videoRefs.current[slotKey] = el)}
                           autoPlay
                           className={isCameraActive[slotKey] ? "w-24 h-24 rounded-md" : "hidden"}
                         />
@@ -298,7 +249,6 @@ const BodyPanels = ({ data, onChange }) => {
         })}
       </div>
 
-      {/* Fullscreen Photo Viewer */}
       {showPhoto && <FullScreenPhotoViewer photo={showPhoto} onClose={() => setShowPhoto(null)} />}
     </div>
   );

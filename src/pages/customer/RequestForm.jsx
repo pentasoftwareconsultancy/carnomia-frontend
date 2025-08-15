@@ -171,7 +171,7 @@ const handleSubmit = async (e) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading mb-4 sm:mb-6 md:mb-8"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8"
           >
             Request Vehicle Inspection
           </motion.h2>
@@ -321,7 +321,7 @@ const handleSubmit = async (e) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-button text-white py-2 sm:py-2.5 md:py-3 text-sm sm:text-base md:text-lg font-heading rounded-xl hover:bg-green-700 transition shadow-md"
+              className="w-full bg-button text-white py-2 sm:py-2.5 md:py-3 text-sm sm:text-base md:text-lg font-bold rounded-xl hover:bg-green-700 transition shadow-md"
             >
               Book PDI Now
             </motion.button>

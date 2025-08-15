@@ -323,7 +323,7 @@ const Recent = () => {
                     }`}
                   >
                     {/* {state['paymentStatus']} */}
-                    {APPLICATION_CONSTANTS.PAYMENT_STATUS[state['paymentStatus'] ? state['paymentStatus'] : APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value].label}
+                    {APPLICATION_CONSTANTS.PAYMENT_STATUS[state['paymentStatus'] ? state['paymentStatus'] : APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value]}
                   </span>
                 </div>
               </div>

@@ -127,7 +127,7 @@ useEffect(() => {
       <div className="flex flex-col lg:flex-row min-h-screen bg-primary items-center justify-center">
         <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-10">
           <h1 className="text-3xl font-extrabold text-black mb-2">We Inspect Before You Invest!</h1>
-          <h2 className="text-2xl text-green-600 font-heading mb-4">Unlock the Unseen with Tech!</h2>
+          <h2 className="text-2xl text-button font-bold mb-4">Unlock the Unseen with Tech!</h2>
           <p className="text-gray-700 leading-relaxed">
             Full-Body Diagnostics | 5000+ Scan Points <br />
             No Surprises. Just Smart Buying.
@@ -139,7 +139,7 @@ useEffect(() => {
           <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
             {stage === "login" && (
               <>
-                <h3 className="text-2xl font-heading text-green-700 mb-2">Log in</h3>
+                <h3 className="text-2xl font-bold text-button mb-2">Log in</h3>
                 <input
                   type="text"
                   placeholder="Mobile Number"
@@ -149,13 +149,13 @@ useEffect(() => {
                 />
                 <button
                   onClick={handleProceed}
-                  className="w-full bg-green-500 text-white py-2.5 rounded-lg hover:bg-green-600"
+                  className="w-full bg-button text-white py-2.5 rounded-lg hover:bg-green-600"
                 >
                   Proceed
                 </button>
                 <p className="text-center text-sm mt-6">
                   Haven't created an account?{" "}
-                  <Link to="/signup" className="text-green-600 font-body hover:underline">
+                  <Link to="/signup" className="text-button font-body hover:underline">
                     Signup
                   </Link>
                 </p>
@@ -170,7 +170,7 @@ useEffect(() => {
 
             {stage === "password" && (
               <>
-                <h3 className="text-2xl font-heading text-green-700 mb-2">Enter Password</h3>
+                <h3 className="text-2xl font-bold text-button mb-2">Enter Password</h3>
                 <input
                   type="password"
                   placeholder="Password"
@@ -180,7 +180,7 @@ useEffect(() => {
                 />
                 <button
                   onClick={handlePasswordLogin}
-                  className="w-full bg-green-500 text-white py-2.5 rounded-lg hover:bg-green-600"
+                  className="w-full bg-button text-white py-2.5 rounded-lg hover:bg-green-600"
                 >
                   Login
                 </button>
@@ -190,7 +190,7 @@ useEffect(() => {
                       setStage("login");
                       setPassword("");
                     }}
-                    className="text-green-600 font-body hover:underline"
+                    className="text-button font-body hover:underline"
                   >
                     ← Back
                   </button>
@@ -200,7 +200,7 @@ useEffect(() => {
 
             {stage === "verify" && (
               <>
-                <h3 className="text-2xl font-heading text-green-700 mb-2">Verify OTP</h3>
+                <h3 className="text-2xl font-bold text-button mb-2">Verify OTP</h3>
                 <p className="text-sm text-gray-600 mb-4">
                   OTP sent to <span className="font-body text-black">{identifier}</span>
                 </p>
@@ -217,13 +217,13 @@ useEffect(() => {
                   </p>
                 )}
                 {otpSent && timer === 0 && (
-                  <button onClick={handleProceed} className="text-sm text-green-600 mb-2 underline">
+                  <button onClick={handleProceed} className="text-sm text-button mb-2 underline">
                     Resend OTP
                   </button>
                 )}
                 <button
                   onClick={handleVerifyOtp}
-                  className="w-full bg-green-500 text-white py-2.5 rounded-lg hover:bg-green-600"
+                  className="w-full bg-button text-white py-2.5 rounded-lg hover:bg-green-600"
                 >
                   Verify & Login
                 </button>
@@ -233,7 +233,7 @@ useEffect(() => {
                       setStage("login");
                       setOtp("");
                     }}
-                    className="text-green-600 font-body hover:underline"
+                    className="text-button font-body hover:underline"
                   >
                     ← Back to Login
                   </button>
@@ -436,7 +436,7 @@ useEffect(() => {
 //       <div className="flex flex-col lg:flex-row min-h-screen bg-primary items-center justify-center">
 //         <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-10">
 //           <h1 className="text-3xl font-extrabold text-black mb-2">We Inspect Before You Invest!</h1>
-//           <h2 className="text-2xl text-green-600 font-heading mb-4">Unlock the Unseen with Tech!</h2>
+//           <h2 className="text-2xl text-green-600 font-bold mb-4">Unlock the Unseen with Tech!</h2>
 //           <p className="text-gray-700 leading-relaxed">
 //             Full-Body Diagnostics | 5000+ Scan Points <br />
 //             No Surprises. Just Smart Buying.
@@ -448,7 +448,7 @@ useEffect(() => {
 //           <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
 //             {stage === "login" && (
 //               <>
-//                 <h3 className="text-2xl font-heading text-green-700 mb-2">Log in</h3>
+//                 <h3 className="text-2xl font-bold text-green-700 mb-2">Log in</h3>
 //                 <input
 //                   type="text"
 //                   placeholder="Mobile Number"
@@ -479,7 +479,7 @@ useEffect(() => {
 
 //             {stage === "password" && (
 //               <>
-//                 <h3 className="text-2xl font-heading text-green-700 mb-2">Enter Password</h3>
+//                 <h3 className="text-2xl font-bold text-green-700 mb-2">Enter Password</h3>
 //                 {isMockLogin && (
 //                   <p className="text-sm text-yellow-600 mb-2">
 //                     You're using a <strong>mock login</strong>. This is a demo login for non-drivesta email users.
@@ -514,7 +514,7 @@ useEffect(() => {
 
 //             {stage === "verify" && (
 //               <>
-//                 <h3 className="text-2xl font-heading text-green-700 mb-2">Verify OTP</h3>
+//                 <h3 className="text-2xl font-bold text-green-700 mb-2">Verify OTP</h3>
 //                 <p className="text-sm text-gray-600 mb-4">
 //                   OTP sent to <span className="font-body text-black">{identifier}</span>
 //                 </p>

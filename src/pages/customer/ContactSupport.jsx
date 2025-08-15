@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
 import emailjs from 'emailjs-com';
 import 'react-toastify/dist/ReactToastify.css';
+import ApiService from '../../core/services/api.service';
+import ServerUrl from '../../core/constants/serverUrl.constant';
 
 const ContactSupport = () => {
   const formRef = useRef();
@@ -40,12 +42,7 @@ const ContactSupport = () => {
     setLoading(true);
 
     // Backend object
-    const backendData = {
-      name: name,
-      email: email,
-      phoneNumber: phone,
-      message: message
-    };
+    const backendData = { name, email, phoneNumber: phone, message };
 
     // EmailJS object
     const emailData = {
@@ -58,6 +55,14 @@ const ContactSupport = () => {
     };
 
     try {
+      // Send data to backend
+      const response = await new ApiService().apipost(ServerUrl.API_ADD_INQUIRY, backendData);  
+      const result = response.data;
+
+      if (!result.success) {
+        toast.error(result.message || "Failed to submit inquiry. Please try again.", { autoClose: 3000 });
+        return;
+      }
 
       // Send email via EmailJS
       await emailjs.send(
@@ -83,7 +88,7 @@ const ContactSupport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f8e9] px-4 sm:px-6 lg:px-12 py-12">
+    <div className="min-h-screen bg-primary px-4 sm:px-6 lg:px-12 py-12">
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick draggable pauseOnHover={false} />
 
       {showConfetti && <Confetti recycle={false} numberOfPieces={250} />}
@@ -92,14 +97,14 @@ const ContactSupport = () => {
 
         {/* Contact Info */}
         <motion.div initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="lg:w-1/2 space-y-6 order-1 lg:order-1">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-green-900 leading-snug">Let’s Connect</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-button">Let’s Connect</h1>
           <p className="text-base sm:text-lg text-gray-700">
             Have questions before your next car purchase?<br />
             Need a Pre-Delivery Inspection?<br />
             We’re here to help you drive smart with confidence.
           </p>
 
-          <div className="bg-[#f1f8e9] shadow-xl rounded-2xl p-5 sm:p-6 border border-gray-200 space-y-6">
+          <div className="bg-primary shadow-xl rounded-2xl p-5 sm:p-6 border border-gray-200 space-y-6">
             {[
               { icon: <FiPhone className="text-xl sm:text-2xl" />, color: '#16a34a', label: 'Phone/WhatsApp:', value: (<><a href="tel:+917385978109" className="text-blue-600 hover:underline block text-sm">+91 73859 78109</a><a href="tel:+917378554409" className="text-blue-600 hover:underline block text-sm">+91 73785 54409</a></>) },
               { icon: <FiMail className="text-xl sm:text-2xl" />, color: '#dc2626', label: 'Email:', value: <a href="mailto:support@drivesta.com" className="text-blue-600 hover:underline text-sm">support@drivesta.com</a> },
@@ -119,7 +124,7 @@ const ContactSupport = () => {
 
         {/* Inquiry Form */}
         <motion.div key={animateForm.toString()} initial={{ scale: 1 }} animate={animateForm ? { scale: [1, 1.05, 1] } : {}} transition={{ duration: 0.6 }} className="w-full lg:w-1/2 bg-white border border-gray-300 rounded-2xl shadow-2xl p-6 sm:p-8 order-2 lg:order-2">
-          <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-6">Inquiry Form</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-button mb-6">Inquiry Form</h2>
           <form ref={formRef} onSubmit={sendEmailAndSave} className="space-y-4">
             <div>
               <label className="block font-semibold mb-1 text-sm">Name *</label>
@@ -137,8 +142,8 @@ const ContactSupport = () => {
               <label className="block font-semibold mb-1 text-sm">Message *</label>
               <textarea name="message" rows="3" placeholder="Write your message..." className="w-full px-4 py-2 rounded-xl border border-gray-300"></textarea>
             </div>
-            <button type="submit" disabled={loading} className="w-full py-3 rounded-xl text-white bg-green-500 hover:bg-green-600">
-              {loading ? "Sending..." : "✉️ Submit Inquiry"}
+            <button type="submit" disabled={loading} className="w-full py-3 rounded-xl text-white bg-button hover:bg-green-600">
+              {loading ? "Sending..." : "Submit Inquiry"}
             </button>
           </form>
         </motion.div>

@@ -270,7 +270,7 @@ export default function Navbar({ onToggleSidebar }) {
                   <button
                     onClick={() => setOpen((o) => !o)}
                     aria-label="Choose city"
-                    className="w-10 h-10 rounded-full bg-button flex items-center justify-center text-white font-heading cursor-pointer hover:bg-[#7db167] transition"
+                    className="w-10 h-10 rounded-full bg-button flex items-center justify-center text-white font-bold cursor-pointer hover:bg-[#7db167] transition"
                   >
                     {selectedCity ? (
                       selectedCity.charAt(0).toUpperCase()
@@ -324,7 +324,7 @@ export default function Navbar({ onToggleSidebar }) {
               <div className="relative">
                 <button
                   onClick={toggleProfile}
-                  className="w-10 h-10 rounded-full bg-[#81da5a] cursor-pointer text-white font-heading flex items-center justify-center hover:bg-button transition"
+                  className="w-10 h-10 rounded-full bg-[#81da5a] cursor-pointer text-white font-bold flex items-center justify-center hover:bg-button transition"
                   aria-label="User Profile"
                 >
                   {(user?.name?.[0] || "U").toUpperCase()}
@@ -453,7 +453,7 @@ export default function Navbar({ onToggleSidebar }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <h2 className="text-2xl font-heading mb-3 text-green-800 flex items-center">
+                    <h2 className="text-2xl font-bold mb-3 text-green-800 flex items-center">
                       <FiMapPin className="mr-2" />
                       Select Your Location
                     </h2>

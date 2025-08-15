@@ -134,7 +134,7 @@ const FreqeuntlyAsked = () => {
   })).filter(section => section.questions.length > 0);
 
   return (
-    <div className="bg-primary min-h-screen font-sans">
+    <div className="bg-primary min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -142,7 +142,7 @@ const FreqeuntlyAsked = () => {
         className="w-full bg-black text-center py-12 px-4"
       >
         <h3 className="text-gray-300 text-sm">FAQs</h3>
-        <h1 className="text-green-400 text-3xl md:text-4xl font-heading mt-2">Ask us anything</h1>
+        <h1 className="text-button text-3xl md:text-4xl font-bold mt-2">Ask us anything</h1>
         <p className="text-white mt-2">Have any questions?</p>
 
         <div className="mt-6 relative w-72 md:w-96 mx-auto">
@@ -174,7 +174,7 @@ const FreqeuntlyAsked = () => {
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-xl font-heading text-gray-800 mb-4 border-b pb-1 border-green-300">{section.category}</h2>
+              <h2 className="text-xl font-bold text-regal-blue mb-4 border-b pb-1 border-button">{section.category}</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {section.questions.map((item, index) => {
                   const globalIndex = faqData
@@ -184,11 +184,11 @@ const FreqeuntlyAsked = () => {
                   return (
                     <motion.div
                       key={index}
-                      className="p-4 bg-[#F9FFF1] border border-gray-200 rounded-md flex flex-col gap-2 shadow-sm hover:shadow-md transition"
+                      className="p-4 bg-white border border-button  rounded-md flex flex-col gap-2 shadow-sm hover:shadow-md transition"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <div className="flex items-center gap-3 mb-1 text-green-700">
-                        <span className="text-white bg-green-600 p-2 rounded-full text-xl">
+                      <div className="flex items-center gap-3 mb-1 text-button">
+                        <span className="text-white bg-button p-2 rounded-full text-xl">
                           {item.icon}
                         </span>
                         <span className="font-body">Q{globalIndex}.</span>
@@ -217,7 +217,7 @@ const FreqeuntlyAsked = () => {
               Can’t find the answer you’re looking for? Please chat to our friendly team.
             </p>
           </div>
-          <Link to="/contact-us" className="bg-green-400 hover:bg-green-500 text-black px-6 py-2 rounded-md font-medium">
+          <Link to="/contact-us" className="bg-button hover:bg-green-500 text-white px-6 py-2 rounded-md font-medium">
             Contact Us
           </Link>
         </div>

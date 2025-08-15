@@ -76,7 +76,7 @@ const Career = () => {
       <section className="bg-gray-800 text-white py-20 px-6 lg:px-20">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-heading mb-4 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
               Join the <span className="text-green-300">Carnomia</span> Team
             </h1>
             <p className="text-blue-100">
@@ -96,7 +96,7 @@ const Career = () => {
 
       {/* Job Openings */}
       <section className="px-6 lg:px-20 py-16">
-        <h2 className="text-3xl font-heading text-center mb-3">Current Openings</h2>
+        <h2 className="text-3xl font-bold text-center mb-3">Current Openings</h2>
         <p className="text-center text-gray-600 mb-12">Explore roles and apply below</p>
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobDescriptions.map((job, i) => (
@@ -108,7 +108,7 @@ const Career = () => {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <div>
-                <h3 className="text-xl font-heading mb-2 text-green-800">{job.title}</h3>
+                <h3 className="text-xl font-bold mb-2 text-green-800">{job.title}</h3>
                 <p className="text-sm"><strong>Experience:</strong> {job.experience}</p>
                 <p className="text-sm"><strong>Location:</strong> {job.location}</p>
                 <p className="text-sm"><strong>Qualification:</strong> {job.qualification}</p>
@@ -160,7 +160,7 @@ const Career = () => {
               onClick={closeModal}
               className="absolute top-3 right-4 text-2xl text-gray-500 hover:text-red-500"
             >&times;</button>
-            <h2 className="text-2xl font-heading mb-3 text-green-700">{selectedJob.title}</h2>
+            <h2 className="text-2xl font-bold mb-3 text-green-700">{selectedJob.title}</h2>
             <p><strong>Experience:</strong> {selectedJob.experience}</p>
             <p><strong>Location:</strong> {selectedJob.location}</p>
             <p><strong>Qualification:</strong> {selectedJob.qualification}</p>

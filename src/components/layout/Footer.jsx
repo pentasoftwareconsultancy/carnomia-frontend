@@ -50,7 +50,7 @@ export default function Footer() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-green-400 transition"
+                  className="flex items-center gap-2 hover:text-button transition"
                 >
                   {item.icon} {item.label}
                 </a>
@@ -65,7 +65,7 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <h3 className="font-heading mb-4 text-lg">Company</h3>
+          <h3 className="font-bold mb-4 text-lg">Company</h3>
           <ul className="space-y-2">
             {[
               { label: "About Us", to: "/about-us" },
@@ -74,7 +74,7 @@ export default function Footer() {
               { label: "Contact Us", to: "/contact-us" },
             ].map((item, i) => (
               <li key={i}>
-                <Link to={item.to} className="hover:text-green-400 transition">
+                <Link to={item.to} className="hover:text-button transition">
                   {item.label}
                 </Link>
               </li>
@@ -88,20 +88,20 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h3 className="font-heading mb-4 text-lg">Support</h3>
+          <h3 className="font-bold mb-4 text-lg">Support</h3>
           <ul className="space-y-2">
             <li>
-              <Link to="/privacy-policy" className="hover:text-green-400 transition">
+              <Link to="/privacy-policy" className="hover:text-button transition">
                 Privacy Policy
               </Link>
             </li>
             <li>
-              <Link to="/terms" className="hover:text-green-400 transition">
+              <Link to="/terms" className="hover:text-button transition">
                 Terms & Conditions
               </Link>
             </li>
             <li>
-              <Link to="/faq" className="hover:text-green-400 transition">
+              <Link to="/faq" className="hover:text-button transition">
                 FAQs
               </Link>
             </li>
@@ -114,9 +114,9 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <h3 className="font-heading mb-4 text-lg">Contact</h3>
-          <p className="my-2 hover:text-green-400 transition">+91 7385978109</p>
-          <p className="my-2 hover:text-green-400 transition">+91 7378554409</p>
+          <h3 className="font-bold mb-4 text-lg cursor-pointer">Contact</h3>
+          <p className="my-2 hover:text-button transition">+91 7385978109</p>
+          <p className="my-2 hover:text-button transition">+91 7378554409</p>
         </motion.div>
       </div>
 

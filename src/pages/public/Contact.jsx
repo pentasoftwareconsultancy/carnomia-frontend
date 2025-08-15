@@ -12,12 +12,12 @@ import {
 
 const Contact = () => {
   return (
-    <div className="font-sans">
+    <div className="bg-primary">
      
 <div
-  className="w-full h-30 bg-gray-800 flex items-center justify-center"
+  className="w-full h-30 bg-black flex items-center justify-center"
 >
-  <h1 className="text-white text-4xl font-heading drop-shadow-lg">CONTACT US</h1>
+  <h1 className="text-button text-4xl font-bold drop-shadow-lg">CONTACT US</h1>
 </div>
       {/* Top Info Section */}
       <div className="text-center px-6 md:px-20 py-12 max-w-3xl mx-auto">
@@ -28,7 +28,7 @@ const Contact = () => {
       <div className="flex flex-col md:flex-row justify-center gap-10 px-6 md:px-20 pb-20">
   {/* Now Contact Info is on the left */}
   <div className="text-gray-800 w-full md:w-1/2 max-w-xl">
-    <h3 className="text-xl font-heading text-[#27ae60] mb-6">Contact Info</h3>
+    <h3 className="text-xl font-bold text-[#27ae60] mb-6">Contact Info</h3>
 
     <div className="mb-6">
       <h4 className="font-body text-lg border-b pb-2">LOCATION</h4>
@@ -52,44 +52,44 @@ const Contact = () => {
     <div>
       <h4 className="font-body text-lg border-b pb-2">FOLLOW US</h4>
       <div className="flex space-x-4 mt-3">
-        <FaFacebookF className="text-[#27ae60] hover:text-black transition" />
-        <FaTwitter className="text-[#27ae60] hover:text-black transition" />
-        <FaLinkedinIn className="text-[#27ae60] hover:text-black transition" />
-        <FaYoutube className="text-[#27ae60] hover:text-black transition" />
-        <FaInstagram className="text-[#27ae60] hover:text-black transition" />
+        <FaFacebookF className="text-button hover:text-black transition" />
+        <FaTwitter className="text-button hover:text-black transition" />
+        <FaLinkedinIn className="text-button hover:text-black transition" />
+        <FaYoutube className="text-button hover:text-black transition" />
+        <FaInstagram className="text-button hover:text-black transition" />
         
       </div>
     </div>
   </div>
   {/* Now Form is on the right */}
-  <div className="bg-[#27ae60] text-white p-8 rounded shadow-lg w-full md:w-1/2 max-w-md">
-    <h3 className="text-xl font-heading mb-6 text-center">
+  <div className="bg-white text-black p-8 rounded-2xl  shadow-lg border border-button  w-full md:w-1/2 max-w-md">
+    <h3 className="text-xl font-bold mb-6 text-center">
       DO YOU HAVE ANY QUESTIONS?
     </h3>
     <form className="space-y-4">
       <input
         type="text"
         placeholder="Your Name"
-        className="w-full px-4 py-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+        className="w-full px-4 py-3 bg-white text-black border border-button rounded focus:outline-none focus:ring-2 focus:ring-green-400"
       />
       <input
         type="email"
         placeholder="Your Email Address"
-        className="w-full px-4 py-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+        className="w-full px-4 py-3 bg-white text-black border border-button rounded focus:outline-none focus:ring-2 focus:ring-green-400"
       />
       <input
         type="tel"
         placeholder="Your Phone"
-        className="w-full px-4 py-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+        className="w-full px-4 py-3 bg-white text-black border border-button rounded focus:outline-none focus:ring-2 focus:ring-green-400"
       />
       <textarea
         rows="4"
         placeholder="Type Message"
-        className="w-full px-4 py-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
+        className="w-full px-4 py-3 bg-white text-black border border-button rounded focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
       ></textarea>
       <button
         type="submit"
-        className="w-full border border-white py-2 mt-2 hover:bg-white hover:text-[#27ae60] transition font-medium"
+        className="w-full border py-2 mt-2 bg-button text-white rounded-2xl transition font-medium"
       >
         Send Message
       </button>

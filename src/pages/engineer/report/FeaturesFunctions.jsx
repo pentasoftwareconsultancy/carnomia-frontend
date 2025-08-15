@@ -1,24 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 
+// Toggle switch component
 const ToggleButton = ({ checked, onChange, label }) => {
   const handleChange = () => {
-    const scrollY = window.scrollY; 
+    const scrollY = window.scrollY;
     onChange();
     window.scrollTo(0, scrollY);
   };
 
   return (
-    
     <label className="flex flex-col items-center cursor-pointer">
-     {/* checking : {checked.toString()} */}
       <div className="relative">
-       
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={handleChange}
-          className="sr-only"
-        />
+        <input type="checkbox" checked={checked} onChange={handleChange} className="sr-only" />
         <div
           className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${
             checked ? "bg-lime-500" : ""
@@ -36,9 +29,8 @@ const ToggleButton = ({ checked, onChange, label }) => {
   );
 };
 
-// resetTrigger: a value (number or string) that changes when parent wants to reset toggles
+// Main FeaturesFunctions component
 const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
-  // List of features exactly matching backend schema
   const featurePanels = [
     "feature_parking_sensors_front",
     "feature_parking_sensors_rear",
@@ -54,7 +46,7 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
     "feature_ventilated_seat_rear",
   ];
 
-  // Initialize toggle state: available = true by default, issueObserved = false
+  // Initialize toggle state
   const getInitialState = () => {
     const initState = {};
     featurePanels.forEach((key) => {
@@ -66,10 +58,7 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
     if (data) {
       Object.keys(data).forEach((key) => {
         if (initState[key]) {
-          initState[key] = {
-            ...initState[key],
-            ...data[key],
-          };
+          initState[key] = { ...initState[key], ...data[key] };
         }
       });
     }
@@ -78,62 +67,43 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
 
   const [toggleStates, setToggleStates] = useState(getInitialState);
 
-  // Only reset toggles when resetTrigger changes
+  // Reset toggleStates when resetTrigger changes
   const prevReset = useRef(resetTrigger);
   useEffect(() => {
     if (resetTrigger !== undefined && prevReset.current !== resetTrigger) {
       setToggleStates(getInitialState());
       prevReset.current = resetTrigger;
     }
-    // eslint-disable-next-line
   }, [resetTrigger]);
 
-  // Sync with data prop if it changes (but don't reset on every render)
+  // Sync with data prop changes
   const prevData = useRef(data);
   useEffect(() => {
     if (data && data !== prevData.current) {
       setToggleStates((prev) => {
         const updated = { ...prev };
         Object.keys(data).forEach((key) => {
-          if (updated[key]) {
-            updated[key] = {
-              ...updated[key],
-              ...data[key],
-            };
-          }
+          if (updated[key]) updated[key] = { ...updated[key], ...data[key] };
         });
-
         return updated;
       });
-
       prevData.current = data;
     }
   }, [data]);
 
-  // Sync changes upwards when toggleStates change
-  // useEffect(() => {
-  //   if (typeof setFeaturesFunctionsDetails === "function") {
-  //     setFeaturesFunctionsDetails(toggleStates);
-  //   }
-  // }, [toggleStates, setFeaturesFunctionsDetails]);
-
-  // Toggle available or issueObserved state for given feature
+  // Handle toggle change
   const handleToggleChange = (key, type) => {
     setToggleStates((prev) => {
       const updated = {
         ...prev,
-        [key]: {
-          ...prev[key],
-          [type]: !prev[key][type],
-        },
+        [key]: { ...prev[key], [type]: !prev[key][type] },
       };
-        onChange && onChange(key, updated[key]);
-
+      // Sync updated state with parent after state has changed
+      if (onChange) onChange(key, updated[key]);
       return updated;
     });
   };
 
-  // Format keys to readable labels
   const formatLabel = (key) =>
     key
       .replace(/^feature_/, "")
@@ -143,30 +113,25 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-heading mb-6 sm:mb-8 text-white text-left">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">
         Features & Functions
       </h2>
+
       <div className="grid grid-cols-1 gap-6 sm:gap-6">
         {featurePanels.map((key, idx) => (
           <div key={key} className="flex flex-col w-full">
             <label className="text-md text-white font-medium mb-2 text-left">
               {`${idx + 1}. ${formatLabel(key)}`}
             </label>
-            <div className="flex justify-center items-center gap-18">
+            <div className="flex justify-start items-center gap-6">
               <ToggleButton
                 checked={!!toggleStates[key]?.available}
-                onChange={() => {
-                  handleToggleChange(key, "available");
-                  if (typeof onChange === "function") onChange(key, "available", toggleStates);
-                }}
+                onChange={() => handleToggleChange(key, "available")}
                 label="Available"
               />
               <ToggleButton
                 checked={!!toggleStates[key]?.issueObserved}
-                onChange={() => {
-                  handleToggleChange(key, "issueObserved");
-                  if (typeof onChange === "function") onChange(key, "issueObserved", toggleStates);
-                }}
+                onChange={() => handleToggleChange(key, "issueObserved")}
                 label="Issue Observed"
               />
             </div>

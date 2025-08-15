@@ -100,7 +100,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
 
     const renderFormFields = () => {
       if (typeof tableConfig.customFormFields === "function") {
-      return tableConfig.customFormFields(selectedRow || {}, setSelectedRow);
+        return tableConfig.customFormFields(selectedRow || {}, setSelectedRow);
       }
 
       // fallback default rendering
@@ -136,8 +136,14 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
       </Stack>
     );
 
-    const columns = useMemo(
-      () => [
+    const columns = useMemo(() => {
+      // If default actions are disabled, return only the provided columns
+      if (tableConfig.disableDefaultActions) {
+        return tableConfig.columns;
+      }
+
+      // Otherwise include the default actions column
+      return [
         ...tableConfig.columns,
         {
           id: "actions",
@@ -180,9 +186,8 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
             </>
           ),
         },
-      ],
-      [anchorEl]
-    );
+      ];
+    }, [anchorEl, tableConfig]);
 
     return (
       <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
@@ -197,20 +202,22 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
             {tableConfig.title}
           </Typography>
 
-          <Tooltip title="Add New">
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={openAddDialog}
-              sx={{
-                backgroundColor: "#1976d2",
-                color: "#fff",
-                ":hover": { backgroundColor: "#1565c0" },
-              }}
-            >
-              Add New
-            </Button>
-          </Tooltip>
+          {!tableConfig.hideAddButton && (
+            <Tooltip title="Add New">
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={openAddDialog}
+                sx={{
+                  backgroundColor: "#1976d2",
+                  color: "#fff",
+                  ":hover": { backgroundColor: "#1565c0" },
+                }}
+              >
+                Add New
+              </Button>
+            </Tooltip>
+          )}
         </Stack>
 
         <MaterialReactTable

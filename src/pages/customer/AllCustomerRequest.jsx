@@ -86,9 +86,9 @@ const AllCustomerRequests = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-primary py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-regal-blue">
           Completed Inspections
         </h1>
 
@@ -123,7 +123,7 @@ const AllCustomerRequests = () => {
             return (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-xl shadow-lg border border-button p-6 hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
@@ -131,7 +131,7 @@ const AllCustomerRequests = () => {
                       {order.brand} {order.model}
                     </h2>
                     <div className="flex items-center mt-2 gap-2">
-                      <span className="px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full flex items-center gap-2">
+                      <span className="px-3 py-1 text-sm font-medium bg-green-50 text-button rounded-full flex items-center gap-2">
                         <FiCheckCircle size={16} />{" "}
                         {APPLICATION_CONSTANTS.REQUEST_STATUS[order.status].label}
                       </span>
@@ -183,9 +183,22 @@ const AllCustomerRequests = () => {
                   />
                   <BottomCard
                     title="Payment Details"
-                    value={`Status: ${APPLICATION_CONSTANTS.PAYMENT_STATUS[order.paymentStatus ? order.paymentStatus : APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value].label} | Date: ${order.paymentStatus && order.paymentStatus == APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value ? new Date(order.paymentDate).toLocaleDateString() : 'N/A'} | Time: ${order.paymentStatus && order.paymentStatus == APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value ? order.payment_time : 'N/A'  }`}
+                    value={`Status: ${
+                      APPLICATION_CONSTANTS.PAYMENT_STATUS[
+                        order.paymentStatus?.toUpperCase() || APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value
+                      ]?.label
+                    } | Date: ${
+                      order.paymentStatus === APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value
+                        ? new Date(order.paymentDate).toLocaleDateString()
+                        : 'N/A'
+                    } | Time: ${
+                      order.paymentStatus === APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value
+                        ? order.payment_time
+                        : 'N/A'
+                    }`}
                     color="purple"
                   />
+
                 </div>
               </div>
             );
@@ -196,7 +209,7 @@ const AllCustomerRequests = () => {
 };
 
 const InfoCard = ({ icon, title, value }) => (
-  <div className="bg-gray-50 p-4 rounded-lg flex flex-col gap-2 transition-transform duration-200 hover:scale-105">
+  <div className="bg-gray-50 border border-button p-4 rounded-lg flex flex-col gap-2 transition-transform duration-200 hover:scale-105">
     <div className="flex items-center gap-2">
       <span className="text-blue-600">{icon}</span>
       <p className="text-sm font-medium text-gray-600">{title}</p>

@@ -20,7 +20,7 @@ export default function VehicleInfo({ data }) {
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl text-white">
-      <h2 className="text-2xl sm:text-3xl font-heading mb-6 sm:mb-8 text-white">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white">
         Information
       </h2>
 

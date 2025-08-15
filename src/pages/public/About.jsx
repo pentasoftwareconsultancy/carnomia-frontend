@@ -26,22 +26,22 @@ import car from "../../assets/car_fr2.jpg";
 
 const services = [
   {
-    icon: <FaTools className="text-green-700 text-5xl mb-2" />, label: "3300+ Parameters Checked"
+    icon: <FaTools className="text-button text-5xl mb-2" />, label: "3300+ Parameters Checked"
   },
   {
-    icon: <FaCogs className="text-green-700 text-5xl mb-2" />, label: "14 Core Mechanical Systems"
+    icon: <FaCogs className="text-button text-5xl mb-2" />, label: "14 Core Mechanical Systems"
   },
   {
-    icon: <FaMicrochip className="text-green-700 text-5xl mb-2" />, label: "Software & Sensor Checks"
+    icon: <FaMicrochip className="text-button text-5xl mb-2" />, label: "Software & Sensor Checks"
   },
   {
-    icon: <FaCarCrash className="text-green-700 text-5xl mb-2" />, label: "Structural & Cosmetic Damage"
+    icon: <FaCarCrash className="text-button text-5xl mb-2" />, label: "Structural & Cosmetic Damage"
   },
   {
-    icon: <FaSearchDollar className="text-green-700 text-5xl mb-2" />, label: "Digital Forensics & Meter Rollback"
+    icon: <FaSearchDollar className="text-button text-5xl mb-2" />, label: "Digital Forensics & Meter Rollback"
   },
   {
-    icon: <FaClipboardCheck className="text-green-700 text-5xl mb-2" />, label: "Feature & Functionality Testing"
+    icon: <FaClipboardCheck className="text-button text-5xl mb-2" />, label: "Feature & Functionality Testing"
   },
 ];
 
@@ -56,16 +56,16 @@ const issues = [
 
 const About = () => {
   return (
-    <div className="bg-[#f1ffe0] text-gray-800">
+    <div className="bg-primary text-regal-blue">
       {/* Header */}
       <div className="text-center bg-black text-white py-12">
-        <h1 className="text-4xl font-heading tracking-wider">ABOUT US</h1>
+        <h1 className="text-4xl font-bold tracking-wider">ABOUT US</h1>
       </div>
 
       {/* Intro Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16 flex flex-col lg:flex-row gap-10">
         <div className="lg:w-1/2 space-y-6">
-          <h2 className="text-4xl font-heading text-green-800 leading-tight">
+          <h2 className="text-4xl font-bold text-button leading-tight">
             WE'RE REVOLUTIONIZING VEHICLE INSPECTION & SERVICES
           </h2>
           <p className="text-lg leading-relaxed">
@@ -75,15 +75,15 @@ const About = () => {
           </p>
           <div className="flex gap-6">
             <div className="text-center p-4 shadow border rounded-xl bg-white">
-              <p className="text-3xl font-heading text-green-700">30+</p>
+              <p className="text-3xl font-bold text-green-700">30+</p>
               <p className="text-sm mt-1">Vehicle Services</p>
             </div>
             <div className="text-center p-4 shadow border rounded-xl bg-white">
-              <p className="text-3xl font-heading text-green-700">300+</p>
+              <p className="text-3xl font-bold text-green-700">300+</p>
               <p className="text-sm mt-1">Certified Technicians</p>
             </div>
             <div className="text-center p-4 shadow border rounded-xl bg-white">
-              <p className="text-3xl font-heading text-green-700">40+</p>
+              <p className="text-3xl font-bold text-green-700">40+</p>
               <p className="text-sm mt-1">Cities Covered</p>
             </div>
           </div>
@@ -100,7 +100,7 @@ const About = () => {
 
       {/* Services */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16">
-        <h2 className="text-3xl font-heading text-center mb-10">What We Do</h2>
+        <h2 className="text-3xl font-bold text-center mb-10">What We Do</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((item, i) => (
             <div
@@ -116,7 +116,7 @@ const About = () => {
 
       {/* Inspection Importance */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16">
-        <h2 className="text-3xl font-heading text-center mb-6">Why New Cars Need Inspection Too</h2>
+        <h2 className="text-3xl font-bold text-center mb-6">Why New Cars Need Inspection Too</h2>
         <p className="text-center text-lg max-w-2xl mx-auto mb-10">
           Carnomia helps you catch hidden flaws before you drive off.
         </p>
@@ -149,7 +149,7 @@ const About = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <FaBullseye className="text-green-700 text-2xl" />
-                <h3 className="text-2xl font-heading">Our Mission</h3>
+                <h3 className="text-2xl font-bold">Our Mission</h3>
               </div>
               <p className="text-lg">
                 To deliver reliable and tech-enabled vehicle services that redefine transparency and
@@ -159,7 +159,7 @@ const About = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <FaEye className="text-green-700 text-2xl" />
-                <h3 className="text-2xl font-heading">Our Vision</h3>
+                <h3 className="text-2xl font-bold">Our Vision</h3>
               </div>
               <p className="text-lg">
                 To become India's most trusted mobility brand through innovation, excellence, and
@@ -172,12 +172,12 @@ const About = () => {
 
       {/* Availability */}
       <section className="max-w-7xl mx-auto px-4 md:px-10 py-16">
-        <h2 className="text-3xl font-heading flex items-center justify-center gap-2 mb-8">
+        <h2 className="text-3xl font-bold flex items-center justify-center gap-2 mb-8">
           <FaMapMarkedAlt className="text-green-700" /> Our Availability
         </h2>
         <div className="flex flex-col lg:flex-row gap-10 items-center">
           <div className="lg:w-1/2 space-y-4">
-            <h4 className="text-xl font-heading text-green-700">Currently Serving</h4>
+            <h4 className="text-xl font-bold text-green-700">Currently Serving</h4>
             <p className="text-lg font-body">Pune, Maharashtra — <span className="text-green-700">Expanding Fast</span></p>
             <div className="space-y-3 mt-4">
               <div className="flex items-center gap-3 text-lg">

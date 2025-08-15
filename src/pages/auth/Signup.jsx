@@ -79,7 +79,7 @@ const Signup = () => {
         <div className="text-center md:text-left px-2 sm:px-6">
           <h1 className="text-3xl font-extrabold leading-snug">
             We Inspect Before You Invest!, <br />
-            <span className="text-green-500">Certified insights for your next car.!</span>
+            <span className="text-button">Certified insights for your next car.!</span>
           </h1>
           <p className="mt-2 text-xl font-body">Go Beyond Checklists!</p>
           <p className="text-gray-600 text-sm">
@@ -89,7 +89,7 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-white p-6 rounded-2xl shadow-md mx-auto">
-          <h2 className="text-3xl font-heading text-green-700 text-center">Signup</h2>
+          <h2 className="text-3xl font-bold text-button text-center">Signup</h2>
 
           <input
             type="text"
@@ -159,14 +159,14 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-500 text-white font-body py-2 rounded hover:bg-green-600"
+            className="w-full bg-button text-white font-body py-2 rounded hover:bg-green-600"
           >
             {loading ? "Processing..." : "Proceed"}
           </button>
 
           <p className="text-center text-sm">
             Already Signed up?{" "}
-            <Link to="/login" className="text-green-600 font-medium">Login</Link>
+            <Link to="/login" className="text-button font-medium">Login</Link>
           </p>
         </form>
 
@@ -256,7 +256,7 @@ export default Signup;
 //         <div className="text-center md:text-left px-2 sm:px-6">
 //           <h1 className="text-3xl font-extrabold leading-snug">
 //             We Inspect Before You Invest!, <br />
-//             <span className="text-green-500">Certified insights for your next car.!</span>
+//             <span className="text-button">Certified insights for your next car.!</span>
 //           </h1>
 //           <p className="mt-2 text-xl font-body">Go Beyond Checklists!</p>
 //           <p className="text-gray-600 text-sm">Beyond Visual Assessment | 3700+ Sensing Areas</p>
@@ -264,7 +264,7 @@ export default Signup;
 //         </div>
 
 //         <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md bg-[#f9fcf4] p-6 rounded-2xl shadow-md mx-auto">
-//           <h2 className="text-3xl font-heading text-green-700 text-center">Signup</h2>
+//           <h2 className="text-3xl font-bold text-button text-center">Signup</h2>
 
 //           <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} required className="w-full border rounded px-4 py-2" />
 
@@ -292,7 +292,7 @@ export default Signup;
 //           </div>
 //           {errors.agreed && <p className="text-red-500 text-sm">{errors.agreed}</p>}
 
-//           <button type="submit" className="w-full bg-green-500 text-white font-body py-2 rounded hover:bg-green-600">
+//           <button type="submit" className="w-full bg-button text-white font-body py-2 rounded hover:bg-green-600">
 //             {loading ? "Processing..." : "Proceed"}
 //           </button>
 

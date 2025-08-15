@@ -52,6 +52,7 @@ import Analytics from "../pages/superadmin/Analytics";
 import InspectionReports from "../pages/superadmin/InspectionReports";
 import PaymentManagements from "../pages/superadmin/PaymentManagements";
 import Report from "../pages/engineer/report/Report";
+import ContactSupport from "../pages/customer/ContactSupport";
 
 // 404
 const NotFound = () => (
@@ -142,7 +143,7 @@ const AppRoutes = () => {
             <Route path="ongoing-job" element={<OngoingJobs />} />
             <Route path="completed-job" element={<CompletedJobs />} />
             <Route path="payment-status" element={<EngineerPayment />} />
-            <Route path="contact-support" element={<EngineerSupport />} />
+            <Route path="contact-support" element={<ContactSupport />} />
             <Route path="report/:id" element={<Report />} />
           </Route>
         </Route>

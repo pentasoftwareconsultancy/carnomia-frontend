@@ -13,7 +13,7 @@ export default function Report() {
           </div>
         </header>
 
-        <h2 className="text-lg font-heading mb-4">PDI Report</h2>
+        <h2 className="text-lg font-bold mb-4">PDI Report</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <InfoCard
             data={{
@@ -37,7 +37,7 @@ export default function Report() {
           />
         </div>
 
-        <h2 className="text-lg font-heading mb-2">Profile Photos</h2>
+        <h2 className="text-lg font-bold mb-2">Profile Photos</h2>
         {["Front Left", "Rear Left", "Front Right", "Rear Right"].map((title, i) => (
           <PhotoCard key={i} heading={`${i + 1}. ${title}`} isLast={i === 3} />
         ))}
@@ -211,7 +211,7 @@ function PhotoCard({ heading, isLast }) {
             className="max-w-full max-h-full rounded-lg shadow-lg"
           />
           <button
-            className="absolute top-4 right-4 text-white text-4xl font-heading"
+            className="absolute top-4 right-4 text-white text-4xl font-bold"
             onClick={() => setPreviewIdx(null)}
           >
             &times;
