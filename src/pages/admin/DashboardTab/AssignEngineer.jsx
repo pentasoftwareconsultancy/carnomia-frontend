@@ -253,12 +253,12 @@ const AssignEngineer = ({ request, onAssign, onBack, setModalOpen }) => {
                     <Box component="span" display="flex" alignItems="center">
                       <LocationOn fontSize="small" sx={{ mr: 0.5, color: '#2E7D32' }} />
                       <Typography variant="body2" color="#2E7D32" component="span">
-                        {engineer.location}
+                        {engineer.engineer_location}
                       </Typography>
                     </Box>
                     <Box component="span" display="flex" alignItems="center">
                       <Phone fontSize="small" sx={{ mr: 0.5, color: '#2E7D32' }} />
-                      <Typography variant="body2" component="span" color="#2E7D32">{engineer.phone}</Typography>
+                      <Typography variant="body2" component="span" color="#2E7D32">{engineer.engineer_mobile}</Typography>
                     </Box>
                   </>
                 }

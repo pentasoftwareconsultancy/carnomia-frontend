@@ -1,173 +1,204 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from "react";
+import withMaterialTable from "../../../components/constants/withMaterialTable";
+import ApiService from "../../../core/services/api.service";
+import ServerUrl from "../../../core/constants/serverUrl.constant";
+import { MoreVert } from "@mui/icons-material";
 import {
-  CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, Box,
-  IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent,
-  DialogContentText, DialogActions, Button,
-} from '@mui/material';
-import {
-  FiMoreVertical, FiFileText,
-} from 'react-icons/fi';
-import EditRequestForm from './EditRequestForm';
-import ApiService from '../../../core/services/api.service';
-import ServerUrl from '../../../core/constants/serverUrl.constant';
+  IconButton,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  Typography,
+  Box,
+} from "@mui/material";
+import EditRequestForm from "./EditRequestForm";
 
 const statusColors = {
-  pending: { bg: 'bg-yellow-100', text: 'text-orange-600' },
-  assigned: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  completed: { bg: 'bg-green-100', text: 'text-green-700' },
-  cancelled: { bg: 'bg-red-100', text: 'text-red-700' },
+  PENDING: { bg: "bg-yellow-200", text: "text-yellow-800", label: "Pending" },
+  WAITING_APPROVAL: { bg: "bg-yellow-200", text: "text-yellow-800", label: "Pending" },
+  ASSIGNED_ENGINEER: { bg: "bg-blue-200", text: "text-blue-800", label: "Assigned" },
+  COMPLETED: { bg: "bg-green-200", text: "text-green-800", label: "Completed" },
+  REJECTED: { bg: "bg-red-200", text: "text-red-800", label: "Cancelled" },
 };
 
-const AllRequests = ({ setSelectedRequest }) => {
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+// Actions menu (View, Edit, Delete)
+const ActionsCell = ({ row, onView, onEdit, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  return (
+    <div>
+      <IconButton onClick={handleClick}>
+        <MoreVert />
+      </IconButton>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem
+          onClick={() => {
+            onView(row.original);
+            handleClose();
+          }}
+        >
+          View
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onEdit(row.original);
+            handleClose();
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onDelete(row.original);
+            handleClose();
+          }}
+        >
+          Delete
+        </MenuItem>
+      </Menu>
+    </div>
+  );
+};
+
+const AllRequests = () => {
   const [selectedRow, setSelectedRow] = useState(null);
+  const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchPDIRequest = async () => {
-      try {
-        const response = await new ApiService().apiget(ServerUrl.API_GET_ALLPDIREQUEST);
-        if (response?.data?.data) {
-          setRequests(response.data.data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch PDI requests', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPDIRequest();
-  }, []);
-
-  const handleMenuOpen = (event, request) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedRow(request);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleView = () => {
+  // Handlers
+  const handleView = (row) => {
+    setSelectedRow(row);
     setViewOpen(true);
-    handleMenuClose();
   };
 
-  const handleEditOpen = () => {
+  const handleEdit = (row) => {
+    setSelectedRow(row);
     setEditOpen(true);
-    handleMenuClose();
+  };
+
+  const handleDelete = (row) => {
+    setSelectedRow(row);
+    setDeleteOpen(true);
   };
 
   const handleEditSave = (updatedRequest) => {
-    setRequests((prev) =>
-      prev.map((r) => (r.id === updatedRequest.id ? updatedRequest : r))
-    );
+    // TODO: API call to update
+    console.log("Updated:", updatedRequest);
     setEditOpen(false);
   };
 
-  const handleEditCancel = () => {
-    setEditOpen(false);
+  const handleDeleteConfirm = async () => {
+    try {
+      await new ApiService().apidelete(
+        `${ServerUrl.API_DELETE_REQUEST}/${selectedRow.id}`
+      );
+      console.log("Deleted:", selectedRow.id);
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setDeleteOpen(false);
+    }
   };
 
-  const handleDeleteOpen = () => {
-    setDeleteOpen(true);
-    handleMenuClose();
-  };
+  const Table = withMaterialTable(() => null, {
+    title: "All Requests",
+    hideAddButton: true,   // 🔥 this hides the Add button
+    disableDefaultActions: false, // keep View/Edit/Delete
 
-  const handleDeleteConfirm = () => {
-    setRequests((prev) => prev.filter((r) => r.id !== selectedRow.id));
-    setDeleteOpen(false);
-  };
+    columns: [
+      { accessorKey: "bookingId", header: "Booking ID" },
+      {
+        accessorKey: "customer",
+        header: "Customer",
+        Cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-semibold text-gray-800">
+              {row.original.customerName || "Unknown"}
+            </span>
+            <span className="text-gray-500 text-sm">
+              {row.original.customerMobile || "N/A"}
+            </span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "vehicle",
+        header: "Vehicle",
+        Cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-semibold">{row.original.brand || "-"}</span>
+            <span className="text-gray-600 text-sm">
+              {row.original.model || "-"}
+            </span>
+            <span className="text-gray-500 text-sm">
+              {row.original.variant || "-"}
+            </span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "address",
+        header: "Address",
+        Cell: ({ row }) => (
+          <div className="text-gray-700 text-sm">
+            {row.original.address || row.original.address || "-"}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        Cell: ({ row }) => {
+          const value = row.original.status;
+          return (
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-bold ${statusColors[value]?.bg} ${statusColors[value]?.text}`}
+            >
+              {statusColors[value]?.label || value}
+            </span>
+          );
+        },
+      },
+      // {
+      //   accessorKey: "actions",
+      //   header: "Actions",
+      //   Cell: ({ row }) => (
+      //     <ActionsCell
+      //       row={row}
+      //       onView={handleView}
+      //       onEdit={handleEdit}
+      //       onDelete={handleDelete}
+      //     />
+      //   ),
+      // },
+    ],
 
-  const handleDeleteCancel = () => {
-    setDeleteOpen(false);
-  };
-
-  if (loading) {
-    return (
-      <Box className="text-center p-8">
-        <Typography variant="body1">Loading requests...</Typography>
-      </Box>
-    );
-  }
+    getData: async () => {
+      try {
+        const res = await new ApiService().apiget(
+          ServerUrl.API_GET_ALLPDIREQUEST
+        );
+        return res?.data?.data || [];
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    },
+  });
 
   return (
-    <div className="w-full">
-      <div className="bg-white rounded-2xl shadow-md hover:scale-[1.01] transition-transform">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex justify-between flex-col sm:flex-row gap-4 mb-4">
-            <Typography
-              variant="h6"
-              className="text-green-700 font-bold text-xl flex items-center gap-2"
-            >
-              <FiFileText size={20} />
-              All Requests
-            </Typography>
-            <Typography variant="body2" className="text-gray-600">
-              {requests.length} requests found
-            </Typography>
-          </div>
-
-          <div className="rounded-2xl overflow-x-auto bg-slate-50">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-white">
-                  {['Booking ID', 'Customer', 'Status', 'address', 'Date', 'Slot', 'Actions'].map((head) => (
-                    <TableCell key={head} align="center" className="text-green-700 font-bold text-sm">
-                      {head}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {requests.map((req, index) => (
-                  <TableRow
-                    key={req.id}
-                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition`}
-                  >
-                    <TableCell align="center" className="text-sm">{req.bookingId}</TableCell>
-                    <TableCell align="center" className="text-sm">{req.customerName}</TableCell>
-                    <TableCell align="center">
-                    <span className={`px-3 py-1 rounded-full font-body text-xs ${statusColors[req.status]?.bg} ${statusColors[req.status]?.text}`}>
-                        {req.status}
-                      </span>
-                    </TableCell>
-                    <TableCell align="center" className="text-sm">{req.address}</TableCell>
-                    <TableCell align="center" className="text-sm">{req.date}</TableCell>
-                    <TableCell align="center" className="text-sm">{req.slot || 'N/A'}</TableCell>
-                    <TableCell align="center">
-                      <IconButton onClick={(e) => handleMenuOpen(e, req)} className="text-green-700">
-                        <FiMoreVertical />
-                      </IconButton>
-                      <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl) && selectedRow?.id === req.id}
-                        onClose={handleMenuClose}
-                        PaperProps={{ sx: { borderRadius: 2, boxShadow: 6 } }}
-                      >
-                        <MenuItem onClick={handleView} className="text-sm hover:bg-green-50 hover:text-green-800">
-                          View
-                        </MenuItem>
-                        <MenuItem onClick={handleEditOpen} className="text-sm hover:bg-green-50 hover:text-green-800">
-                          Edit
-                        </MenuItem>
-                        <MenuItem onClick={handleDeleteOpen} className="text-sm hover:bg-green-50 hover:text-green-800">
-                          Delete
-                        </MenuItem>
-                      </Menu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </div>
+    <>
+      <Table />
 
       {/* View Dialog */}
       <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="sm" fullWidth>
@@ -180,7 +211,9 @@ const AllRequests = ({ setSelectedRequest }) => {
                   {key}
                 </Typography>
                 <Typography variant="body2">
-                  {typeof value === 'object' ? JSON.stringify(value) : value?.toString() || 'N/A'}
+                  {typeof value === "object"
+                    ? JSON.stringify(value)
+                    : value?.toString() || "N/A"}
                 </Typography>
               </Box>
             ))
@@ -189,7 +222,7 @@ const AllRequests = ({ setSelectedRequest }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewOpen(false)} variant="contained" sx={{ backgroundColor: '#2E7D32' }}>
+          <Button onClick={() => setViewOpen(false)} variant="contained">
             Close
           </Button>
         </DialogActions>
@@ -199,20 +232,21 @@ const AllRequests = ({ setSelectedRequest }) => {
       <EditRequestForm
         request={selectedRow || {}}
         onSave={handleEditSave}
-        onCancel={handleEditCancel}
+        onCancel={() => setEditOpen(false)}
         open={editOpen}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteOpen} onClose={handleDeleteCancel}>
+      {/* Delete Confirmation */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete Booking ID: {selectedRow?.bookingId}?
+            Are you sure you want to delete Booking ID:{" "}
+            {selectedRow?.bookingId}?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteCancel} variant="outlined">
+          <Button onClick={() => setDeleteOpen(false)} variant="outlined">
             Cancel
           </Button>
           <Button onClick={handleDeleteConfirm} variant="contained" color="error">
@@ -220,7 +254,7 @@ const AllRequests = ({ setSelectedRequest }) => {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </>
   );
 };
 

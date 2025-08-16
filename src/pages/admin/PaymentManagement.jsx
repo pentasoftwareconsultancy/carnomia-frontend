@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FiEye, FiDownload, FiCheck, FiX } from "react-icons/fi"; // Feather icons
+import { FiEye, FiDownload, FiCheck, FiX } from "react-icons/fi";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import ApiService from "../../core/services/api.service";
@@ -100,13 +100,8 @@ const generateInvoicePdf = (payment) => {
     head: [["Vehicle", "Amount", "Payment Status"]],
     body: [
       [
-        `${payment.brand || "-"} ${payment.model || "-"} ${
-          payment.variant || "-"
-        }`,
-        `₹${payment.amount.toLocaleString("en-IN", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`,
+        `${payment.brand || "-"} ${payment.model || "-"} ${payment.variant || "-"}`,
+        `₹${payment.amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         payment.paymentStatus || "N/A",
       ],
     ],
@@ -134,10 +129,7 @@ const generateInvoicePdf = (payment) => {
   doc.setFontSize(12);
   doc.setTextColor(255, 255, 255);
   doc.text(
-    `Total: ₹${payment.amount.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`,
+    `Total: ₹${payment.amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
     195 - 42,
     finalY + 7
   );
@@ -151,13 +143,12 @@ const generateInvoicePdf = (payment) => {
   doc.save(`invoice_${payment.bookingId}.pdf`);
 };
 
-const PaymentManagement = () => {
+const PaymentManagement = ({ isAdmin = true }) => {
   const { id } = useParams();
   const [payments, setPayments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPayment, setSelectedPayment] = useState(null);
 
-  // Fetch payments
   useEffect(() => {
     const fetchPayments = async () => {
       try {
@@ -168,26 +159,22 @@ const PaymentManagement = () => {
         const data = id ? [res.data.data] : res.data.data || [];
 
         const mapped = data
-
           .map((item) => ({
             id: item._id,
             bookingId: item.bookingId || "N/A",
             customerName: item.customerName || "Unknown",
             customerMobile: item.customerMobile || "N/A",
-            address: item.address || item.address || "N/A",
+            address: item.address || "N/A",
             brand: item.brand || "-",
             model: item.model || "-",
             variant: item.variant || "-",
             amount: item.amount || 0,
             pdiDate: item.date || "N/A",
-            status: item.status?.toUpperCase() || "PENDING", // normalize status
+            status: item.status?.toUpperCase() || "PENDING",
             paymentStatus: item.paymentStatus || "Unpaid",
             paymentMode: item.paymentMode || "N/A",
           }))
-
-          .filter(
-            (p) => p.status === "ADMIN_APPROVED" || p.status === "COMPLETED"
-          );
+          .filter((p) => p.status === "ADMIN_APPROVED" || p.status === "COMPLETED");
 
         setPayments(mapped);
       } catch (err) {
@@ -206,19 +193,15 @@ const PaymentManagement = () => {
       p.customerMobile.includes(searchTerm)
   );
 
-  // Update payment & request status
   const updatePaymentStatus = async (payment) => {
+    if (!isAdmin) return; // Engineers cannot update
     try {
       const requestId = payment.id;
-
-      // Determine new request status
       const newRequestStatus =
-        payment.status ===
-        APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value
+        payment.status === APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value
           ? APPLICATION_CONSTANTS.REQUEST_STATUS.COMPLETED.value
-          : payment.status; // keep current if not ADMIN_APPROVED
+          : payment.status;
 
-      // Call backend API to update both paymentStatus and request status
       const res = await new ApiService().apiput(
         `${ServerUrl.API_UPDATE_PAYMENT_STATUS}/${requestId}`,
         {
@@ -229,22 +212,14 @@ const PaymentManagement = () => {
 
       if (res.data && res.data.data) {
         alert("Payment and request status updated successfully");
-
-        // Update local state for table
         setPayments((prev) =>
           prev.map((p) =>
             p.id === requestId
-              ? {
-                  ...p,
-                  paymentStatus:
-                    APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value,
-                  status: newRequestStatus,
-                }
+              ? { ...p, paymentStatus: APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value, status: newRequestStatus }
               : p
           )
         );
 
-        // Update local state for modal if open
         if (selectedPayment?.id === requestId) {
           setSelectedPayment((prev) => ({
             ...prev,
@@ -252,10 +227,6 @@ const PaymentManagement = () => {
             status: newRequestStatus,
           }));
         }
-
-        console.log(
-          `Payment marked as PAID and request status updated to ${newRequestStatus}`
-        );
       } else {
         alert("Failed to update payment/request status");
       }
@@ -267,9 +238,7 @@ const PaymentManagement = () => {
 
   return (
     <div className="min-h-screen bg-[#f1f8e9] p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl font-bold text-green-800 mb-6">
-        Payment Management
-      </h1>
+      <h1 className="text-3xl font-bold text-green-800 mb-6">Payment Management</h1>
 
       <div className="mb-6 flex flex-col sm:flex-row items-center gap-4">
         <input
@@ -290,7 +259,7 @@ const PaymentManagement = () => {
               <th className="p-3">Vehicle</th>
               <th className="p-3">Amount</th>
               <th className="p-3">Payment Status</th>
-              <th className="p-3">Actions</th>
+              {isAdmin && <th className="p-3">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -306,43 +275,32 @@ const PaymentManagement = () => {
                   </div>
                 </td>
                 <td className="p-3">{p.bookingId}</td>
-                <td className="p-3">
-                  {p.brand} {p.model} {p.variant}
-                </td>
+                <td className="p-3">{p.brand} {p.model} {p.variant}</td>
                 <td className="p-3">₹{p.amount.toLocaleString("en-IN")}</td>
                 <td className="p-3">
-                  <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                      p.paymentStatus === "Paid"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                    p.paymentStatus === "Paid"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}>
                     {p.paymentStatus}
                   </span>
                 </td>
-                <td className="p-3 flex space-x-2">
-                  <button
-                    onClick={() => setSelectedPayment(p)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                   <FiEye className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => generateInvoicePdf(p)}
-                    className="text-gray-600 hover:text-gray-800"
-                  >
-                  <FiDownload className="w-5 h-5" />
-                  </button>
-                  {p.paymentStatus !== "Paid" && (
-                    <button
-                      onClick={() => updatePaymentStatus(p)}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                    <FiCheck className="w-5 h-5" />
+                {isAdmin && (
+                  <td className="p-3 flex space-x-2">
+                    <button onClick={() => setSelectedPayment(p)} className="text-blue-600 hover:text-blue-800">
+                      <FiEye className="w-5 h-5" />
                     </button>
-                  )}
-                </td>
+                    <button onClick={() => generateInvoicePdf(p)} className="text-gray-600 hover:text-gray-800">
+                      <FiDownload className="w-5 h-5" />
+                    </button>
+                    {p.paymentStatus !== "Paid" && (
+                      <button onClick={() => updatePaymentStatus(p)} className="text-green-600 hover:text-green-800">
+                        <FiCheck className="w-5 h-5" />
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -353,56 +311,30 @@ const PaymentManagement = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
           <div className="relative bg-white rounded-lg max-w-lg w-full shadow-xl z-10 p-6">
-            <h2 className="text-lg font-bold mb-4">
-              {selectedPayment.customerName} - {selectedPayment.bookingId}
-            </h2>
+            <h2 className="text-lg font-bold mb-4">{selectedPayment.customerName} - {selectedPayment.bookingId}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <p>
-                <strong>Mobile:</strong> {selectedPayment.customerMobile}
-              </p>
-              <p>
-                <strong>Address:</strong> {selectedPayment.address}
-              </p>
-              <p>
-                <strong>Vehicle:</strong> {selectedPayment.brand}{" "}
-                {selectedPayment.model} {selectedPayment.variant}
-              </p>
-              <p>
-                <strong>Amount:</strong> ₹
-                {selectedPayment.amount.toLocaleString("en-IN")}
-              </p>
-              <p>
-                <strong>PDI Date:</strong> {selectedPayment.date}
-              </p>
-              <p>
-                <strong>Payment Status:</strong> {selectedPayment.paymentStatus}
-              </p>
-              <p>
-                <strong>Request Status:</strong> {selectedPayment.status}
-              </p>
+              <p><strong>Mobile:</strong> {selectedPayment.customerMobile}</p>
+              <p><strong>Address:</strong> {selectedPayment.address}</p>
+              <p><strong>Vehicle:</strong> {selectedPayment.brand} {selectedPayment.model} {selectedPayment.variant}</p>
+              <p><strong>Amount:</strong> ₹{selectedPayment.amount.toLocaleString("en-IN")}</p>
+              <p><strong>PDI Date:</strong> {selectedPayment.pdiDate}</p>
+              <p><strong>Payment Status:</strong> {selectedPayment.paymentStatus}</p>
+              <p><strong>Request Status:</strong> {selectedPayment.status}</p>
             </div>
+
             <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => generateInvoicePdf(selectedPayment)}
-                className="px-4 py-2 bg-green-600 text-white rounded-md"
-              >
-              <FiDownload className="w-5 h-5" />
+              <button onClick={() => generateInvoicePdf(selectedPayment)} className="px-4 py-2 bg-green-600 text-white rounded-md flex items-center">
+                <FiDownload className="w-5 h-5 mr-1" /> Download
               </button>
-              {selectedPayment.paymentStatus !==
-                APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value && (
-                <button
-                  onClick={() => updatePaymentStatus(selectedPayment)}
-                  className="px-4 py-2 border border-green-600 text-green-600 rounded-md flex items-center"
-                >
-                <FiCheck className="w-5 h-5" />
-                  Mark as Paid
+
+              {isAdmin && selectedPayment.paymentStatus !== "Paid" && (
+                <button onClick={() => updatePaymentStatus(selectedPayment)} className="px-4 py-2 border border-green-600 text-green-600 rounded-md flex items-center">
+                  <FiCheck className="w-5 h-5 mr-1" /> Mark as Paid
                 </button>
               )}
-              <button
-                onClick={() => setSelectedPayment(null)}
-                className="px-4 py-2 border text-gray-600 rounded-md"
-              >
-               <FiX className="w-5 h-5" />
+
+              <button onClick={() => setSelectedPayment(null)} className="px-4 py-2 border text-gray-600 rounded-md flex items-center">
+                <FiX className="w-5 h-5 mr-1" /> Close
               </button>
             </div>
           </div>

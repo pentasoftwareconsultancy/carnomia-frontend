@@ -15,7 +15,6 @@ import ApiService from '../../core/services/api.service';
 import ServerUrl from '../../core/constants/serverUrl.constant';  
 import { APPLICATION_CONSTANTS } from '../../core/constants/app.constant';
 
-// Mock data for initial state
 export default function AdminDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -144,11 +143,11 @@ export default function AdminDashboard() {
 
 
     return (
-    <div className="bg-[#F1FFE0] min-h-screen p-2 sm:p-3">
+    <div className="bg-primary min-h-screen p-2 sm:p-3">
       <Typography
         variant="h4"
         component="h1"
-        className="font-body mb-4 text-center text-[#2E7D32]"
+        className="font-body mb-4 text-center text-button"
       >
       </Typography>
 
@@ -192,7 +191,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-       <div ref={newRequestsRef} className="bg-[#F1FFE0] rounded-lg p-3 mb-3">
+       <div ref={newRequestsRef} className="bg-primary rounded-lg p-3 mb-3">
         <NewRequests
           requests={requests}
           setRequests={setRequests}
@@ -202,7 +201,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div ref={assignedJobsRef} className="bg-[#F1FFE0] rounded-lg p-3 mb-3">
+      <div ref={assignedJobsRef} className="bg-primary rounded-lg p-3 mb-3">
         <JobsManagement
           requests={requests}
           setRequests={setRequests}
@@ -215,11 +214,11 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div ref={completedJobsRef} className="bg-[#F1FFE0] rounded-lg p-3 mb-3">
+      <div ref={completedJobsRef} className="bg-primary rounded-lg p-3 mb-3">
         <CompletedJobs requests={requests} />
       </div>
 
-      <div ref={allRequestsRef} className="bg-[#F1FFE0] rounded-lg p-3 mb-3">
+      <div ref={allRequestsRef} className="bg-primary rounded-lg p-3 mb-3">
         <AllRequests
           requests={requests}
           setRequests={setRequests}
@@ -229,11 +228,11 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div ref={engineersRef} className="bg-[#F1FFE0] rounded-lg p-3 mb-3">
+      <div ref={engineersRef} className="bg-primary rounded-lg p-3 mb-3">
         <EngineerManagement engineers={engineers} setEngineers={setEngineers} />
       </div>
 
-      <div ref={calendarRef} className="bg-[#F1FFE0] rounded-lg p-3 mb-3">
+      <div ref={calendarRef} className="bg-primary rounded-lg p-3 mb-3">
         <ScheduleCalendar
           calendarDate={calendarDate}
           setCalendarDate={setCalendarDate}

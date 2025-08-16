@@ -1,144 +1,121 @@
-import React, { useEffect, useState } from "react";
-import {
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Switch,
-  Box,
-} from "@mui/material";
+import React from "react";
+import withMaterialTable from "../../../components/constants/withMaterialTable";
 import ApiService from "../../../core/services/api.service";
 import ServerUrl from "../../../core/constants/serverUrl.constant";
 
-const EngineerManagement = () => {
-  const [engineers, setEngineers] = useState([]);
+const EngineerManagement = withMaterialTable(() => null, {
+  title: "Engineers Management",
+  hideAddButton: true,
+  disableDefaultActions: true,
+  showAddButton: false,
 
-  useEffect(() => {
-    const fetchEngineers = async () => {
-      try {
-        const response = await new ApiService().apiget(
-          ServerUrl.API_GET_ALL_USERS_BY_ROLES + "/engineer"
+  columns: [
+    {
+      accessorKey: "name",
+      header: "Name",
+      Cell: ({ row }) => (
+        <span className="text-sm md:text-base text-center">{row.original.name}</span>
+      ),
+    },
+    {
+      accessorKey: "city",
+      header: "Location",
+      Cell: ({ row }) => (
+        <span className="text-sm md:text-base text-center">{row.original.city}</span>
+      ),
+    },
+    {
+      accessorKey: "mobile",
+      header: "Mobile",
+      Cell: ({ row }) => (
+        <span className="text-sm md:text-base text-center">{row.original.mobile}</span>
+      ),
+    },
+    {
+      accessorKey: "engineer_status",
+      header: "Status",
+      Cell: ({ row }) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-bold text-white ${
+            row.original.engineer_status ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {row.original.engineer_status ? "Active" : "Inactive"}
+        </span>
+      ),
+    },
+    {
+      id: "toggle",
+      header: "Toggle",
+      size: 100,
+      enableSorting: false,
+      enableColumnOrdering: false,
+      Cell: ({ row, table }) => {
+        const [loading, setLoading] = React.useState(false);
+
+        const handleToggle = async () => {
+          setLoading(true);
+          const updated = {
+            ...row.original,
+            engineer_status: !row.original.engineer_status,
+          };
+          try {
+            await new ApiService().apiput(
+              `${ServerUrl.API_UPDATE_USER}/${updated.engineer_id}`,
+              { engineer_status: updated.engineer_status }
+            );
+            table.options.updateData?.(updated);
+          } catch (err) {
+            console.error("Failed to update engineer status", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        return (
+          <div className="flex items-center justify-center">
+            <button
+              onClick={handleToggle}
+              disabled={loading}
+              className={`relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none ${
+                row.original.engineer_status ? "bg-green-500" : "bg-red-500"
+              } ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              <span
+                className={`absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                  row.original.engineer_status ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </button>
+            <span className="ml-2 text-sm font-medium text-gray-900">
+              {row.original.engineer_status ? "Active" : "Inactive"}
+            </span>
+          </div>
         );
+      },
+    },
+  ],
 
-        if (response?.data?.data) {
-          setEngineers(response.data.data);
-        } else if (Array.isArray(response?.data)) {
-          setEngineers(response.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch engineers", err);
-      }
-    };
+  getData: async () => {
+    try {
+      const res = await new ApiService().apiget(
+        `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}/engineer`
+      );
+      const data = res?.data || [];
+      return data.map((eng) => ({
+        ...eng,
+        engineer_status: eng.engineer_status ?? true,
+        id: eng.engineer_id,
+      }));
+    } catch (err) {
+      console.error("Failed to fetch engineers", err);
+      return [];
+    }
+  },
 
-    fetchEngineers();
-  }, []);
-
-  const handleToggle = async (id) => {
-    setEngineers((prev) =>
-      prev.map((eng) => (eng.id === id ? { ...eng, active: !eng.active } : eng))
-    );
-    // You may also add your API call to update status here
-  };
-
-  const renderTable = (data, columns, renderRow, emptyMessage) =>
-    data.length === 0 ? (
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        align="center"
-        sx={{
-          py: 4,
-          fontSize: { xs: "0.9rem", sm: "1rem" },
-          animation: "fadeIn 0.5s ease-out",
-        }}
-      >
-        {emptyMessage}
-      </Typography>
-    ) : (
-      <TableContainer
-        component={Paper}
-        className="rounded-xl shadow-md bg-gray-100"
-      >
-        <Table size="small">
-          <TableHead>
-            <TableRow className="bg-green-100">
-              {columns.map((column) => (
-                <TableCell
-                  key={column}
-                  className="text-green-800 font-bold text-center text-sm md:text-base"
-                >
-                  {column}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>{data.map(renderRow)}</TableBody>
-        </Table>
-      </TableContainer>
-    );
-
-  return (
-    <Box className="w-full p-0 bg-[#F1FFE0]">
-      <div className="bg-white rounded-2xl shadow-lg w-full transition-all duration-300 hover:scale-[1.01] hover:shadow-xl">
-        <div className="p-4 sm:p-6 md:p-8">
-          <h2 className="text-green-800 font-bold text-xl sm:text-2xl mb-4 animate-fadeIn">
-            Engineers Management
-          </h2>
-
-          {renderTable(
-            engineers,
-            ["Name", "City", "Mobile", "Status", "Toggle"],
-            (eng, index) => (
-              <TableRow
-                key={eng._id}
-                className={`${
-                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                } hover:bg-slate-100`}
-              >
-                <TableCell className="text-center text-sm">
-                  {eng.name}
-                </TableCell>
-                <TableCell className="text-center text-sm">
-                  {eng.city}
-                </TableCell>
-                <TableCell className="text-center text-sm">
-                  {eng.mobile}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Chip
-                    label={eng.active ? "Active" : "Inactive"}
-                    sx={{
-                      fontWeight: "bold",
-                      px: 1.5,
-                      backgroundColor: eng.active ? "#4CAF50" : "#EF4444",
-                      color: "#fff",
-                      borderRadius: 8,
-                      fontSize: "0.75rem",
-                    }}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell className="text-center">
-                  <Switch
-                    checked={eng.active || false} // default false if undefined
-                    onChange={() => handleToggle(eng._id)}
-                    color="success"
-                    inputProps={{ "aria-label": "toggle engineer status" }}
-                  />
-                </TableCell>
-              </TableRow>
-            ),
-            "No engineers available."
-          )}
-        </div>
-      </div>
-    </Box>
-  );
-};
+  addData: async (row) => row,      // not used
+  updateData: async (row) => row,   // handled by toggle
+  deleteData: async (id) => id,     // not used
+});
 
 export default EngineerManagement;
