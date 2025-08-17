@@ -19,11 +19,11 @@ const Blog = () => {
           </motion.h2>
           <motion.img
             src={img}
-            alt="Thumbnail"
+            alt="Car"
             className="w-full h-auto max-h-72 object-cover rounded-md mb-4 sm:max-h-64 md:max-h-72 lg:max-h-80"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            initial={{ x: "100vw", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 30, damping: 20 }} 
           />
           <motion.div
             className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm"

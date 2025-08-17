@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import privacyData from "../../components/constants/publicData/privacyData";
 
 const PrivacyPolicy = () => {
   return (
@@ -35,8 +36,8 @@ const PrivacyPolicy = () => {
             when you interact with our website, services, or customer support.
           </motion.p>
 
-          {/* Sections */}
-          {sections.map((section, i) => (
+          {/* privacyData */}
+          {privacyData.map((section, i) => (
             <Section
               key={i}
               number={section.number}
@@ -62,10 +63,10 @@ const Section = ({ number, content, list, delay }) => {
       transition={{ duration: 0.6, delay }}
       className="bg-white p-6 rounded-md shadow-md border border-button"
     >
-      <h2 className="text-base md:text-lg font-body text-gray-800 mb-2">
+      <h2 className="text-base md:text-lg font-bold text-button mb-2">
         {number}
       </h2>
-      <p className="text-gray-700 text-sm md:text-base mb-3">{content}</p>
+      <p className="text-regal-blue text-sm md:text-base mb-3">{content}</p>
       {list && (
         <ul className="list-disc pl-5 space-y-1 text-sm md:text-base text-regal-blue">
           {list.map((item, idx) => (
@@ -76,70 +77,5 @@ const Section = ({ number, content, list, delay }) => {
     </motion.section>
   );
 };
-
-const sections = [
-  {
-    number: "1. Information We Collect",
-    content: "We may collect the following types of personal information:",
-    list: [
-      "Contact Information: Name, email address, phone number, and address.",
-      "Vehicle Information: Car make, model, variant, year, and condition-related data.",
-      "Location Data: To provide on-site inspection services.",
-      "Payment Information: If applicable, for booking services (processed via secure third-party gateways).",
-      "Website Usage Data: IP address, browser type, pages visited, and session duration.",
-    ],
-  },
-  {
-    number: "2. How We Use Your Information",
-    content: "We use your data to:",
-    list: [
-      "Schedule and conduct car inspections.",
-      "Generate and share inspection reports.",
-      "Communicate with you about your service request.",
-      "Process payments and provide customer support.",
-      "Improve our services, website performance, and user experience.",
-      "Comply with legal or regulatory requirements.",
-    ],
-  },
-  {
-    number: "3. Data Sharing and Disclosure",
-    content:
-      "We do not sell or rent your personal data to third parties. However, we may share information with:",
-    list: [
-      "Our professional engineers for providing services.",
-      "Payment processing providers (secure and PCI-compliant).",
-      "Law enforcement or regulatory bodies when required by law.",
-    ],
-  },
-  {
-    number: "4. Cookies and Tracking",
-    content: "We may use cookies or similar technologies to:",
-    list: [
-      "Improve website functionality.",
-      "Analyze user behavior and website performance.",
-      "Customize user experience.",
-      "You can choose to disable cookies in your browser settings.",
-    ],
-  },
-  {
-    number: "5. Data Security",
-    content:
-      "We take reasonable and industry-standard measures to protect your information from unauthorized access, misuse, or loss.",
-  },
-  {
-    number: "6. Your Rights",
-    content: "You have the right to:",
-    list: [
-      "Access, update, or delete your personal data.",
-      "Withdraw consent for data use (where applicable).",
-      "Request a copy of the information we hold about you.",
-    ],
-  },
-  {
-    number: "7. Changes to This Policy",
-    content:
-      "We may update this Privacy Policy from time to time. Any changes will be posted on this page with a revised effective date.",
-  },
-];
 
 export default PrivacyPolicy;

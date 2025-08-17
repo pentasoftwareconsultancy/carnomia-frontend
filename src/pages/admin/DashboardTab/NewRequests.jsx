@@ -140,7 +140,7 @@ const NewRequests = ({ setViewMode }) => {
             variant="h6"
             gutterBottom
             sx={{
-              color: '#2E7D32',
+              color: '#81da5b',
               fontWeight: 'bold',
               }}
           >
@@ -153,7 +153,7 @@ const NewRequests = ({ setViewMode }) => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#616161',
+                    color: '#81da5b',
                     textAlign: 'center',
                     padding: 2,}}
                 >
@@ -171,7 +171,7 @@ const NewRequests = ({ setViewMode }) => {
                           variant="subtitle2"
                           sx={{
                             fontWeight: 700,
-                            color: '#2E7D32',
+                            color: '#81da5b',
                             display: 'flex',
                             alignItems: 'center',
                           }}
@@ -201,7 +201,7 @@ const NewRequests = ({ setViewMode }) => {
                                 padding: '1px 4px',
                                 borderRadius: 4,
                                 marginRight: 6,
-                                color: '#2E7D32',
+                                color: '#81da5b',
                                 fontWeight: 600,
                               }}
                             >
@@ -229,6 +229,7 @@ const NewRequests = ({ setViewMode }) => {
                             variant="body2"
                             sx={{
                               color: '#555',
+                            
                             }}
                           >
                             {r.createdAt ? `${r.createdAt}` : 'Not scheduled'}
@@ -242,6 +243,8 @@ const NewRequests = ({ setViewMode }) => {
                         onClick={() => handleAssignClick(r)}
                         sx={{
                           alignSelf: 'flex-start',
+                          bgcolor: '#81da5b',
+
                         }}
                       >
                         Assign Engineer

@@ -198,9 +198,10 @@ const RubberComponent = ({ data = {}, onChange }) => {
                         className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                       >
                         <option>None</option>
-                        <option>Crack</option>
-                        <option>Chip</option>
+                        <option>Fitment Not Proper</option>
                         <option>Scratch</option>
+                        <option>Torn</option>
+                        <option>Aging And Cracks</option>
                       </select>
                     </div>
                     {condition[panel] !== "None" && (

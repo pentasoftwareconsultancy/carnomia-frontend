@@ -181,10 +181,32 @@ const BodyPanels = ({ data, onChange }) => {
                   className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
                 >
                   <option>None</option>
-                  <option>Scratch</option>
+                  <option>Clear Coat Scratch</option>
+                  <option>Primer Scratch</option>
+                  <option>Paint Scratch</option>
                   <option>Dent</option>
+                  <option>Swirl Marks</option>
+                  <option>Bleeding</option>
+                  <option>Blistering</option>
+                  <option>Boiling</option>
+                  <option>Clouding</option>
+                  <option>Cracking</option>
+                  <option>Cratering</option>
+                  <option>Dust Contamination</option>
+                  <option>Lifting</option>
+                  <option>Loss Of Gloss</option>
+                  <option>Orange Peel</option>
+                  <option>Poor Adhesion</option>
+                  <option>Poor Hiding</option>
+                  <option>Runs</option>
                   <option>Rust</option>
-                  <option>Crack</option>
+                  <option>Sanding Scratches</option>
+                  <option>Seeds</option>
+                  <option>Stone Chipping</option>
+                  <option>Paint Chipping</option>
+                  <option>Water Spotting</option>
+                  <option>Wrinkling</option>
+                  <option>Pin Holes</option>
                 </select>
               </div>
 

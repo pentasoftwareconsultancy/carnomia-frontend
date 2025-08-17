@@ -1,7 +1,8 @@
 class ServerUrl {
     
     // Base URL
-    static REACT_APP_API_URL = "http://localhost:3000/api"
+    // static REACT_APP_API_URL = "http://localhost:3000/api"
+    static REACT_APP_API_URL = "http://31.97.231.187:3000/api"
 
     static API_MODULE_USER = "/user";
     static API_LOGIN = ServerUrl.API_MODULE_USER + "/login";
@@ -30,10 +31,10 @@ class ServerUrl {
 
     static API_MODULE_PDI = "/pdi";
     static API_PDI_CREATE = ServerUrl.API_MODULE_PDI + "/create";
-    static API_PDI_UPDATE = ServerUrl.API_MODULE_PDI + "/update";
     static API_GET_ALLPDIREQUEST = ServerUrl.API_MODULE_PDI + "/request";
     static API_GET_REQUEST_BY_ID = ServerUrl.API_MODULE_PDI + "/request-by-id";
     static API_GET_INSPECTION_UPDATE = ServerUrl.API_MODULE_PDI + "/request/updateInspectionById";
+    static API_GET_INSPECTION_DELETE = ServerUrl.API_MODULE_PDI + "/request/deleteInspectionById";
     static API_GET_ALL_REQUESTS_BY_ENGINEER = ServerUrl.API_MODULE_PDI + "/request-by-engineer";
     static API_ASSIGN_ENGINEER = ServerUrl.API_MODULE_PDI + "/request/assign";
     static API_WITHVEHICLE_DATA = ServerUrl.API_MODULE_PDI + "/PDIRequestwithvehicledata";

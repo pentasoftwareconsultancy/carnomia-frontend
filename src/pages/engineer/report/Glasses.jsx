@@ -235,8 +235,8 @@ const Glasses = ({ data = {}, onChange }) => {
                 >
                   <option>None</option>
                   <option>Crack</option>
-                  <option>Chip</option>
                   <option>Scratch</option>
+                  <option>Fitting Mismatch</option>
                 </select>
               </div>
 

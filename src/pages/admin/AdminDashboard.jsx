@@ -155,19 +155,19 @@ export default function AdminDashboard() {
         {statusCards.map((card, index) => (
           <div
             key={index}
-            className="bg-[#fbfcfa] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between h-40 overflow-hidden hover:-translate-y-1 border-t-4 border-[#2E7D32] relative"
+            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between h-40 overflow-hidden hover:-translate-y-1 border-t-4 border-button relative"
             onClick={() => scrollToSection(card.ref)}
           >            
             <div className="p-4 flex flex-col h-full z-10">
               <div className="flex items-start justify-between mb-2">
-                <div className="bg-[#E8F5E9] p-2 rounded-lg">
+                <div className="bg-primary p-2 rounded-lg">
                   {React.cloneElement(card.icon, { 
-                    style: { color: '#2E7D32', fontSize: '1.5rem' } 
+                    style: { color: '#81da5b', fontSize: '1.5rem' } 
                   })}
                 </div>
                 <Typography
                   variant="h4"
-                  className="font-bold text-[#2E7D32] text-2xl"
+                  className="font-bold text-button text-2xl"
                 >
                   {card.count}
                 </Typography>

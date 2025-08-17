@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { MaterialReactTable } from "material-react-table";
 import {
   Dialog,
@@ -64,7 +64,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
     const handleAddSubmit = async () => {
       try {
         const newRow = await tableConfig.addData(selectedRow);
-        setData((prevData) => [...prevData, newRow]);
+        setData((prev) => [...prev, newRow]);
         closeDialogs();
       } catch (error) {
         console.error("Error adding data:", error);
@@ -73,10 +73,10 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
 
     const handleEditSubmit = async () => {
       try {
-        await tableConfig.updateData(selectedRow);
-        setData((prevData) =>
-          prevData.map((item) =>
-            item.id === selectedRow.id ? selectedRow : item
+        const updatedRow = await tableConfig.updateData(selectedRow);
+        setData((prev) =>
+          prev.map((item) =>
+            item.id === selectedRow.id ? updatedRow : item
           )
         );
         closeDialogs();
@@ -88,10 +88,9 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
     const handleDelete = async (rowData) => {
       if (window.confirm("Are you sure you want to delete this item?")) {
         try {
-          await tableConfig.deleteData(rowData.id);
-          setData((prevData) =>
-            prevData.filter((item) => item.id !== rowData.id)
-          );
+          const requestId = rowData.id;
+          await tableConfig.deleteData(requestId);
+          setData((prev) => prev.filter((item) => item.id !== requestId));
         } catch (error) {
           console.error("Error deleting data:", error);
         }
@@ -100,35 +99,63 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
 
     const renderFormFields = () => {
       if (typeof tableConfig.customFormFields === "function") {
-        return tableConfig.customFormFields(selectedRow || {}, setSelectedRow);
+        return tableConfig.customFormFields(selectedRow, setSelectedRow);
       }
 
-      // fallback default rendering
-      return tableConfig.columns.map((col) => (
-        <TextField
-          key={col.accessorKey}
-          margin="dense"
-          label={col.header}
-          fullWidth
-          value={selectedRow[col.accessorKey] || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({
-              ...prev,
-              [col.accessorKey]: e.target.value,
-            }))
-          }
-        />
-      ));
+      return tableConfig.columns.map((col) => {
+        const value = selectedRow[col.accessorKey] || "";
+
+        // Dropdown select
+        if (col.editVariant === "select" && Array.isArray(col.editSelectOptions)) {
+          return (
+            <TextField
+              key={col.accessorKey}
+              margin="dense"
+              label={col.header}
+              fullWidth
+              select
+              value={value}
+              onChange={(e) =>
+                setSelectedRow((prev) => ({
+                  ...prev,
+                  [col.accessorKey]: e.target.value,
+                }))
+              }
+            >
+              {col.editSelectOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          );
+        }
+
+        // Default text input
+        return (
+          <TextField
+            key={col.accessorKey}
+            margin="dense"
+            label={col.header}
+            fullWidth
+            value={value}
+            onChange={(e) =>
+              setSelectedRow((prev) => ({
+                ...prev,
+                [col.accessorKey]: e.target.value,
+              }))
+            }
+          />
+        );
+      });
     };
 
     const renderViewFields = () => (
       <Stack spacing={2}>
         {tableConfig.columns.map((col) => (
           <Box key={col.accessorKey}>
-            <Typography variant="subtitle2" component="span">
-              {col.header}:{" "}
-            </Typography>
-            <Typography variant="body2" component="span">
+            <Typography variant="subtitle2">{col.header}:</Typography>
+            <Typography variant="body2">
               {selectedRow[col.accessorKey] || "N/A"}
             </Typography>
           </Box>
@@ -137,12 +164,8 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
     );
 
     const columns = useMemo(() => {
-      // If default actions are disabled, return only the provided columns
-      if (tableConfig.disableDefaultActions) {
-        return tableConfig.columns;
-      }
+      if (tableConfig.disableDefaultActions) return tableConfig.columns;
 
-      // Otherwise include the default actions column
       return [
         ...tableConfig.columns,
         {
@@ -198,9 +221,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           spacing={2}
           sx={{ mb: 3 }}
         >
-          <Typography variant="h5" component="h2">
-            {tableConfig.title}
-          </Typography>
+          <Typography variant="h5">{tableConfig.title}</Typography>
 
           {!tableConfig.hideAddButton && (
             <Tooltip title="Add New">
@@ -208,11 +229,6 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={openAddDialog}
-                sx={{
-                  backgroundColor: "#1976d2",
-                  color: "#fff",
-                  ":hover": { backgroundColor: "#1565c0" },
-                }}
               >
                 Add New
               </Button>
@@ -229,7 +245,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           enableGlobalFilter
         />
 
-        {/* Dialogs */}
+        {/* Add/Edit/View Dialogs */}
         <Dialog open={isAddOpen} onClose={closeDialogs} fullWidth>
           <DialogTitle>Add New</DialogTitle>
           <DialogContent>{renderFormFields()}</DialogContent>

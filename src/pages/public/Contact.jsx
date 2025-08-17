@@ -9,14 +9,20 @@ import {
   FaInstagram,
   FaPinterestP,
 } from 'react-icons/fa';
+import _con from '../../assets/_con.png';
 
 const Contact = () => {
   return (
     <div className="bg-primary">
      
 <div
-  className="w-full h-30 bg-black flex items-center justify-center"
->
+        className="w-full h-30 flex items-center justify-center"
+        style={{
+          backgroundImage: `url(${_con})`,
+          backgroundSize: '200px',
+        }}
+      >
+
   <h1 className="text-button text-4xl font-bold drop-shadow-lg">CONTACT US</h1>
 </div>
       {/* Top Info Section */}
@@ -36,12 +42,12 @@ const Contact = () => {
     </div>
     <div className="mb-6">
       <h4 className="font-body text-lg border-b pb-2">EMAIL & PHONE</h4>
-      <p className="mt-2 text-s text-gray-600">support@drivesta.com</p>
+      <p className="mt-2 text-s text-gray-600">support@carnomia.com</p>
       <p className="text-s text-gray-600">(+91) 7385978109 / 7378554409</p>
     </div>
     <div className="mb-6">
       <h4 className="font-body text-lg border-b pb-2">WEBSITE</h4>
-      <p className="mt-2 text-s text-gray-600">www.drivesta.com</p>
+      <p className="mt-2 text-s text-gray-600">www.carnomia.com</p>
     </div>
     <div className="mb-6">
       <h4 className="font-body text-lg border-b pb-2">CUSTOMER SUPPORT HOURS</h4>
@@ -50,15 +56,28 @@ const Contact = () => {
       </p>
     </div>
     <div>
-      <h4 className="font-body text-lg border-b pb-2">FOLLOW US</h4>
-      <div className="flex space-x-4 mt-3">
-        <FaFacebookF className="text-button hover:text-black transition" />
-        <FaTwitter className="text-button hover:text-black transition" />
-        <FaLinkedinIn className="text-button hover:text-black transition" />
-        <FaYoutube className="text-button hover:text-black transition" />
-        <FaInstagram className="text-button hover:text-black transition" />
-        
-      </div>
+        <h4 className="font-heading-bold text-lg border-b pb-2">FOLLOW US</h4>
+        <div className="flex space-x-4 mt-3">
+      <a href="https://www.facebook.com/profile.php?id=61579184318790
+    " target="_blank" rel="noopener noreferrer">
+        <FaFacebookF className="text-[#27ae60] hover:text-black transition" />
+      </a>
+      <a href="https://x.com/carnomia
+    " target="_blank" rel="noopener noreferrer">
+        <FaTwitter className="text-[#27ae60] hover:text-black transition" />
+      </a>
+      <a href=" https://www.linkedin.com/company/108622309/admin/dashboard/ " target="_blank" rel="noopener noreferrer">
+        <FaLinkedinIn className="text-[#27ae60] hover:text-black transition" />
+      </a>
+      <a href="https://www.youtube.com/@CarnomiaTechnologies
+    " target="_blank" rel="noopener noreferrer">
+        <FaYoutube className="text-[#27ae60] hover:text-black transition" />
+      </a>
+      <a href=" https://www.instagram.com/carnomiatechnologies/?next=https%3A%2F%2Fwww.instagram.com%2F%3Fhl%3Den%26__coig_ufac%3D1
+    " target="_blank" rel="noopener noreferrer">
+        <FaInstagram className="text-[#27ae60] hover:text-black transition" />
+      </a>
+    </div>
     </div>
   </div>
   {/* Now Form is on the right */}
