@@ -54,8 +54,8 @@ const InspectionReport = () => {
 
   return (
     <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen font-sans">
-      <h1 className="text-xl sm:text-2xl font-bold text-green-900 mb-6 flex items-center gap-2">
-        <span className="p-2 bg-green-100 rounded-full"><FiEye size={20} className="text-green-700" /></span>
+      <h1 className="text-xl sm:text-2xl font-bold text-button mb-6 flex items-center gap-2">
+        <span className="p-2 bg-primary rounded-full"><FiEye size={20} className="text-button" /></span>
         Inspection Reports Management
       </h1>
 
