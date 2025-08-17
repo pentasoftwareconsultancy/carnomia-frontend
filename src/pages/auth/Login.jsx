@@ -44,7 +44,7 @@ useEffect(() => {
   }, [stage, timer]);
 
   const isEmail = inputValue.includes("@");
-  const isDrivestaEmail = isEmail && inputValue.endsWith("@drivesta.com");
+  const isDrivestaEmail = isEmail && inputValue.endsWith("@carnomia.com");
   const isMobile = /^[6-9]\d{9}$/.test(inputValue.trim());
 
   const roleRedirectMap = {

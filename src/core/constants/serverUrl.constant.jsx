@@ -1,8 +1,10 @@
 class ServerUrl {
     
     // Base URL
+    // static REACT_APP_API_URL = "http://localhost:3000/api"
     static REACT_APP_API_URL = "https://api.carnomia.com/api/"
     // static REACT_APP_API_URL = "http://31.97.231.187:3000/api"
+
 
     static API_MODULE_USER = "/user";
     static API_LOGIN = ServerUrl.API_MODULE_USER + "/login";
