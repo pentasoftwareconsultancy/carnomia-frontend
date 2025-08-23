@@ -34,37 +34,6 @@ export default function AdminDashboard() {
   const engineersRef = useRef(null);
   const calendarRef = useRef(null);
 
-  const isEngineerAvailable = (engineerId, date, slot) => {
-    if (!slot) return false;
-    return !requests.some(
-      (req) =>
-        req.assignedEngineer === engineers.find((eng) => eng.id === engineerId)?.name &&
-        req.date === date &&
-        req.slot === slot &&
-        req.status !== 'completed'
-    );
-  };
-
-  const assignEngineer = (id, eng, slot) => {
-    console.log('AdminDashboard: Assigning Engineer:', { id, engineer: eng, slot });
-    if (!slot) {
-      alert('Please select a time slot.');
-      return;
-    }
-    if (!isEngineerAvailable(eng.id, selectedRequest?.date, slot)) {
-      alert(`Engineer ${eng.name} is already assigned to another job in the ${slot} slot on ${selectedRequest?.date}.`);
-      return;
-    }
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? { ...r, assignedEngineer: eng.name, slot, status: 'assigned' }
-          : r
-      )
-    );
-    setSelectedRequest(null);
-  };
-
   const handleSaveEdit = (updatedRequest) => {
     console.log('AdminDashboard: Saving edited request:', updatedRequest);
     setRequests((prev) =>
@@ -139,8 +108,6 @@ export default function AdminDashboard() {
   };
   fetchRequestCounts();
 }, []);
-
-
 
     return (
     <div className="bg-primary min-h-screen p-2 sm:p-3">

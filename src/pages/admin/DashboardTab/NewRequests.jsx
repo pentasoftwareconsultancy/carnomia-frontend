@@ -1,118 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Paper,
-  Button,
-  Box,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { FiUser, FiPhone, FiCalendar } from 'react-icons/fi';
-import RequestDetails from './RequestDetails';
-import ApiService from '../../../core/services/api.service';
-import ServerUrl from '../../../core/constants/serverUrl.constant';
-import { APPLICATION_CONSTANTS } from '../../../core/constants/app.constant';
-
-const StyledCard = styled(Card)(({ theme }) => ({
-  backgroundColor: '#ffffff',
-  borderRadius: theme.spacing(2),
-  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-  margin: 0,
-  width: '100%',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
-  },
-}));
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1.5),
-  borderRadius: theme.spacing(1.5),
-  borderLeft: `4px solid ${theme.palette.success.main}`,
-  backgroundColor: '#ffffff',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-  transition: 'all 0.3s ease',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  '&:hover': {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  },
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1),
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  marginTop: 'auto',
-  backgroundColor: '#2E7D32',
-  color: '#ffffff',
-  fontWeight: 600,
-  borderRadius: theme.spacing(1),
-  padding: theme.spacing(0.75, 1.5),
-  textTransform: 'none',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    backgroundColor: '#1B5E20',
-    transform: 'translateY(-1px)',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-  },
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(0.5, 1),
-    fontSize: '0.75rem',
-  },
-}));
+import React, { useEffect, useState } from "react";
+import { FiUser, FiPhone, FiCalendar, FiTruck } from "react-icons/fi";
+import RequestDetails from "./RequestDetails";
+import ApiService from "../../../core/services/api.service";
+import ServerUrl from "../../../core/constants/serverUrl.constant";
+import { APPLICATION_CONSTANTS } from "../../../core/constants/app.constant";
+import { useNavigate } from "react-router-dom";
+import RequestForm from "../../customer/RequestForm";
 
 const NewRequests = ({ setViewMode }) => {
+
+  const navigate = useNavigate();
+
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
 
   useEffect(() => {
-    let isMounted = true; // prevents state updates after unmount
-
+    let isMounted = true;
     fetchPDIRequests(isMounted);
 
     return () => {
-      isMounted = false; // cleanup on unmount
+      isMounted = false;
     };
   }, []);
 
-
   useEffect(() => {
-    if(!modalOpen) {
+    if (!modalOpen) {
       fetchPDIRequests(true);
     }
-  },[modalOpen]);
+  }, [modalOpen]);
 
-   const fetchPDIRequests = async (isMounted) => {
-      try {
-        setLoading(true); // optional: show loader
+  const fetchPDIRequests = async (isMounted) => {
+    try {
+      setLoading(true);
+      const api = new ApiService();
+      const { data } = await api.apipost(
+        ServerUrl.API_GET_ALL_PDIREQUEST_STATUSES,
+        [APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value]
+      );
 
-        const api = new ApiService();
-        const { data } = await api.apipost(ServerUrl.API_GET_ALL_PDIREQUEST_STATUSES,[APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value]);
-
-        if (isMounted && Array.isArray(data?.data)) {
-          setRequests(data.data);
-          console.log(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch PDI requests:", error);
-        if (isMounted) {
-          setError("Unable to load PDI requests."); // optional: show error in UI
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+      if (isMounted && Array.isArray(data?.data)) {
+        setRequests(data.data);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch PDI requests:", error);
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+  };
 
   const handleAssignClick = (request) => {
     setSelectedRequest(request);
@@ -122,7 +60,7 @@ const NewRequests = ({ setViewMode }) => {
   const handleAssignEngineer = (id, engineer, slot) => {
     const updated = requests.map((r) =>
       r.id === id
-        ? { ...r, assignedEngineer: engineer.name, slot, status: 'assigned' }
+        ? { ...r, assignedEngineer: engineer.name, slot, status: "assigned" }
         : r
     );
     setRequests(updated);
@@ -131,132 +69,73 @@ const NewRequests = ({ setViewMode }) => {
   };
 
   return (
-    <Box sx={{ width: '100%', p: 0, bgcolor: '#F1FFE0' }}>
-      <StyledCard>
-        <CardContent
-          sx={{ padding: 2, display: 'flex', flexDirection: 'column' }} 
+    <div className="w-full p-4 bg-white rounded-lg shadow-sm">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-button">New Requests</h2>
+        <button
+          onClick={() => {
+            navigate(`/request?isAdm=true`);
+          }}
+          className="px-4 py-2 bg-button text-white rounded-lg shadow hover:bg-green-500 transition"
         >
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{
-              color: '#81da5b',
-              fontWeight: 'bold',
-              }}
-          >
-            New Requests
-          </Typography>
+          + New Request
+        </button>
+      </div>
 
-          <Grid container >
-            {requests.filter((r) => r.status === 'NEW').length === 0 ? (
-              <Grid item xs={12}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#81da5b',
-                    textAlign: 'center',
-                    padding: 2,}}
+      {/* Requests Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {requests.filter((r) => r.status === "NEW").length === 0 ? (
+          <p className="text-center text-button col-span-full py-4">
+            No new requests available
+          </p>
+        ) : (
+          requests
+            .filter((r) => r.status === "NEW")
+            .map((r) => (
+              <div
+                key={r.id || r._id}
+                className="bg-white border-l-4 border-green-500 rounded-lg shadow hover:shadow-md p-4 flex flex-col justify-between transition"
+              >
+                <div>
+                  <h3 className="font-semibold text-button flex items-center">
+                    <FiUser className="mr-2" />
+                    {r.customerName || "Unknown Customer"}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    <span className="bg-green-100 text-button px-2 py-0.5 rounded text-xs font-semibold">
+                      #{r.bookingId}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="mt-3 text-gray-600 text-sm space-y-1">
+                  <p className="flex items-center">
+                    <FiTruck className="mr-2 text-gray-500" />
+                    {`${r.brand} ${r.model} ${r.variant}` || "Not provided"} 
+                  </p>
+                  <p className="flex items-center">
+                    <FiPhone className="mr-2 text-gray-500" />
+                    {r.customerMobile || "Not provided"}
+                  </p>
+                  <p className="flex items-center">
+                    <FiCalendar className="mr-2 text-gray-500" />
+                    {r.createdAt ? r.createdAt : "Not scheduled"}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => handleAssignClick(r)}
+                  className="mt-4 px-3 py-2 bg-button text-white rounded-lg shadow hover:bg-green-600 transition text-sm"
                 >
-                  No new requests available
-                </Typography>
-              </Grid>
-            ) : (
-              requests
-                .filter((r) => r.status === 'NEW')
-                .map((r) => (
-                  <Grid item xs={6} sm={6} md={4} lg={3} key={r.id || r._id}>
-                    <StyledPaper elevation={0}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 700,
-                            color: '#81da5b',
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <FiUser  style={{ marginRight: 6 }} />
-                          {r.customerName || 'Unknown Customer'}
-                        </Typography>
+                  Assign Engineer
+                </button>
+              </div>
+            ))
+        )}
+      </div>
 
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            color: '#555',
-                          }}
-                        >
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              fontWeight: 500,
-                              display: 'flex',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <span
-                              style={{
-                                backgroundColor: '#E8F5E9',
-                                padding: '1px 4px',
-                                borderRadius: 4,
-                                marginRight: 6,
-                                color: '#81da5b',
-                                fontWeight: 600,
-                              }}
-                            >
-                              #{r.bookingId}
-                            </span>
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between', mt: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
-                          <FiPhone  color="#555" style={{ marginRight: 6 }} />
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#555',
-                            }}
-                          >
-                            {r.customerMobile || 'Not provided'}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <FiCalendar  color="#555" style={{ marginRight: 6 }} />
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#555',
-                            
-                            }}
-                          >
-                            {r.createdAt ? `${r.createdAt}` : 'Not scheduled'}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <StyledButton
-                        variant="contained"
-                        size="small"
-                        onClick={() => handleAssignClick(r)}
-                        sx={{
-                          alignSelf: 'flex-start',
-                          bgcolor: '#81da5b',
-
-                        }}
-                      >
-                        Assign Engineer
-                      </StyledButton>
-                    </StyledPaper>
-                  </Grid>
-                ))
-            )}
-          </Grid>
-        </CardContent>
-      </StyledCard>
-
+      {/* Assign Engineer Modal */}
       <RequestDetails
         open={modalOpen}
         onClose={() => {
@@ -267,7 +146,7 @@ const NewRequests = ({ setViewMode }) => {
         onAssign={handleAssignEngineer}
         setModalOpen={setModalOpen}
       />
-    </Box>
+    </div>
   );
 };
 

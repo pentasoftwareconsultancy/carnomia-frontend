@@ -26,7 +26,7 @@ const JobsManagement = () => {
       }
     };
 
-    setSlots([
+    setSlots([ 
       { label: "Morning (9AM - 12PM)", value: "Morning" },
       { label: "Afternoon (12PM - 3PM)", value: "Afternoon" },
       { label: "Evening (3PM - 6PM)", value: "Evening" },

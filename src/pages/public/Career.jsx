@@ -49,13 +49,13 @@ const Career = () => {
           {careerData.map((job, i) => (
             <motion.div
               key={i}
-              className="bg-white border rounded-xl p-6 shadow hover:shadow-lg transition-all flex flex-col justify-between hover:scale-[1.02]"
+              className="bg-white border border-button rounded-xl p-6 shadow hover:shadow-lg transition-all flex flex-col justify-between hover:scale-[1.02]"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <div>
-                <h3 className="text-xl font-heading-bold mb-2 text-green-800">{job.title}</h3>
+                <h3 className="text-xl font-semibold mb-2 text-button">{job.title}</h3>
                 <p className="text-sm font-body"><strong>Experience:</strong> {job.experience}</p>
                 <p className="text-sm font-body "><strong>Location:</strong> {job.location}</p>
                 <p className="text-sm font-body"><strong>Qualification:</strong> {job.qualification}</p>
@@ -64,7 +64,7 @@ const Career = () => {
               </div>
               <button
                 onClick={() => openModal(job)}
-                className="mt-5 bg-button text-white px-4 py-2 rounded hover:bg-green-700 transition font-medium"
+                className="mt-5 bg-button text-white px-4 py-2 rounded hover:bg-green-500 transition font-medium"
               >
                 View Details
               </button>
@@ -83,13 +83,13 @@ const Career = () => {
       {/* Close button */}
       <button
         onClick={closeModal}
-        className="absolute top-3 right-4 text-2xl text-gray-500 hover:text-red-500"
+        className="absolute top-3 right-4 text-2xl text-regal-blue hover:text-red-500"
       >
         &times;
       </button>
 
       {/* Job Title */}
-      <h2 className="text-2xl font-heading-bold mb-3 text-green-700">
+      <h2 className="text-2xl font-semibold mb-3 text-button">
         {selectedJob.title}
       </h2>
 
@@ -111,8 +111,8 @@ const Career = () => {
       </div>
 
       {/* Google Form Section */}
-      <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <h3 className="text-lg font-heading-bold text-green-800 mb-2">
+      <div className="mt-6 p-4 bg-primary border border-button rounded-lg">
+        <h3 className="text-lg font-heading-bold text-button mb-2">
           Apply for this Position
         </h3>
         <p className="text-sm text-gray-700 font-body mb-4">
@@ -122,7 +122,7 @@ const Career = () => {
           href="https://docs.google.com/forms/d/e/1FAIpQLScItrr66uFn1JheRJufFonMIA4vK-f7ziR-KpMnWokUfYztvg/viewform?usp=header "
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block bg-button text-white px-5 py-2 rounded-md shadow hover:bg-green-700 transition-colors"
+          className="inline-block bg-button text-white px-5 py-2 rounded-md shadow hover:bg-green-500 transition-colors"
         >
           Fill Application Form
         </a>

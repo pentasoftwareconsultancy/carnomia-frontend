@@ -237,8 +237,8 @@ const PaymentManagement = ({ isAdmin = true }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f8e9] p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl font-bold text-green-800 mb-6">Payment Management</h1>
+    <div className="min-h-screen bg-primary p-4 sm:p-6 md:p-8">
+      <h1 className="text-3xl font-bold text-button mb-6">Payment Management</h1>
 
       <div className="mb-6 flex flex-col sm:flex-row items-center gap-4">
         <input
@@ -246,13 +246,13 @@ const PaymentManagement = ({ isAdmin = true }) => {
           placeholder="Search payments..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full sm:flex-1 px-4 py-2 border border-button rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
         <table className="w-full text-left text-sm sm:text-base">
-          <thead className="bg-green-50">
+          <thead className="bg-green-50 text-button">
             <tr>
               <th className="p-3">Customer</th>
               <th className="p-3">Booking ID</th>

@@ -53,6 +53,7 @@ import InspectionReports from "../pages/superadmin/InspectionReports";
 import PaymentManagements from "../pages/superadmin/PaymentManagements";
 import Report from "../pages/engineer/report/Report";
 import ContactSupport from "../pages/customer/ContactSupport";
+import CustomerReport from '../components/common/customer-report';
 
 // 404
 const NotFound = () => (
@@ -164,6 +165,7 @@ const AppRoutes = () => {
             <Route path="inspection-report" element={<InspectionReport />} />
             <Route path="payment-management" element={<PaymentManagement />} />
             <Route path="report/:id" element={<Report />} />
+            <Route path="customer-report" element={<CustomerReport />} />
          
           </Route>
         </Route>
@@ -184,6 +186,7 @@ const AppRoutes = () => {
             <Route path="customize" element={<Customize />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="inspection-report" element={<InspectionReports />} />
+            <Route path="report/:id" element={<Report />} />
             <Route path="payment-management" element={<PaymentManagements />} />
           </Route>
         </Route>

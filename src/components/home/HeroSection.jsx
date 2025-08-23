@@ -11,12 +11,19 @@ export default function HeroSection() {
   const handleBookPDI = (e) => {
     e.preventDefault();
 
-    if (!isLoggedIn || !user) {
-      toast.info("Please login to book your PDI.");
-      navigate("/login");
+  if (!isLoggedIn || !user) {
+    toast.info("Please login to book your PDI.");
+    navigate("/login");
+  } else {
+    // Check role and add isAdm query param for admin, superadmin, engineer
+    const adminRoles = ["admin", "superadmin", "engineer"];
+    if (adminRoles.includes(user.role)) {
+      navigate("/request?isAdm=true");
     } else {
+      // Normal customer
       navigate("/request");
     }
+  }
   };
 
   return (

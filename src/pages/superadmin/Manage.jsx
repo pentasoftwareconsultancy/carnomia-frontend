@@ -6,7 +6,7 @@ import ServerUrl from "../../core/constants/serverUrl.constant";
 
 const ROLES = { ADMIN: "admin", ENGINEER: "engineer" };
 
-// Admin Table
+// -------------------- Admin Table --------------------
 const AdminTable = withMaterialTable(null, {
   title: "Admins",
   columns: [
@@ -26,17 +26,39 @@ const AdminTable = withMaterialTable(null, {
     const res = await new ApiService().apiget(
       `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}/admin`
     );
-    return res?.data.map((u) => ({ ...u, id: u._id })) || [];
+    return res?.data.map(u => ({ ...u, id: u._id, _id: u._id })) || [];
   },
-  addData: async (data) =>
-    await new ApiService().apipost(ServerUrl.API_REGISTER, { ...data, role: "admin" }),
-  updateData: async (data) =>
-    await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${data.id}`, data),
-  deleteData: async (id) =>
-    await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${id}`),
+  addData: async ({ name, email, mobile, city, password }) => {
+    const result = await new ApiService().apipost(ServerUrl.API_REGISTER, {
+      name,
+      email,
+      mobile,
+      city,
+      password,
+      role: "admin",
+    });
+    // Always return latest data
+    return await AdminTable.options.getData();
+  },
+  updateData: async ({ _id, name, email, mobile, city, password }) => {
+    await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${_id}`, {
+      name,
+      email,
+      mobile,
+      city,
+      password,
+    });
+    // Always return latest data
+    return await AdminTable.options.getData();
+  },
+  deleteData: async (_id) => {
+    await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${_id}`);
+    // Always return latest data
+    return await AdminTable.options.getData();
+  },
 });
 
-// Engineer Table with toggle
+// -------------------- Engineer Table --------------------
 const EngineerTable = withMaterialTable(null, {
   title: "Engineers",
   columns: [
@@ -74,18 +96,25 @@ const EngineerTable = withMaterialTable(null, {
 
         const handleToggle = async () => {
           setLoading(true);
-          const updated = {
-            ...row.original,
-            engineer_status: !row.original.engineer_status,
-          };
+          const { id, name, email, mobile, city, password, engineer_status } = row.original;
+
           try {
-            await new ApiService().apiput(
-              `${ServerUrl.API_UPDATE_USER}/${updated.engineer_id}`,
-              { engineer_status: updated.engineer_status }
-            );
-            table.options.updateData?.(updated);
+            // Toggle status
+            await table.options.updateData?.({
+              id,
+              name,
+              email,
+              mobile,
+              city,
+              password,
+              engineer_status: !engineer_status,
+            });
+
+            // Refresh table data
+            const updatedData = await table.options.getData?.();
+            table.setData(updatedData);
           } catch (err) {
-            console.error("Failed to update engineer status", err);
+            console.error("Failed to toggle engineer status", err);
           } finally {
             setLoading(false);
           }
@@ -119,22 +148,46 @@ const EngineerTable = withMaterialTable(null, {
       `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}/engineer`
     );
     return (
-      res?.data.map((u) => ({
+      res?.data.map(u => ({
         ...u,
-        id: u.engineer_id,
+        id: u._id,
+        _id: u._id,
         engineer_status: u.engineer_status ?? true,
       })) || []
     );
   },
-  addData: async (data) =>
-    await new ApiService().apipost(ServerUrl.API_REGISTER, { ...data, role: "engineer" }),
-  updateData: async (data) =>
-    await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${data.id}`, data),
-  deleteData: async (id) =>
-    await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${id}`),
+  addData: async ({ name, email, mobile, city, password }) => {
+    const result = await new ApiService().apipost(ServerUrl.API_REGISTER, {
+      name,
+      email,
+      mobile,
+      city,
+      password,
+      role: "engineer",
+    });
+    // Always return latest data
+    return await EngineerTable.options.getData();
+  },
+  updateData: async ({ _id, name, email, mobile, city, password, engineer_status }) => {
+    await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${_id}`, {
+      name,
+      email,
+      mobile,
+      city,
+      password,
+      engineer_status,
+    });
+    // Always return latest data
+    return await EngineerTable.options.getData();
+  },
+  deleteData: async (_id) => {
+    await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${_id}`);
+    // Always return latest data
+    return await EngineerTable.options.getData();
+  },
 });
 
-// Manage Page
+// -------------------- Manage Page --------------------
 export default function Manage() {
   const [activeTab, setActiveTab] = useState(ROLES.ADMIN);
 

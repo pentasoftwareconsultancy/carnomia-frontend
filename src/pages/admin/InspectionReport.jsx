@@ -53,7 +53,7 @@ const InspectionReport = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen font-sans">
+    <div className="p-4 sm:p-6 bg-primary min-h-screen font-sans">
       <h1 className="text-xl sm:text-2xl font-bold text-button mb-6 flex items-center gap-2">
         <span className="p-2 bg-primary rounded-full"><FiEye size={20} className="text-button" /></span>
         Inspection Reports Management
@@ -65,13 +65,13 @@ const InspectionReport = () => {
           <table className="w-full min-w-[700px]">
             <thead className="bg-green-50">
               <tr>
-                <th className="p-3 text-left text-sm font-body text-green-900">Booking ID</th>
-                <th className="p-3 text-left text-sm font-body text-green-900">Customer Name</th>
-                <th className="p-3 text-left text-sm font-body text-green-900">Engineer Name</th>
-                <th className="p-3 text-left text-sm font-body text-green-900">Brand Model</th>
-                <th className="p-3 text-left text-sm font-body text-green-900">Date / Time</th>
-                <th className="p-3 text-left text-sm font-body text-green-900">Status</th>
-                <th className="p-3 text-left text-sm font-body text-green-900">Actions</th>
+                <th className="p-3 text-left text-sm font-body text-button">Booking ID</th>
+                <th className="p-3 text-left text-sm font-body text-button">Customer Name</th>
+                <th className="p-3 text-left text-sm font-body text-button">Engineer Name</th>
+                <th className="p-3 text-left text-sm font-body text-button">Brand Model</th>
+                <th className="p-3 text-left text-sm font-body text-button">Date / Time</th>
+                <th className="p-3 text-left text-sm font-body text-button">Status</th>
+                <th className="p-3 text-left text-sm font-body text-button">Actions</th>
               </tr>
             </thead>
             <tbody>

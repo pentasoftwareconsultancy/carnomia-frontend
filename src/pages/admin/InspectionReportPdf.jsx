@@ -31,45 +31,78 @@ const GRID = {
 /** =========================================================================
  * IMAGE HELPERS (robust URL → DataURL with fallback)
  * ========================================================================= */
-async function urlToDataURL(url) {
-  if (!url) return null;
 
-  // Try fetch → blob → FileReader (works when CORS allows)
+
+async function urlToDataURL(url, preferPngFallback = false, timeoutMs = 10000) {
+  if (!url || typeof url !== "string" || url.trim() === "") {
+    console.warn(`Invalid or missing URL: ${url}`);
+    return null;
+  }
+
   try {
     const res = await fetch(url, { mode: "cors" });
     if (res.ok) {
       const blob = await res.blob();
       const fr = new FileReader();
-      return await new Promise((resolve) => {
+      return await new Promise((resolve, reject) => {
         fr.onload = () => resolve(fr.result);
+        fr.onerror = () => {
+          console.warn(`FileReader failed for ${url}`);
+          reject(null);
+        };
         fr.readAsDataURL(blob);
       });
+    } else {
+      console.warn(`Fetch failed for ${url}: HTTP ${res.status} ${res.statusText}`);
+      return null;
     }
-  } catch (_) {
-    /* fall through */
+  } catch (err) {
+    console.warn(`Fetch/network error for ${url}: ${err.message}`);
+    if (err.message.includes("NetworkError") || err.message.includes("CORS")) {
+      console.warn(`CORS issue detected for ${url}. Check server CORS headers.`);
+      return null;
+    }
   }
 
-  // Fallback using <img> + canvas (still needs CORS on server)
+  // Fallback using <img> + canvas with timeout
   try {
-    const dataURL = await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = "anonymous";
+
+      const timer = setTimeout(() => {
+        img.src = ""; // Cancel loading
+        reject(new Error(`Image load timeout after ${timeoutMs}ms: ${url}`));
+      }, timeoutMs);
+
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg", 0.92));
+        clearTimeout(timer);
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          const format = preferPngFallback ? "image/png" : "image/jpeg";
+          resolve(canvas.toDataURL(format, 0.92));
+        } catch (ex) {
+          reject(ex);
+        }
       };
-      img.onerror = reject;
+
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error(`Image load failed (canvas fallback): ${url}`));
+      };
       img.src = url;
     });
-    return dataURL;
-  } catch (_) {
+  } catch (err) {
+    console.warn(`Canvas fallback failed for ${url}: ${err.message}`);
     return null;
   }
 }
+
+
 
 /** =========================================================================
  * DRAWING HELPERS
@@ -77,6 +110,7 @@ async function urlToDataURL(url) {
 function setText(doc, color = THEME.text, size = 10) {
   doc.setTextColor(color);
   doc.setFontSize(size);
+  doc.setFont("helvetica", "normal"); // Ensure consistent font
 }
 
 function roundedRect(doc, x, y, w, h, r = 4, fill, stroke) {
@@ -95,7 +129,7 @@ function labelValue(doc, label, value, x, y) {
   setText(doc, THEME.subtext, 8);
   doc.text(label, x, y);
   setText(doc, THEME.text, 10);
-  doc.text(value ?? "—", x, y + 4.3);
+  doc.text(String(value ?? "—"), x, y + 4.3);
 }
 
 function chip(doc, text, x, y, bg = THEME.brandLight) {
@@ -123,7 +157,7 @@ function metricPill(doc, x, y, label, value) {
   setText(doc, "#ffffff", 7.3);
   doc.text(label, x + 3, y + 5);
   setText(doc, "#ffffff", 9.5);
-  doc.text(value, x + 3, y + 11); // keep ASCII glyphs to avoid missing font chars
+  doc.text(String(value), x + 3, y + 11); // Ensure ASCII compatibility
   setText(doc);
 }
 
@@ -134,14 +168,27 @@ function labeledPhotoBox(doc, label, x, y, w = 50, h = 50) {
   roundedRect(doc, x, y, w, h, 4, undefined, THEME.boxStroke);
 }
 
-async function drawThumbRow(doc, urls = [], x, y, w = 10.8, h = 10.8, gap = 2.5, max = 4) {
-  for (let i = 0; i < max; i++) {
-    const bx = x + i * (w + gap);
-    roundedRect(doc, bx, y, w, h, 2, undefined, THEME.boxStroke);
-    const u = urls[i];
-    if (u) {
-      const data = await urlToDataURL(u);
-      if (data) doc.addImage(data, "JPEG", bx + 1.1, y + 1.1, w - 2.2, h - 2.2, undefined, "FAST");
+async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap = 4) {
+  let i = 0;
+  // Filter out invalid URLs
+  const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
+  for (let url of validUrls) {
+    try {
+      const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
+      const dataURL = await urlToDataURL(finalUrl);
+      if (dataURL) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const posX = x + col * (w + gap);
+        const posY = y - row * (h + gap);
+        const format = dataURL.match(/^data:image\/(\w+);base64,/)?.[1]?.toUpperCase() || "JPEG";
+        doc.addImage(dataURL, format, posX, posY, w, h, undefined, "FAST");
+        i++;
+      } else {
+        console.warn(`Image not loaded: ${url}`);
+      }
+    } catch (err) {
+      console.error(`Error loading image: ${url}`, err);
     }
   }
 }
@@ -149,9 +196,12 @@ async function drawThumbRow(doc, urls = [], x, y, w = 10.8, h = 10.8, gap = 2.5,
 function checkmark(doc, x, y, checked) {
   roundedRect(doc, x, y - 3.5, 3.5, 3.5, 0.8, "#fff", THEME.boxStroke);
   if (checked) {
-    setText(doc, THEME.good, 10);
-    doc.text("✓", x + 0.6, y - 0.4);
-    setText(doc);
+    // Draw checkmark using lines to avoid font glyph issues
+    doc.setDrawColor(THEME.good);
+    doc.setLineWidth(0.5);
+    doc.line(x + 0.8, y - 1.8, x + 1.5, y - 0.5); // \
+    doc.line(x + 1.5, y - 0.5, x + 2.8, y - 2.8); // /
+    doc.setLineWidth(0.2); // Reset line width
   }
 }
 
@@ -161,108 +211,135 @@ function checkmark(doc, x, y, checked) {
 function drawTopBand(doc) {
   roundedRect(doc, mm(12), mm(12), mm(186), mm(10), 3, THEME.brandDark, THEME.brandDark);
   setText(doc, "#ffffff", 11);
-  doc.text("Drivesta", mm(18), mm(18));
+  doc.text("Carnomia", mm(18), mm(18));
   doc.text("PDI Report", mm(186), mm(18), { align: "right" });
   setText(doc);
 }
 
 function drawFooter(doc) {
   setText(doc, THEME.subtext, 8);
-  doc.text("Generated by Drivesta • " + new Date().toLocaleString(), mm(105), mm(287), { align: "center" });
+  doc.text(`Generated by Carnomia • ${new Date().toLocaleString()}`, mm(105), mm(287), { align: "center" });
   setText(doc);
 }
 
 /** =========================================================================
- * COVER PAGE (matches Figma look)
+ * COVER PAGE
  * ========================================================================= */
+
 async function addCoverPage(doc, r) {
   drawTopBand(doc);
 
-  // Booking ID row
+  // Booking ID Bar
   setText(doc, THEME.subtext, 8.5);
-  doc.text(`Booking ID: ${r.bookingId ?? "—"}`, PAGE_PAD_X, mm(26.5));
+  doc.text(`Booking ID: ${String(r.bookingId ?? "—")}`, PAGE_PAD_X, mm(10));
   setText(doc);
 
-  // HERO
-  const { x, y, w, h } = GRID.hero;
-  roundedRect(doc, mm(x), mm(y), mm(w), mm(h), 6, "#000", "#000");
-  const heroImg = await urlToDataURL(r.imageUrl);
-  if (heroImg) {
-    doc.addImage(heroImg, "JPEG", mm(x) + 1.2, mm(y) + 1.2, mm(w) - 2.4, mm(h) - 2.4, undefined, "FAST");
+  // PDI Report Title
+  setText(doc, THEME.header, 12);
+  doc.text("PDI Report", A4.w - mm(40), mm(10), { align: "right" }); // Fixed PAGE_WIDTH to A4.w
+  setText(doc);
+
+  // HERO IMAGE section
+  const hero = { x: 15, y: 22, w: 110, h: 48 };
+  roundedRect(doc, mm(hero.x), mm(hero.y), mm(hero.w), mm(hero.h), 6, "#000", "#000");
+  if (r.imageUrl) {
+    const heroImg = await urlToDataURL(r.imageUrl);
+    if (heroImg) {
+      doc.addImage(heroImg, "JPEG", mm(hero.x) + 1.2, mm(hero.y) + 1.2, mm(hero.w) - 2.4, mm(hero.h) - 2.4, undefined, "FAST");
+    }
   }
 
-  // Metric chips
-  const pX = mm(x + 10), pY = mm(y + 4);
-  metricPill(doc, pX + 0, pY, "BHP", "0");
-  metricPill(doc, pX + 26, pY, "Airbags", "6");
-  metricPill(doc, pX + 52, pY, "NCAP", "5*");
-  metricPill(doc, pX + 78, pY, "Mileage", "17.0");
+  // Metric chips (top overlay)
+  const metrX = mm(hero.x + 8);
+  const metrY = mm(hero.y + 5);
+  metricPill(doc, metrX, metrY, "BHPs", String(r.bhp ?? "0"));
+  metricPill(doc, metrX + 30, metrY, "Airbags", String(r.airbags ?? "6"));
+  metricPill(doc, metrX + 60, metrY, "NCAP", String(r.ncapRating ?? "0"));
+  metricPill(doc, metrX + 90, metrY, "Mileage (kmpl)", String(r.mileage ?? "17.0"));
 
-  // Score card
-  const sX = mm(x + w + 8);
-  const sY = mm(y);
-  roundedRect(doc, sX, sY, mm(GRID.scoreCard.w), mm(GRID.scoreCard.h), 5, "#fff", THEME.softLine);
+  // SCORE CARD
+  const score = { x: hero.x + hero.w + 10, y: hero.y, w: 40, h: 36 };
+  roundedRect(doc, mm(score.x), mm(score.y), mm(score.w), mm(score.h), 5, "#fff", THEME.softLine);
   setText(doc, THEME.subtext, 8);
-  doc.text("Overall Vehicle Score", sX + 6, sY + 7);
+  doc.text("Overall Vehicle Score", mm(score.x + 7), mm(score.y + 8));
   setText(doc);
   doc.setDrawColor(THEME.good);
-  doc.circle(sX + 21, sY + 17, 10, "S");
-  setText(doc, THEME.text, 14);
-  doc.text("9.2", sX + 17.7, sY + 20.5);
+  doc.circle(mm(score.x + 22), mm(score.y + 19), 10, "S");
+  setText(doc, THEME.text, 16);
+  doc.text(String(r.vehicleScore ?? "9.2"), mm(score.x + 18), mm(score.y + 22));
   setText(doc, THEME.good, 7.5);
-  doc.text("GOOD", sX + 16.4, sY + 27);
-  setText(doc, THEME.subtext, 6.9);
-  doc.text("No major issues; consumables OK.\nElectronics working.\nRecommended: PDI delivery.", sX + 6, sY + 30.5);
+  doc.text("GOOD", mm(score.x + 16), mm(score.y + 29));
+  setText(doc, THEME.subtext, 6.5);
+  doc.text(String(r.scoreComment ?? "This score signifies that the car is free of defects..."), mm(score.x + 5), mm(score.y + 33.5), { maxWidth: mm(score.w - 10) });
   setText(doc);
 
-  // Info cards
-  const cardY = mm(y + h + 6);
-  const leftX = mm(x);
-  const rightX = mm(x + 70);
+  // Info Cards Layout
+  const cardY = hero.y + hero.h + 7;
+  const cardW = 85;
+  const cardH = 35;
+  const leftX = hero.x;
+  const rightX = hero.x + cardW + 8;
 
-  // Customer Info
-  roundedRect(doc, leftX, cardY, mm(85), mm(35), 4, "#fff", THEME.softLine);
+  // CUSTOMER INFO
+  roundedRect(doc, mm(leftX), mm(cardY), mm(cardW), mm(cardH), 4, "#fff", THEME.softLine);
   setText(doc, THEME.text, 9.5);
-  doc.text("Customer Info", leftX + 4, cardY + 6);
-  divider(doc, leftX + 4, cardY + 7.5, leftX + 81, THEME.faintLine);
-  labelValue(doc, "Name", r.customerName, leftX + 4, cardY + 14);
-  labelValue(doc, "Location", r.address, leftX + 48, cardY + 14);
-  labelValue(doc, "Engineer Name", r.engineer_name, leftX + 4, cardY + 24);
-  labelValue(doc, "Engineer Mobile", r.engineer_mobile, leftX + 48, cardY + 24);
-  labelValue(
-    doc,
-    "PDI Date & Time",
-    `${new Date(r.date).toLocaleDateString()}  ${r.engineer_assignedSlot ?? ""}`,
-    leftX + 4,
-    cardY + 34
-  );
-  labelValue(doc, "Dealer", r.dealerName, leftX + 48, cardY + 34);
+  doc.text("Customer Info", mm(leftX + 4), mm(cardY + 7));
+  divider(doc, mm(leftX + 4), mm(cardY + 8.5), mm(leftX + cardW - 4), THEME.faintLine);
+  labelValue(doc, "Name", r.customerName, mm(leftX + 4), mm(cardY + 13));
+  labelValue(doc, "Location", r.address, mm(leftX + 50), mm(cardY + 13));
+  labelValue(doc, "Engineer Name", r.engineer_name, mm(leftX + 4), mm(cardY + 21));
+  labelValue(doc, "PDI Date & Time", `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`, mm(leftX + 4), mm(cardY + 29));
+  labelValue(doc, "Address", r.showroom, mm(leftX + 4), mm(cardY + 33));
 
-  // Vehicle Info
-  roundedRect(doc, rightX, cardY, mm(85), mm(35), 4, "#fff", THEME.softLine);
+  // VEHICLE INFO
+  roundedRect(doc, mm(rightX), mm(cardY), mm(cardW), mm(cardH), 4, "#fff", THEME.softLine);
   setText(doc, THEME.text, 9.5);
-  doc.text("Vehicle Info", rightX + 4, cardY + 6);
-  divider(doc, rightX + 4, cardY + 7.5, rightX + 81, THEME.faintLine);
-  labelValue(doc, "Brand", r.brand, rightX + 4, cardY + 14);
-  labelValue(doc, "Model", r.model, rightX + 48, cardY + 14);
-  labelValue(doc, "Variant", r.variant, rightX + 4, cardY + 24);
-  labelValue(doc, "Car Status", r.carStatus, rightX + 48, cardY + 24);
-  labelValue(doc, "Transmission", r.transmissionType, rightX + 4, cardY + 34);
-  labelValue(doc, "Fuel", r.fuelType, rightX + 48, cardY + 34);
+  doc.text("Vehicle Info", mm(rightX + 4), mm(cardY + 7));
+  divider(doc, mm(rightX + 4), mm(cardY + 8.5), mm(rightX + cardW - 4), THEME.faintLine);
+  labelValue(doc, "Brand", r.brand, mm(rightX + 4), mm(cardY + 13));
+  labelValue(doc, "Model", r.model, mm(rightX + 50), mm(cardY + 13));
+  labelValue(doc, "Car Status", r.carStatus, mm(rightX + 4), mm(cardY + 21));
+  labelValue(doc, "VIN No.", r.vin, mm(rightX + 50), mm(cardY + 21));
+  labelValue(doc, "Variant", r.variant, mm(rightX + 4), mm(cardY + 25));
+  labelValue(doc, "Transmission", r.transmissionType, mm(rightX + 50), mm(cardY + 25));
+  labelValue(doc, "Fuel", r.fuelType, mm(rightX + 4), mm(cardY + 29));
+  labelValue(doc, "Engine", r.engine, mm(rightX + 50), mm(cardY + 29));
+  labelValue(doc, "Engine Type", r.engineType, mm(rightX + 4), mm(cardY + 33));
+  labelValue(doc, "Emission", r.emission, mm(rightX + 50), mm(cardY + 33));
+  labelValue(doc, "Keys", String(r.keys), mm(rightX + 85), mm(cardY + 33));
 
   // Running bar module
-  const barY = cardY + 41;
+  const barY = cardY + cardH + 9;
   sectionHeader(doc, "How Much Has My Car Been Driven Before The PDI Date?", barY);
-  roundedRect(doc, leftX, barY + 5, 130, 6, 3, THEME.softLine, THEME.softLine);
-  roundedRect(doc, leftX, barY + 5, 40, 6, 3, THEME.good, THEME.good);
+  // Background running bar
+  roundedRect(doc, mm(leftX), mm(barY + 7), mm(130), mm(8), 3, THEME.softLine, THEME.softLine);
+  // Foreground with defensive parsing
+  const kmsDrivenNum = isNaN(parseInt(r.kmsDriven)) ? 55 : parseInt(r.kmsDriven);
+  const fgBarW = Math.min((kmsDrivenNum / 130) * 130, 130);
+  roundedRect(doc, mm(leftX), mm(barY + 7), mm(fgBarW), mm(8), 3, THEME.good, THEME.good);
   setText(doc, "#065f46", 8.2);
-  doc.text("My Car's Running", leftX + 1.8, barY + 9.4);
+  doc.text("My Car's Running", mm(leftX + 2), mm(barY + 13));
   setText(doc);
-  doc.text("55 Kms", leftX + 135, barY + 9.4);
-  chip(doc, "No Tampering", leftX + 118, barY + 16);
+  doc.text(String(r.kmsDriven ?? "55 Kms"), mm(leftX + 135), mm(barY + 13));
+  chip(doc, String(r.tamperingStatus ?? "No Tampering"), mm(leftX + 118), mm(barY + 19));
+
+  // Avg. Running
+  setText(doc, THEME.text, 9.5);
+  doc.text("Avg. Running Before Delivery", mm(leftX), mm(barY + 26));
+  doc.text(String(r.avgRunning ?? "39 Kms"), mm(leftX + 60), mm(barY + 26));
+
+  // Details Text
+  setText(doc, THEME.subtext, 8);
+  doc.text(
+    `At the time of PDI, your car's ODO reading was ${String(r.kmsDriven ?? "55 Kms")}, which is slightly above the city average of ${String(r.avgRunning ?? "39 kms")}.`,
+    mm(leftX),
+    mm(barY + 33),
+    { maxWidth: mm(130) }
+  );
 
   drawFooter(doc);
 }
+
 
 /** =========================================================================
  * PAGE 2: PROFILE PHOTOS (360)
@@ -271,20 +348,32 @@ async function addProfilePhotosPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
 
-  sectionHeader(doc, "Profile Photos", mm(24), "Your Car’s 360° View • Check each side for a complete visual record");
+  sectionHeader(
+    doc,
+    "Profile Photos",
+    mm(24),
+    "Your Car’s 360° View • Check each side for a complete visual record"
+  );
 
   const cells = [
-    { label: "1. Front Left View", x: mm(24), y: mm(50), url: r.front_left_view_url },
-    { label: "2. Rear Left View", x: mm(90), y: mm(50), url: r.rear_left_view_url },
-    { label: "3. Rear Right View", x: mm(24), y: mm(120), url: r.rear_right_view_url },
-    { label: "4. Front Right View", x: mm(90), y: mm(120), url: r.front_right_view_url },
+    { label: "1. Front Left View", x: mm(24), y: mm(50), url: r.front_left_imageUrl },
+    { label: "2. Rear Left View", x: mm(90), y: mm(50), url: r.rear_left_imageUrl },
+    { label: "3. Rear Right View", x: mm(24), y: mm(120), url: r.rear_right_imageUrl },
+    { label: "4. Front Right View", x: mm(90), y: mm(120), url: r.front_right_imageUrl },
   ];
 
   for (const c of cells) {
     labeledPhotoBox(doc, c.label, c.x, c.y, 50, 50);
-    if (c.url) {
+    if (typeof c.url === "string" && c.url.trim()) {
       const data = await urlToDataURL(c.url);
-      if (data) doc.addImage(data, "JPEG", c.x + 1.2, c.y + 1.2, 50 - 2.4, 50 - 2.4, undefined, "FAST");
+      if (data) {
+        const format = data.match(/^data:image\/(\w+);base64,/)?.[1]?.toUpperCase() || "JPEG";
+        doc.addImage(data, format, c.x + 1.2, c.y + 1.2, 50 - 2.4, 50 - 2.4, undefined, "FAST");
+      } else {
+        console.warn(`Image not loaded: ${c.label} (${c.url})`);
+      }
+    } else {
+      console.warn(`Invalid or missing URL for ${c.label}`);
     }
   }
 
@@ -326,15 +415,15 @@ async function addBodyPanelsPage(doc, r) {
 
   let y = mm(44);
   for (const row of rows) {
-    const urls = r[`${row.key}_imageUrls`] || [];
+    const urls = Array.isArray(r[`${row.key}_imageUrls`]) ? r[`${row.key}_imageUrls`] : [];
     const cladding = row.claddingKey ? (r[row.claddingKey] ? "Yes" : "NA") : "NA";
     const repaint = row.repaintKey ? (r[row.repaintKey] ? "Yes" : "No") : "—";
-    const issue = (urls.length > 0 || r[row.claddingKey] || r[row.repaintKey]) ? "Observed" : "—";
+    const issue = urls.length > 0 || r[row.claddingKey] || r[row.repaintKey] ? "Observed" : "—";
 
-    // text cells
+    // Text cells
     setText(doc, THEME.text, 9);
     doc.text(row.label, colX[0], y);
-    doc.text("NA", colX[1], y); // thickness placeholder
+    doc.text(String(r[`${row.key}_paintThickness`] ?? "NA"), colX[1], y); // Dynamic paint thickness
     doc.text(issue, colX[2], y);
     doc.text(cladding, colX[3], y);
     doc.text(repaint, colX[4], y);
@@ -344,7 +433,7 @@ async function addBodyPanelsPage(doc, r) {
     divider(doc, mm(18), y + 4, mm(192), THEME.faintLine);
     y += 14;
 
-    // pagination
+    // Pagination
     if (y > mm(275)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
@@ -359,10 +448,8 @@ async function addBodyPanelsPage(doc, r) {
 }
 
 /** =========================================================================
- * PAGES 4..N: ALL REMAINING FIELDS WIRED FROM YOUR JSON
+ * PAGE 4: GLASSES
  * ========================================================================= */
-
-// 4) Glasses
 async function addGlassesPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
@@ -386,7 +473,7 @@ async function addGlassesPage(doc, r) {
   for (const row of rows) {
     setText(doc, THEME.text, 9.5);
     doc.text(row.label, PAGE_PAD_X, y + 4);
-    await drawThumbRow(doc, row.arr || [], PAGE_PAD_X + 50, y, 14, 14, 3, 4);
+    await drawThumbRow(doc, row.arr, PAGE_PAD_X + 50, y, 14, 14, 3, 4);
     divider(doc, PAGE_PAD_X, y + 18, A4.w - PAGE_PAD_X, THEME.faintLine);
     y += 20;
     if (y > mm(270)) {
@@ -400,7 +487,9 @@ async function addGlassesPage(doc, r) {
   drawFooter(doc);
 }
 
-// 5) Rubber
+/** =========================================================================
+ * PAGE 5: RUBBER
+ * ========================================================================= */
 async function addRubberPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
@@ -428,7 +517,7 @@ async function addRubberPage(doc, r) {
       checkmark(doc, PAGE_PAD_X + 51, y + 4.3, !!row.toggle);
       setText(doc);
     }
-    await drawThumbRow(doc, row.arr || [], PAGE_PAD_X + 60, y, 14, 14, 3, 4);
+    await drawThumbRow(doc, row.arr, PAGE_PAD_X + 60, y, 14, 14, 3, 4);
     divider(doc, PAGE_PAD_X, y + 18, A4.w - PAGE_PAD_X, THEME.faintLine);
     y += 20;
     if (y > mm(270)) {
@@ -442,7 +531,9 @@ async function addRubberPage(doc, r) {
   drawFooter(doc);
 }
 
-// 6) Seats & Belts
+/** =========================================================================
+ * PAGE 6: SEATS & BELTS
+ * ========================================================================= */
 async function addSeatsBeltsPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
@@ -471,7 +562,7 @@ async function addSeatsBeltsPage(doc, r) {
       checkmark(doc, PAGE_PAD_X + 51, y + 4.3, !!row.toggle);
       setText(doc);
     }
-    await drawThumbRow(doc, row.arr || [], PAGE_PAD_X + 60, y, 14, 14, 3, 4);
+    await drawThumbRow(doc, row.arr, PAGE_PAD_X + 60, y, 14, 14, 3, 4);
     divider(doc, PAGE_PAD_X, y + 18, A4.w - PAGE_PAD_X, THEME.faintLine);
     y += 20;
     if (y > mm(270)) {
@@ -503,7 +594,7 @@ async function addSeatsBeltsPage(doc, r) {
       checkmark(doc, PAGE_PAD_X + 51, y + 4.3, !!row.toggle);
       setText(doc);
     }
-    await drawThumbRow(doc, row.arr || [], PAGE_PAD_X + 60, y, 14, 14, 3, 4);
+    await drawThumbRow(doc, row.arr, PAGE_PAD_X + 60, y, 14, 14, 3, 4);
     divider(doc, PAGE_PAD_X, y + 18, A4.w - PAGE_PAD_X, THEME.faintLine);
     y += 20;
     if (y > mm(270)) {
@@ -518,7 +609,9 @@ async function addSeatsBeltsPage(doc, r) {
   drawFooter(doc);
 }
 
-// 7) Plastics
+/** =========================================================================
+ * PAGE 7: PLASTICS
+ * ========================================================================= */
 async function addPlasticsPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
@@ -548,7 +641,7 @@ async function addPlasticsPage(doc, r) {
       checkmark(doc, PAGE_PAD_X + 51, y + 4.3, !!row.toggle);
       setText(doc);
     }
-    await drawThumbRow(doc, row.arr || [], PAGE_PAD_X + 60, y, 14, 14, 3, 4);
+    await drawThumbRow(doc, row.arr, PAGE_PAD_X + 60, y, 14, 14, 3, 4);
     divider(doc, PAGE_PAD_X, y + 18, A4.w - PAGE_PAD_X, THEME.faintLine);
     y += 20;
     if (y > mm(270)) {
@@ -562,7 +655,9 @@ async function addPlasticsPage(doc, r) {
   drawFooter(doc);
 }
 
-// 8) Features (available + issueObserved)
+/** =========================================================================
+ * PAGE 8: FEATURES
+ * ========================================================================= */
 async function addFeaturesPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
@@ -583,7 +678,7 @@ async function addFeaturesPage(doc, r) {
     ["Ventilated Seat (Rear)", r.feature_ventilated_seat_rear_available, r.feature_ventilated_seat_rear_issueObserved],
   ];
 
-  // header row
+  // Header row
   setText(doc, THEME.subtext, 9);
   doc.text("Feature", PAGE_PAD_X, mm(34));
   doc.text("Available", PAGE_PAD_X + 95, mm(34));
@@ -618,13 +713,15 @@ async function addFeaturesPage(doc, r) {
   drawFooter(doc);
 }
 
-// 9) Live/Fluids + Diagnostics
+/** =========================================================================
+ * PAGE 9: LIVE/FLUIDS + DIAGNOSTICS
+ * ========================================================================= */
 async function addLiveFluidsDiagnosticsPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
   sectionHeader(doc, "Live Readings & Fluids", mm(24));
 
-  // Live
+  // Live Readings
   setText(doc, THEME.text, 10.5);
   doc.text("Live Readings", PAGE_PAD_X, mm(34));
   setText(doc, THEME.subtext, 9);
@@ -680,7 +777,7 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
     setText(doc, THEME.text, 9.5);
     doc.text("Other Observations:", PAGE_PAD_X, y);
     setText(doc, THEME.subtext, 9.5);
-    const wrapped = doc.splitTextToSize(r.other_observations, A4.w - PAGE_PAD_X * 2 - 10);
+    const wrapped = doc.splitTextToSize(String(r.other_observations), A4.w - PAGE_PAD_X * 2 - 10);
     doc.text(wrapped, PAGE_PAD_X + 40, y);
     setText(doc);
   }
@@ -688,7 +785,9 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   drawFooter(doc);
 }
 
-// 10) Tyres + Payment
+/** =========================================================================
+ * PAGE 10: TYRES + PAYMENT
+ * ========================================================================= */
 async function addTyresPaymentPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
@@ -712,7 +811,7 @@ async function addTyresPaymentPage(doc, r) {
       checkmark(doc, PAGE_PAD_X + 51, y + 4.3, !!row.toggle);
       setText(doc);
     }
-    await drawThumbRow(doc, row.arr || [], PAGE_PAD_X + 60, y, 14, 14, 3, 4);
+    await drawThumbRow(doc, row.arr, PAGE_PAD_X + 60, y, 14, 14, 3, 4);
     divider(doc, PAGE_PAD_X, y + 18, A4.w - PAGE_PAD_X, THEME.faintLine);
     y += 20;
     if (y > mm(270)) {
@@ -728,8 +827,8 @@ async function addTyresPaymentPage(doc, r) {
   sectionHeader(doc, "Payment Summary", y + 6);
   y += 16;
   labelValue(doc, "Amount", String(r.amount ?? "—"), PAGE_PAD_X, y);
-  labelValue(doc, "Payment Status", r.paymentStatus, PAGE_PAD_X + 70, y);
-  labelValue(doc, "Payment Mode", r.paymentMode, PAGE_PAD_X + 140, y);
+  labelValue(doc, "Payment Status", String(r.paymentStatus ?? "—"), PAGE_PAD_X + 70, y);
+  labelValue(doc, "Payment Mode", String(r.paymentMode ?? "—"), PAGE_PAD_X + 140, y);
 
   drawFooter(doc);
 }
@@ -738,16 +837,21 @@ async function addTyresPaymentPage(doc, r) {
  * MAIN EXPORT
  * ========================================================================= */
 export default async function generateInspectionPDF(report) {
+  if (!report || typeof report !== "object") {
+    console.error("Invalid or missing report data");
+    throw new Error("Report data is required");
+  }
+
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
-  // Cover (Figma look)
+  // Cover
   await addCoverPage(doc, report);
 
-  // Figma frames 2 & 3
+  // Profile Photos & Body Panels
   await addProfilePhotosPage(doc, report);
   await addBodyPanelsPage(doc, report);
 
-  // All remaining sections (every field from your JSON is used)
+  // Remaining sections
   await addGlassesPage(doc, report);
   await addRubberPage(doc, report);
   await addSeatsBeltsPage(doc, report);
@@ -757,5 +861,5 @@ export default async function generateInspectionPDF(report) {
   await addTyresPaymentPage(doc, report);
 
   // Save
-  doc.save(`PDI_Report_${report.bookingId || "report"}.pdf`);
+  doc.save(`PDI_Report_${String(report.bookingId ?? "report")}.pdf`);
 }

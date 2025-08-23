@@ -221,7 +221,9 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           spacing={2}
           sx={{ mb: 3 }}
         >
-          <Typography variant="h5">{tableConfig.title}</Typography>
+        <Typography variant="h5" sx={{ color: "#81da5b", fontWeight: "bold" }}>
+          {tableConfig.title}
+        </Typography>
 
           {!tableConfig.hideAddButton && (
             <Tooltip title="Add New">

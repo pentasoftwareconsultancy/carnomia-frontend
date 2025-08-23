@@ -1,40 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import ApiService from '../../core/services/api.service';
 import ServerUrl from '../../core/constants/serverUrl.constant';
 import StorageService from "../../core/services/storage.service";
 import { APPLICATION_CONSTANTS } from '../../core/constants/app.constant';
-import Report from '../engineer/report/Report';
 
-const timeSlots = ['09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '11:00 AM - 12:00 PM'];
+const AssignedJobs = () => {
+  const navigate = useNavigate();
 
-export default function AssignedJobs() {
   const [jobs, setJobs] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedJob, setSelectedJob] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     const fetchAssignedJobs = async () => {
       try {
         const user = JSON.parse(StorageService.getData(APPLICATION_CONSTANTS.STORAGE.USER_DETAILS));
-        console.log("User from storage:", user);
 
         const res = await new ApiService().apiget(
           `${ServerUrl.API_GET_ALL_REQUESTS_BY_ENGINEER}/${user.userId}`
         );
 
-        console.log("API Response:", res.data);
-
         const allJobs = res.data?.data || [];
-        console.log("All jobs:", allJobs);
-
         const assignedJobs = allJobs.filter(
           job => job.status === APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value
         );
-        console.log("Filtered Assigned Jobs:", assignedJobs);
-
         setJobs(assignedJobs);
       } catch (err) {
         console.error("Error fetching assigned jobs:", err);
@@ -42,6 +34,7 @@ export default function AssignedJobs() {
     };
     fetchAssignedJobs();
   }, []);
+
   const filteredJobs = jobs.filter(job => {
     const searchLower = searchText.toLowerCase();
     return (
@@ -52,37 +45,37 @@ export default function AssignedJobs() {
       job.address?.toLowerCase().includes(searchLower)
     );
   });
-  
+
   const handleStartPdi = (job) => {
     setSelectedJob(job);
     setShowPopup(true);
   };
 
-  const handleContinueInspection = async () => {
-    if (!selectedJob) return;
+  const handleContinueInspection = async (job) => {
+    if (!job) return;
+
     try {
+      // Update status in backend
       await new ApiService().apiput(
-        `${ServerUrl.API_GET_INSPECTION_UPDATE}/${selectedJob._id}`,
+        `${ServerUrl.API_GET_INSPECTION_UPDATE}/${job._id}`,
         { status: APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value }
       );
-      setJobs(prev => prev.filter(j => j._id !== selectedJob._id));
+
+      // Remove job from assigned jobs list
+      setJobs(prev => prev.filter(j => j._id !== job._id));
+
+      // Close popup
       setShowPopup(false);
-      setShowReport(true);
+
+      // Navigate to Report page (like OngoingJobs)
+      navigate("/engineer/dashboard/report/" + job._id, {
+        state: { job },
+      });
     } catch (err) {
       console.error("Failed to start PDI:", err);
       alert("Failed to start PDI. Try again.");
     }
   };
-
-  if (showReport && selectedJob) {
-    return (
-      <Report
-        job={selectedJob}
-        slot={timeSlots[0]}
-        onBack={() => setShowReport(false)}
-      />
-    );
-  }
 
   return (
     <div className="p-6 bg-primary min-h-screen">
@@ -145,11 +138,17 @@ export default function AssignedJobs() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowPopup(false)} variant="outlined">Cancel</Button>
-          <Button onClick={handleContinueInspection} variant="contained" color="success">
+          <Button
+            onClick={() => handleContinueInspection(selectedJob)}
+            variant="contained"
+            color="success"
+          >
             Continue for Inspection
           </Button>
         </DialogActions>
       </Dialog>
     </div>
   );
-}
+};
+
+export default AssignedJobs;

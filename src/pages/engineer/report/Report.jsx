@@ -53,7 +53,7 @@ export default function Report() {
     "Brakes",
     "Diagnostic Codes",
     "Tyres",
-    "OtherObservations",
+    "Other Observations",
   ];
 
   useEffect(() => {

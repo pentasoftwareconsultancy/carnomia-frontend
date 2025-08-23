@@ -5,8 +5,8 @@ import TermsPopup from "../../components/common/TermsPopup";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import { useAuth } from "../../core/contexts/AuthContext"; // Updated import path
-import ServerUrl from "../../core/constants/serverUrl.constant"; // Adjust the import path as necessary
 import { toast } from "react-toastify";
+import ServerUrl from "../../core/constants/serverUrl.constant"; 
 import ApiService from "../../core/services/api.service";
 
 export default function Login() {

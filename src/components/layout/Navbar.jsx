@@ -70,11 +70,15 @@ export default function Navbar({ onToggleSidebar }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef();
+  const profileRef = useRef();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -265,18 +269,14 @@ export default function Navbar({ onToggleSidebar }) {
             {/* Location selector: hidden on dashboard */}
             {!hideLocationOnDashboard && (
               <>
-                {/* Small screen: circle icon */}
+                {/* Small screen: circle icon for location */}
                 <div className="block sm:hidden relative">
                   <button
                     onClick={() => setOpen((o) => !o)}
                     aria-label="Choose city"
                     className="w-10 h-10 rounded-full bg-button flex items-center justify-center text-white font-bold cursor-pointer hover:bg-[#7db167] transition"
                   >
-                    {selectedCity ? (
-                      selectedCity.charAt(0).toUpperCase()
-                    ) : (
-                      <FiMapPin className="w-5 h-5" />
-                    )}
+                    <FiMapPin className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -313,15 +313,26 @@ export default function Navbar({ onToggleSidebar }) {
             )}
 
             {!isLoggedIn ? (
-              <Link
-                to="/login"
-                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-button hover:bg-white hover:text-green-700 border border-green-600 rounded-xl transition"
-              >
-                <FiUser className="text-lg" />
-                <span>Login / Signup</span>
-              </Link>
+              <>
+                {/* Mobile: icon only */}
+                <Link
+                  to="/login"
+                  className="block sm:hidden w-10 h-10 rounded-full bg-button flex items-center justify-center text-white font-bold cursor-pointer hover:bg-[#7db167] transition"
+                  aria-label="Login"
+                >
+                  <FiUser className="text-lg" />
+                </Link>
+                {/* Desktop: full button */}
+                <Link
+                  to="/login"
+                  className="hidden sm:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-button hover:bg-white hover:text-green-700 border border-green-600 rounded-xl transition"
+                >
+                  <FiUser className="text-lg" />
+                  <span>Login / Signup</span>
+                </Link>
+              </>
             ) : (
-              <div className="relative">
+              <div className="relative" ref={profileRef}>
                 <button
                   onClick={toggleProfile}
                   className="w-10 h-10 rounded-full bg-[#81da5a] cursor-pointer text-white font-bold flex items-center justify-center hover:bg-button transition"

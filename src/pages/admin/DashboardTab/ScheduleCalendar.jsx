@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import {
+  Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem, Chip
+} from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import ApiService from "../../../core/services/api.service";
@@ -13,6 +15,7 @@ const ScheduleCalendar = ({ calendarDate, setCalendarDate, requests }) => {
   const [selectedEngineerId, setSelectedEngineerId] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedSlots, setSelectedSlots] = useState([]);
 
   useEffect(() => {
     const fetchEngineers = async () => {
@@ -32,23 +35,20 @@ const ScheduleCalendar = ({ calendarDate, setCalendarDate, requests }) => {
           throw new Error('Invalid API response structure');
         }
 
-        console.log('Fetched Engineers:', fetchedEngineers); // Debug log
         setEngineers(fetchedEngineers);
 
-        // Derive unique locations from engineers' cities
         const uniqueLocations = [...new Set(
           fetchedEngineers
-            .map(eng => eng.city?.trim()) // Handle null/undefined and trim spaces
-            .filter(city => city && city.length > 0) // Remove empty or null cities
+            .map(eng => eng.city?.trim())
+            .filter(city => city && city.length > 0)
         )].sort();
-        console.log('Unique Locations:', uniqueLocations); // Debug log
+
         setLocations(uniqueLocations);
 
         if (uniqueLocations.length === 0) {
           toast.warn('No valid locations found for engineers');
         }
       } catch (err) {
-        console.error("Failed to fetch engineers:", err);
         setError('Failed to load engineers. Please try again.');
         toast.error('Error fetching engineers');
       } finally {
@@ -59,68 +59,96 @@ const ScheduleCalendar = ({ calendarDate, setCalendarDate, requests }) => {
     fetchEngineers();
   }, []);
 
-  // Filter engineers based on selected location
   const filteredEngineers = engineers.filter((eng) => {
     const locationMatch = selectedLocation === 'all' || eng.city?.trim() === selectedLocation;
-    return locationMatch && eng.active !== false; // Allow engineers without active field or active: true
+    return locationMatch && eng.active !== false;
   });
 
-  // Debug filtered engineers
-  useEffect(() => {
-    console.log('Selected Location:', selectedLocation);
-    console.log('Filtered Engineers:', filteredEngineers);
-  }, [selectedLocation, filteredEngineers]);
-
-  // Reset selectedEngineerId when location changes if the current engineer is not valid
   useEffect(() => {
     if (selectedEngineerId !== 'all' && filteredEngineers.length > 0) {
       const isValidEngineer = filteredEngineers.some(eng => eng._id === selectedEngineerId);
       if (!isValidEngineer) {
         setSelectedEngineerId('all');
-        console.log('Reset selectedEngineerId to "all" due to location change');
       }
     } else if (filteredEngineers.length === 0 && selectedEngineerId !== 'all') {
       setSelectedEngineerId('all');
-      console.log('Reset selectedEngineerId to "all" due to no engineers available');
     }
   }, [selectedLocation, filteredEngineers, selectedEngineerId]);
 
-  // Calculate available slots for a given date
-  const getAvailableSlotsCount = (dateStr) => {
+  const calculateSlotsForDate = (date) => {
+    const dateStr = date.toISOString().split('T')[0]; // Use YYYY-MM-DD format
+    const slots = ["Slot 1", "Slot 2", "Slot 3"];
     const activeEngineers = selectedEngineerId === 'all'
       ? filteredEngineers
       : filteredEngineers.filter(eng => eng._id === selectedEngineerId);
-    const totalPossibleAssignments = activeEngineers.length * 3; // 3 slots per engineer
 
-    const assignedSlots = requests.filter(
+    if (activeEngineers.length === 0) return [];
+
+    const assignedRequests = requests.filter(
       (req) =>
         req.date === dateStr &&
         activeEngineers.some((eng) => eng._id === req.engineerId) &&
         req.status !== 'completed' &&
         req.slot
-    ).length;
+    );
 
-    return Math.max(0, totalPossibleAssignments - assignedSlots);
+    const assignedSlots = assignedRequests.map(r => r.slot);
+    return slots.filter(slot => !assignedSlots.includes(slot));
+  };
+
+  const handleDateClick = (date) => {
+    const newDate = new Date(date); // Create a new Date instance to avoid reference issues
+    setCalendarDate(newDate);
+    const slots = calculateSlotsForDate(newDate);
+    setSelectedSlots(slots);
   };
 
   const getTileClassName = ({ date }) => {
-    const dateStr = date.toISOString().split('T')[0];
-    const availableSlots = getAvailableSlotsCount(dateStr);
+    const currentDateStr = calendarDate ? calendarDate.toISOString().split('T')[0] : null;
+    const tileDateStr = date.toISOString().split('T')[0];
+    const availableSlots = calculateSlotsForDate(date).length;
     const maxSlots = (selectedEngineerId === 'all' ? filteredEngineers.length : 1) * 3;
+    let classes = [];
 
-    if (maxSlots === 0) return null; // No active engineers
+    // Highlight the currently selected date
+    if (currentDateStr === tileDateStr) {
+      classes.push('selected-date');
+    }
 
-    if (availableSlots === maxSlots && maxSlots >= 3) return 'all-slots-available';
-    if (availableSlots === maxSlots - 1) return 'two-slots-available';
-    if (availableSlots === maxSlots - 2) return 'one-slot-available';
-    if (availableSlots === 0) return 'no-slots-available';
-    return null;
+    if (maxSlots > 0) {
+      if (availableSlots === maxSlots && maxSlots >= 3) classes.push('all-slots-available');
+      else if (availableSlots === maxSlots - 1) classes.push('two-slots-available');
+      else if (availableSlots === maxSlots - 2) classes.push('one-slot-available');
+      else if (availableSlots === 0) classes.push('no-slots-available');
+    }
+
+    return classes.join(" ");
   };
 
+  // ✅ Dynamic date disabling logic
+  const isDateDisabled = ({ date }) => {
+    // Disable all past dates
+    if (date < new Date().setHours(0, 0, 0, 0)) {
+      return true;
+    }
+
+    // Case 1: No engineer selected → keep all future dates enabled
+    if (selectedEngineerId === "all") {
+      return false;
+    }
+
+    // Case 2: Engineer selected → disable dates if that engineer has no slots
+    const slots = calculateSlotsForDate(date);
+    return slots.length === 0;
+  };
+
+
+  const selectedEngineer = engineers.find(eng => eng._id === selectedEngineerId);
+
   return (
-    <Card>
+    <Card sx={{ background: '#ffff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', p: 2 }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
+        <Typography variant="h5" gutterBottom sx={{ color: '#81da5b', fontWeight: 'bold', textAlign: 'center', mb: 3 }}>
           Schedule Calendar
         </Typography>
 
@@ -131,21 +159,23 @@ const ScheduleCalendar = ({ calendarDate, setCalendarDate, requests }) => {
         )}
 
         {error && (
-          <Typography variant="body2" sx={{ color: '#F44336', textAlign: 'center', py: 2 }}>
+          <Typography variant="body2" sx={{ color: '#D32F2F', textAlign: 'center', py: 2 }}>
             {error}
           </Typography>
         )}
 
         {!loading && !error && (
           <>
-            <Box display="flex" gap={2} mb={2}>
-              <FormControl size="small" sx={{ minWidth: 150 }}>
+            {/* Filters */}
+            <Box display="flex" gap={2} mb={4} justifyContent="center" flexWrap="wrap">
+              <FormControl size="small" sx={{ minWidth: 150, background: '#FFF', borderRadius: '8px' }}>
                 <InputLabel>Location</InputLabel>
                 <Select
                   value={selectedLocation}
                   label="Location"
                   onChange={(e) => setSelectedLocation(e.target.value)}
                   disabled={locations.length === 0}
+                  sx={{ borderRadius: '8px' }}
                 >
                   <MenuItem value="all">All Locations</MenuItem>
                   {locations.map((loc) => (
@@ -156,13 +186,14 @@ const ScheduleCalendar = ({ calendarDate, setCalendarDate, requests }) => {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 180 }}>
+              <FormControl size="small" sx={{ minWidth: 180, background: '#FFF', borderRadius: '8px' }}>
                 <InputLabel>Engineer</InputLabel>
                 <Select
                   value={selectedEngineerId}
                   label="Engineer"
                   onChange={(e) => setSelectedEngineerId(e.target.value)}
                   disabled={filteredEngineers.length === 0}
+                  sx={{ borderRadius: '8px' }}
                 >
                   <MenuItem value="all">All Engineers</MenuItem>
                   {filteredEngineers.map((eng) => (
@@ -174,56 +205,141 @@ const ScheduleCalendar = ({ calendarDate, setCalendarDate, requests }) => {
               </FormControl>
             </Box>
 
-            <Box display="flex" justifyContent="center">
-              <Calendar
-                onChange={setCalendarDate}
-                value={calendarDate}
-                tileClassName={getTileClassName}
-                tileDisabled={() => filteredEngineers.length === 0}
-              />
+            {/* Calendar + Slots Side by Side */}
+            <Box display="flex" justifyContent="center" gap={3} mt={2} flexWrap="wrap">
+              {/* Calendar */}
+              <Card
+                sx={{
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  background: '#FFF',
+                  flex: '0 1 400px',
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: "bold", color: "#81da5b", mb: 2 }}>
+                    Select a Date
+                  </Typography>
+                  <Calendar
+                    onChange={handleDateClick}
+                    value={calendarDate}
+                    tileClassName={getTileClassName}
+                    tileDisabled={isDateDisabled}
+                    className="calendar-full"
+                    minDate={new Date()}   // this also ensures no past date selection
+                  />
+
+                </CardContent>
+              </Card>
+
+              {/* Slots */}
+              {selectedEngineerId !== 'all' && (
+                <Card
+                  sx={{
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    background: '#FFF',
+                    flex: '0 1 300px',
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#81da5b', mb: 2 }}>
+                      {selectedEngineer ? selectedEngineer.name : "Engineer"}'s Slots
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2, color: "#81da5b" }}>
+                      Date: {calendarDate ? calendarDate.toISOString().split("T")[0] : ''}
+                    </Typography>
+
+                    {selectedSlots.length > 0 ? (
+                      <Box display="flex" flexDirection="column" gap={1}>
+                        {selectedSlots.map((slot) => (
+                          <Chip
+                            key={slot}
+                            label={slot}
+                            sx={{
+                              background: '#81da5b',
+                              color: '#FFF',
+                              fontWeight: 'bold',
+                              borderRadius: '12px',
+                              padding: '8px',
+                              fontSize: '0.95rem',
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" sx={{ color: "#D32F2F", fontStyle: 'italic' }}>
+                        No slots available
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </Box>
           </>
         )}
 
+        {/* Styles */}
         <style>{`
+          .calendar-full {
+            width: 100% !important;
+          }
+          .selected-date {
+            background: #1976D2 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            font-weight: bold;
+          }
           .react-calendar {
             border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
             padding: 10px;
-            max-width: 100%;
+          }
+          .react-calendar__tile--active.selected-date {
+            background: #1976D2 !important;
+            color: #fff !important;
+            border-radius: 50% !important;
           }
           .react-calendar__tile--now {
-            background: #E8F5E9;
+            background: #E3F2FD !important;
+            border-radius: 50%;
           }
           .react-calendar__tile--active {
-            background: #4CAF50;
-            color: white;
+            background: #1976D2 !important;
+            color: white !important;
+            border-radius: 50%;
           }
           .all-slots-available {
-            background: #F5F5F7 /* light green */
+            background: #A5D6A7 !important;
             border-radius: 50%;
-            color: black;
+            color: #1B5E20 !important;
+            font-weight: bold;
           }
           .two-slots-available {
-            background: #FFEB3B; /* yellow */
+            background: #FFCA28 !important;
             border-radius: 50%;
-            color: black;
+            color: #F57F17 !important;
+            font-weight: bold;
           }
           .one-slot-available {
-            background: #FF9800; /* orange */
+            background: #FF9800 !important;
             border-radius: 50%;
-            color: white;
+            color: #FFF !important;
+            font-weight: bold;
           }
           .no-slots-available {
-            background: #F44336; /* red */
+            background: #EF5350 !important;
             border-radius: 50%;
-            color: white;
+            color: #FFF !important;
+            font-weight: bold;
           }
-          .react-calendar__tile--disabled {
-            background: #E0E0E0;
-            color: #9E9E9E;
+          .react-calendar__tile:disabled {
+            background: #f5f5f5 !important;
+            color: #bdbdbd !important;
+            opacity: 0.6;
             cursor: not-allowed;
+            border-radius: 50% !important;
           }
         `}</style>
       </CardContent>

@@ -1,40 +1,80 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const Engine = ({ data = {}, onChange }) => {
-  // Example options for engine issues
   const options = [
-    { value: '', label: 'Select engine issue' },
     { value: 'overheating', label: 'Overheating' },
     { value: 'oil_leak', label: 'Oil Leak' },
     { value: 'misfire', label: 'Misfire' },
     { value: 'noise', label: 'Unusual Noise' },
-    { value: 'none', label: 'No Issue' },
   ];
 
-  const selectedValue = data.engine_issue || '';
+  const [selectedIssues, setSelectedIssues] = useState(() => {
+    if (Array.isArray(data.engine_issues)) return data.engine_issues;
+    if (data.engine_issue && data.engine_issue !== 'none') return [data.engine_issue];
+    return [];
+  });
 
-  // Notify parent about dropdown value change
-  const handleChange = (e) => {
-    if (typeof onChange === 'function') {
-      onChange('engine_issue', e.target.value);
-    }
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    // Notify parent whenever selectedIssues change
+    if (onChange) onChange('engine_issues', selectedIssues);
+  }, [selectedIssues, onChange]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleCheckboxChange = (value) => {
+    setSelectedIssues((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
   };
 
+  const displayText = selectedIssues.length
+    ? options.filter((o) => selectedIssues.includes(o.value)).map((o) => o.label).join(', ')
+    : 'Select engine issues';
+
   return (
-    <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Engine</h2>
-      <div className="flex flex-col w-full">
-        <select
-          value={selectedValue}
-          onChange={handleChange}
-          className="w-full p-2 border border-white/20 rounded bg-[#ffffff0a] text-white focus:outline-none focus:ring-2 focus:ring-lime-500"
+    <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white relative">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Engine Issues</h2>
+
+      <div ref={dropdownRef} className="relative w-full">
+        <button
+          type="button"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="w-full p-2 bg-gray-800 text-white rounded-md border border-white/20 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-lime-500"
         >
-          {options.map(({ value, label }) => (
-            <option key={value} value={value} className="text-black">
-              {label}
-            </option>
-          ))}
-        </select>
+          <span>{displayText}</span>
+          <span className="ml-2">{dropdownOpen ? '▲' : '▼'}</span>
+        </button>
+
+        {dropdownOpen && (
+          <div className="absolute z-10 mt-1 w-full bg-gray-800 border border-white/20 rounded-md shadow-lg max-h-60 overflow-auto">
+            {options.map(({ value, label }) => (
+              <label
+                key={value}
+                className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-700"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedIssues.includes(value)}
+                  onChange={() => handleCheckboxChange(value)}
+                  className="w-4 h-4"
+                />
+                <span className="text-white">{label}</span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

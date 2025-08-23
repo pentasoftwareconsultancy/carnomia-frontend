@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { FaDownload, FaChevronDown } from "react-icons/fa";
@@ -13,7 +13,12 @@ const carStatusOptions = [
 ];
 
 const Request = () => {
+  
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const query = new URLSearchParams(useLocation().search);
+  const isAdm = query.get("isAdm") === "true";
 
   // form state
 const [selectedBrand, setSelectedBrand] = useState("");
@@ -31,7 +36,10 @@ const [note, setNotes] = useState("");
 const [address, setAddress] = useState("");
 const [dealer, setDealer] = useState("");
 const [selectedImage, setSelectedImage] = useState(jeepImage);
-const [errorMessage, setErrorMessage] = useState(""); // For error handling
+const [errorMessage, setErrorMessage] = useState(""); 
+
+const [customerName, setCustomerName] = useState("");
+const [customerMobile, setCustomerMobile] = useState("");
 
 useEffect(() => {
   const fetchVehicles = async () => {
@@ -135,6 +143,8 @@ const handleSubmit = async (e) => {
     fuelType: fuel,
     imageUrl:selectedImage,
     carStatus: carStatus,
+    customerName: customerName,
+    customerMobile: customerMobile,
   };
 
   try {
@@ -154,7 +164,11 @@ const handleSubmit = async (e) => {
     setPdiDate("");
     setAddress("");
     setDealer("");
-
+    setNotes("");
+    if (isAdm) {
+        setCustomerName("");
+        setCustomerMobile("");
+      }
   } catch (error) {
     console.error("Error creating PDI:", error);
     setErrorMessage("Failed to create PDI. Please try again later.");
@@ -214,6 +228,28 @@ const handleSubmit = async (e) => {
           {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
 
           <form className="space-y-3 md:space-y-4" onSubmit={handleSubmit}>
+
+            {isAdm && (
+              <>
+                <input
+                  type="text"
+                  placeholder="Customer Name"
+                  required
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-button"
+                />
+                <input
+                  type="tel"
+                  placeholder="Customer Mobile"
+                  required
+                  value={customerMobile}
+                  onChange={(e) => setCustomerMobile(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-button"
+                />
+              </>
+            )}
+
             <SelectField
               label="Select Brand"
               required
@@ -341,7 +377,7 @@ const SelectField = ({
   toggle,
   disabled = false,
   required = true,
-}) => (
+}) => ( 
   <div className="relative">
     <motion.div whileHover={{ scale: 1.01 }} className="w-full">
       <select

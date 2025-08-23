@@ -21,18 +21,18 @@ const labelNames = {
 };
 
 const photoCount = 5;
+const issueOptions = ["Crack", "Chip", "Scratch"];
 
 const SeatBelts = ({ data = {}, onChange }) => {
-  // Issues state initialization from props data
   const [condition, setCondition] = useState(() => {
     const init = {};
     seatbeltPanels.forEach((panel) => {
-      init[panel] = data?.[`seatbelt_${panel}_issues`] || "None";
+      const existing = data?.[`seatbelt_${panel}_issues`];
+      init[panel] = Array.isArray(existing) ? existing : existing ? [existing] : [];
     });
     return init;
   });
 
-  // Photos state init from props data
   const [photos, setPhotos] = useState(() => {
     const init = {};
     seatbeltPanels.forEach((panel) => {
@@ -44,16 +44,13 @@ const SeatBelts = ({ data = {}, onChange }) => {
     return init;
   });
 
-  // Third row toggle state from data
   const [thirdRowEnabled, setThirdRowEnabled] = useState(data?.seatbelt_third_row_toggle || false);
-
-  const videoRefs = useRef({});
-  const [streamStates, setStreamStates] = useState({});
-  const [isCameraActive, setIsCameraActive] = useState({});
   const [showDropdown, setShowDropdown] = useState(null);
   const [showPhoto, setShowPhoto] = useState(null);
+  const [isCameraActive, setIsCameraActive] = useState({});
+  const [streamStates, setStreamStates] = useState({});
+  const videoRefs = useRef({});
 
-  // Stop all streams on unmount
   useEffect(() => {
     return () => {
       Object.values(streamStates).forEach((stream) => {
@@ -62,63 +59,56 @@ const SeatBelts = ({ data = {}, onChange }) => {
     };
   }, [streamStates]);
 
-  // Update condition locally and propagate onChange
-  const handleConditionChange = (panel, val) => {
+  const handleConditionChange = (panel, issue) => {
     setCondition((prev) => {
-      const updated = { ...prev, [panel]: val };
-      onChange?.(`seatbelt_${panel}_issues`, val);
-      return updated;
+      const current = prev[panel] || [];
+      const updated = current.includes(issue)
+        ? current.filter((i) => i !== issue)
+        : [...current, issue];
+      onChange?.(`seatbelt_${panel}_issues`, updated);
+      return { ...prev, [panel]: updated };
     });
   };
 
-  // Update photos locally and propagate onChange
   const updatePhotos = (panel, newPhotos) => {
     setPhotos((prev) => {
       const updated = { ...prev, [panel]: newPhotos };
-      onChange?.(`seatbelt_${panel}_imageUrls`, newPhotos);
+      onChange?.(`seatbelt_${panel}_imageUrls`, newPhotos.filter(Boolean));
       return updated;
     });
   };
 
-  // Toggle third row boolean and propagate onChange
   const toggleThirdRow = () => {
     const newVal = !thirdRowEnabled;
     setThirdRowEnabled(newVal);
     onChange?.("seatbelt_third_row_toggle", newVal);
   };
 
-  // Handle file upload
   const handleFileUpload = async (e, panel, idx) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      try {
-        const uploadedData = await FileUploaderService.uploadFileToServer(file, panel);
-        const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
-        if (imageUrl) {
-          const newPhotos = [...(photos[panel] || Array(photoCount).fill(null))];
-          newPhotos[idx] = imageUrl;
-          updatePhotos(panel, newPhotos);
-          setShowDropdown(null);
-        }
-      } catch (error) {
-        console.error("Upload failed:", error);
-        alert("Failed to upload image. Please try again.");
+    if (!file || !file.type.startsWith("image/")) return alert("Select a valid image file");
+
+    const arr = [...photos[panel]];
+    try {
+      const uploaded = await FileUploaderService.uploadFileToServer(file, panel);
+      const imageUrl = uploaded.files?.[0]?.fileUrl || null;
+      if (imageUrl) {
+        arr[idx] = imageUrl;
+        updatePhotos(panel, arr);
+        setShowDropdown(null);
       }
-    } else {
-      alert("Please select a valid image file.");
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Failed to upload image");
     }
   };
 
-  // Camera start/stop and photo capture
   const handleCameraClick = async (panel, idx) => {
     const slotKey = `${panel}-${idx}`;
-    const isActive = isCameraActive[slotKey];
-
-    if (!isActive) {
+    if (!isCameraActive[slotKey]) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         if (videoRefs.current[slotKey]) videoRefs.current[slotKey].srcObject = stream;
-
         setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
         setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
       } catch {
@@ -134,12 +124,11 @@ const SeatBelts = ({ data = {}, onChange }) => {
       canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const photo = canvas.toDataURL("image/png");
-      const newPhotos = [...(photos[panel] || Array(photoCount).fill(null))];
-      newPhotos[idx] = photo;
-      updatePhotos(panel, newPhotos);
+      const arr = [...photos[panel]];
+      arr[idx] = photo;
+      updatePhotos(panel, arr);
 
       streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
-
       setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
       setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
       setShowDropdown(null);
@@ -158,149 +147,86 @@ const SeatBelts = ({ data = {}, onChange }) => {
     }
   };
 
-  const capitalizeFirstWord = (str) => {
-    if (!str) return str;
-    const words = str.trim().split(" ");
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-    return words.join(" ");
-  };
-
-  if (!photos || Object.keys(photos).length === 0) {
-    return <div className="text-white">Loading seatbelt data...</div>;
-  }
-
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-white text-left">Seat Belts</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Seat Belts</h2>
+
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {seatbeltPanels.map((panel, idx) => (
-          <div key={panel} className="flex flex-col w-full">
-            {panel === "third_row" ? (
-              <>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-md text-white font-medium text-left">
-                    {`${idx + 1}. ${labelNames[panel] || capitalizeFirstWord(panel.replace(/_/g, " "))}`}
-                  </label>
-                  <ToggleButton checked={thirdRowEnabled} onChange={toggleThirdRow} />
-                </div>
-                {thirdRowEnabled && (
-                  <>
-                    <div className="mb-4">
-                      <label className="text-md text-white font-medium text-left mb-2">Issues</label>
-                      <select
-                        value={condition[panel] || "None"}
-                        onChange={(e) => handleConditionChange(panel, e.target.value)}
-                        className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
-                      >
-                        <option>None</option>
-                        <option>Crack</option>
-                        <option>Chip</option>
-                        <option>Scratch</option>
-                      </select>
-                    </div>
-                    {condition[panel] !== "None" && (
-                      <div className="mt-2 flex flex-col items-center">
-                        <div className="mt-2 flex flex-wrap gap-4 justify-center">
-                          {Array.from({ length: photoCount }).map((_, i) => (
-                            <div key={i} className="relative">
-                              {photos[panel]?.[i] ? (
-                                <img
-                                  src={photos[panel][i]}
-                                  alt={`Photo ${i + 1} for ${panel}`}
-                                  className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                                  onClick={() => setShowPhoto(photos[panel][i])}
-                                />
-                              ) : (
-                                <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
-                                  <button
-                                    onClick={() => handlePlusClick(panel, i)}
-                                    className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
-                                    title={photos[panel]?.[i] ? "View Photo" : "Add Photo"}
-                                  >
-                                    <AiOutlinePlus className="text-xl" />
-                                  </button>
-                                </div>
-                              )}
+        {seatbeltPanels.map((panel, idx) => {
+          const panelPhotos = photos[panel] || [];
+          const firstEmptyIdx = panelPhotos.findIndex((p) => !p);
 
-                              {showDropdown === `${panel}-${i}` && (
-                                <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
-                                  <button
-                                    onClick={() => handleCameraClick(panel, i)}
-                                    className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 w-full text-left"
-                                  >
-                                    <AiOutlineCamera className="mr-2" /> Take Photo
-                                  </button>
-                                  <label className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 cursor-pointer w-full">
-                                    <AiOutlineUpload className="mr-2" /> Upload Photo
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      className="hidden"
-                                      onChange={(e) => handleFileUpload(e, panel, i)}
-                                    />
-                                  </label>
-                                </div>
-                              )}
+          return (
+            <div key={panel} className="flex flex-col w-full relative">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-md text-white font-medium text-left">
+                  {`${idx + 1}. ${labelNames[panel] || panel.replace(/_/g, " ")}`}
+                </label>
+                {panel === "third_row" && <ToggleButton checked={thirdRowEnabled} onChange={toggleThirdRow} />}
+              </div>
 
-                              <video
-                                ref={(el) => (videoRefs.current[`${panel}-${i}`] = el)}
-                                autoPlay
-                                className={isCameraActive[`${panel}-${i}`] ? "w-24 h-24 rounded-md" : "hidden"}
-                              />
-                            </div>
-                          ))}
-                        </div>
+              {(panel !== "third_row" || thirdRowEnabled) && (
+                <>
+                  {/* Issues Dropdown */}
+                  <div className="mb-4 relative">
+                    <label className="text-md text-white font-medium text-left mb-2">Issues</label>
+                    <button
+                      type="button"
+                      onClick={() => toggleDropdown(panel)}
+                      className="w-full bg-gray-800 text-white p-2 rounded-md flex justify-between items-center focus:outline-none"
+                    >
+                      {condition[panel].length > 0 ? condition[panel].join(", ") : "Select Issues"}
+                      <span className="ml-2">&#9662;</span>
+                    </button>
+
+                    {showDropdown === panel && (
+                      <div className="absolute z-20 mt-1 w-full bg-gray-800 border border-white/20 rounded-md shadow-lg max-h-48 overflow-auto">
+                        {issueOptions.map((issue) => (
+                          <label
+                            key={issue}
+                            className="flex items-center gap-2 px-4 py-2 cursor-pointer text-white hover:bg-gray-700"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={condition[panel].includes(issue)}
+                              onChange={() => handleConditionChange(panel, issue)}
+                              className="w-4 h-4"
+                            />
+                            {issue}
+                          </label>
+                        ))}
                       </div>
                     )}
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <label className="text-md text-white font-medium text-left mb-2">
-                  {`${idx + 1}. ${labelNames[panel] || capitalizeFirstWord(panel.replace(/_/g, " "))}`}
-                </label>
-                <div className="mb-4">
-                  <label className="text-md text-white font-medium text-left mb-2">Issues</label>
-                  <select
-                    value={condition[panel] || "None"}
-                    onChange={(e) => handleConditionChange(panel, e.target.value)}
-                    className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-lime-400"
-                  >
-                    <option>None</option>
-                    <option>Crack</option>
-                    <option>Chip</option>
-                    <option>Scratch</option>
-                  </select>
-                </div>
-                {condition[panel] !== "None" && (
-                  <div className="mt-2 flex flex-col items-center">
-                    <div className="mt-2 flex flex-wrap gap-4 justify-center">
-                      {Array.from({ length: photoCount }).map((_, i) => (
-                        <div key={i} className="relative">
-                          {photos[panel]?.[i] ? (
-                            <img
-                              src={photos[panel][i]}
-                              alt={`Photo ${i + 1} for ${panel}`}
-                              className="w-24 h-24 object-cover rounded-md cursor-pointer"
-                              onClick={() => setShowPhoto(photos[panel][i])}
-                            />
-                          ) : (
-                            <div className="w-24 h-24 bg-gray-700 rounded-md flex items-center justify-center">
-                              <button
-                                onClick={() => handlePlusClick(panel, i)}
-                                className="p-2 rounded-full bg-gray-500 text-white hover:bg-opacity-80"
-                                title={photos[panel]?.[i] ? "View Photo" : "Add Photo"}
-                              >
-                                <AiOutlinePlus className="text-xl" />
-                              </button>
-                            </div>
-                          )}
+                  </div>
 
-                          {showDropdown === `${panel}-${i}` && (
-                            <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
+                  {/* Photos */}
+                  {condition[panel].length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-4 justify-left items-center relative">
+                      {panelPhotos.map((photo, i) =>
+                        photo ? (
+                          <img
+                            key={i}
+                            src={photo}
+                            alt={`${panel} photo ${i + 1}`}
+                            className="w-24 h-24 object-cover rounded-md cursor-pointer"
+                            onClick={() => setShowPhoto(photo)}
+                          />
+                        ) : null
+                      )}
+
+                      {firstEmptyIdx !== -1 && (
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                          <button
+                            onClick={() => handlePlusClick(panel, firstEmptyIdx)}
+                            className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-500 hover:bg-gray-600 text-white text-2xl"
+                          >
+                            <AiOutlinePlus />
+                          </button>
+
+                          {showDropdown === `${panel}-${firstEmptyIdx}` && (
+                            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
                               <button
-                                onClick={() => handleCameraClick(panel, i)}
+                                onClick={() => handleCameraClick(panel, firstEmptyIdx)}
                                 className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 w-full text-left"
                               >
                                 <AiOutlineCamera className="mr-2" /> Take Photo
@@ -311,26 +237,29 @@ const SeatBelts = ({ data = {}, onChange }) => {
                                   type="file"
                                   accept="image/*"
                                   className="hidden"
-                                  onChange={(e) => handleFileUpload(e, panel, i)}
+                                  onChange={(e) => handleFileUpload(e, panel, firstEmptyIdx)}
                                 />
                               </label>
                             </div>
                           )}
-
-                          <video
-                            ref={(el) => (videoRefs.current[`${panel}-${i}`] = el)}
-                            autoPlay
-                            className={isCameraActive[`${panel}-${i}`] ? "w-24 h-24 rounded-md" : "hidden"}
-                          />
                         </div>
+                      )}
+
+                      {panelPhotos.map((_, i) => (
+                        <video
+                          key={`video-${i}`}
+                          ref={(el) => (videoRefs.current[`${panel}-${i}`] = el)}
+                          autoPlay
+                          className={isCameraActive[`${panel}-${i}`] ? "w-24 h-24 rounded-md" : "hidden"}
+                        />
                       ))}
                     </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {showPhoto && <FullScreenPhotoViewer photo={showPhoto} onClose={() => setShowPhoto(null)} />}
