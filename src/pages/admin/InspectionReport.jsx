@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { APPLICATION_CONSTANTS } from '../../core/constants/app.constant';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useAuth } from "../../core/contexts/AuthContext";
 import generateInspectionPDF from './InspectionReportPdf';
 
 const statusColors = {
@@ -16,6 +17,7 @@ const statusColors = {
 };
 
 const InspectionReport = () => {
+  const { user } = useAuth();
   const [reports, setReports] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const modalRef = useRef(null);
@@ -48,9 +50,13 @@ const InspectionReport = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openDialog]);
 
-  const handleViewReport = report => {
-    navigate(`/admin/dashboard/report/${report._id}?isAdm=true`);
-  };
+const handleViewReport = (report) => {
+  const adminRoles = ["admin", "superadmin"];
+
+  if (adminRoles.includes(user.role)) {
+    navigate(`/${user.role}/dashboard/report/${report._id}?isAdm=true`);
+  }
+};
 
   return (
     <div className="p-4 sm:p-6 bg-primary min-h-screen font-sans">
@@ -116,7 +122,7 @@ const InspectionReport = () => {
                         ${r.paymentStatus === 'PAID' && r.status === 'COMPLETED'
                           ? 'text-green-600 border-green-300 hover:bg-green-50'
                           : 'text-gray-400 border-gray-300 cursor-not-allowed hover:bg-transparent'}`}
-                      disabled={!(r.paymentStatus === 'PAID' && r.status === 'COMPLETED')}
+                     
                     >
                       <FiDownload size={16} /> Report
                     </button>

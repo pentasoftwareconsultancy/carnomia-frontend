@@ -11,19 +11,23 @@ export default function HeroSection() {
   const handleBookPDI = (e) => {
     e.preventDefault();
 
-  if (!isLoggedIn || !user) {
-    toast.info("Please login to book your PDI.");
-    navigate("/login");
+if (!isLoggedIn || !user) {
+  toast.info("Please login to book your PDI.");
+  navigate("/login");
+} else {
+  const adminRoles = ["admin", "superadmin"];
+
+  if (adminRoles.includes(user.role)) {
+    // Admin or Superadmin
+    navigate("/request?isAdm=true");
+  } else if (user.role === "engineer") {
+    // Engineer restricted
+    toast.error("You are not allowed to create a new request.");
   } else {
-    // Check role and add isAdm query param for admin, superadmin, engineer
-    const adminRoles = ["admin", "superadmin", "engineer"];
-    if (adminRoles.includes(user.role)) {
-      navigate("/request?isAdm=true");
-    } else {
-      // Normal customer
-      navigate("/request");
-    }
+    // Normal customer
+    navigate("/request");
   }
+}
   };
 
   return (

@@ -26,6 +26,29 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [currentRow, setCurrentRow] = useState(null);
+
+    const toggleStatus = async (rowId) => {
+      const row = data.find((u) => u.id === rowId);
+      if (!row) return;
+
+      const updatedStatus = !row.user_status;
+
+      try {
+        await new ApiService().apipatch(
+          `${ServerUrl.API_UPDATE_USER}/${rowId}`,
+          { user_status: updatedStatus }
+        );
+
+        setData((prev) =>
+          prev.map((u) =>
+            u.id === rowId ? { ...u, user_status: updatedStatus } : u
+          )
+        );
+      } catch (err) {
+        console.error("Failed to toggle engineer status", err);
+      }
+    };
 
     useEffect(() => {
       const fetchData = async () => {
@@ -173,17 +196,24 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           header: "Actions",
           Cell: ({ row }) => (
             <>
-              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+              <IconButton
+                onClick={(e) => {
+                  setAnchorEl(e.currentTarget);
+                  setCurrentRow(row.original);
+                }}
+              >
                 <MoreVertIcon />
               </IconButton>
               <Menu
                 anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
+                open={
+                  Boolean(anchorEl) && currentRow?.id === row.original.id
+                }
                 onClose={() => setAnchorEl(null)}
               >
                 <MenuItem
                   onClick={() => {
-                    openViewDialog(row.original);
+                    openViewDialog(currentRow);
                     setAnchorEl(null);
                   }}
                 >
@@ -191,7 +221,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    openEditDialog(row.original);
+                    openEditDialog(currentRow);
                     setAnchorEl(null);
                   }}
                 >
@@ -199,7 +229,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    handleDelete(row.original);
+                    handleDelete(currentRow);
                     setAnchorEl(null);
                   }}
                 >
@@ -210,7 +240,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           ),
         },
       ];
-    }, [anchorEl, tableConfig]);
+    }, [anchorEl, currentRow, tableConfig]);
 
     return (
       <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
@@ -221,9 +251,12 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           spacing={2}
           sx={{ mb: 3 }}
         >
-        <Typography variant="h5" sx={{ color: "#81da5b", fontWeight: "bold" }}>
-          {tableConfig.title}
-        </Typography>
+          <Typography
+            variant="h5"
+            sx={{ color: "#81da5b" }}
+          >
+            {tableConfig.title}
+          </Typography>
 
           {!tableConfig.hideAddButton && (
             <Tooltip title="Add New">
@@ -238,6 +271,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           )}
         </Stack>
 
+        {/* Table with styled headers */}
         <MaterialReactTable
           columns={columns}
           data={data}
@@ -245,9 +279,21 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           enablePagination
           enableRowSelection={false}
           enableGlobalFilter
+          muiTableHeadRowProps={{
+            sx: {
+              backgroundColor: "#f0fdf4", // header row background
+            },
+          }}
+          muiTableHeadCellProps={{
+            sx: {
+              color: "#81da5b", // heading text color
+              fontWeight: "bold",
+              fontSize: "15px",
+            },
+          }}
         />
 
-        {/* Add/Edit/View Dialogs */}
+        {/* Add Dialog */}
         <Dialog open={isAddOpen} onClose={closeDialogs} fullWidth>
           <DialogTitle>Add New</DialogTitle>
           <DialogContent>{renderFormFields()}</DialogContent>
@@ -257,6 +303,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           </DialogActions>
         </Dialog>
 
+        {/* Edit Dialog */}
         <Dialog open={isEditOpen} onClose={closeDialogs} fullWidth>
           <DialogTitle>Edit</DialogTitle>
           <DialogContent>{renderFormFields()}</DialogContent>
@@ -266,6 +313,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           </DialogActions>
         </Dialog>
 
+        {/* View Dialog */}
         <Dialog open={isViewOpen} onClose={closeDialogs} fullWidth>
           <DialogTitle>View Details</DialogTitle>
           <DialogContent>{renderViewFields()}</DialogContent>

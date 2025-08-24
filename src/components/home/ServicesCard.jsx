@@ -18,7 +18,10 @@ export default function ServicesCard() {
       const adminRoles = ["admin", "superadmin"];
       if (adminRoles.includes(user.role)) {
         navigate("/request?isAdm=true");
-      } else {
+    } else if (user.role === "engineer") {
+    // Engineer restricted
+    toast.error("You are not allowed to create a new request.");
+    } else {
         navigate("/request");
       }
     }

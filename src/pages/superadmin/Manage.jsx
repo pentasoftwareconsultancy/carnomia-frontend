@@ -29,7 +29,7 @@ const AdminTable = withMaterialTable(null, {
     return res?.data.map(u => ({ ...u, id: u._id, _id: u._id })) || [];
   },
   addData: async ({ name, email, mobile, city, password }) => {
-    const result = await new ApiService().apipost(ServerUrl.API_REGISTER, {
+    await new ApiService().apipost(ServerUrl.API_REGISTER, {
       name,
       email,
       mobile,
@@ -37,7 +37,6 @@ const AdminTable = withMaterialTable(null, {
       password,
       role: "admin",
     });
-    // Always return latest data
     return await AdminTable.options.getData();
   },
   updateData: async ({ _id, name, email, mobile, city, password }) => {
@@ -48,18 +47,16 @@ const AdminTable = withMaterialTable(null, {
       city,
       password,
     });
-    // Always return latest data
     return await AdminTable.options.getData();
   },
   deleteData: async (_id) => {
     await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${_id}`);
-    // Always return latest data
     return await AdminTable.options.getData();
   },
 });
 
 // -------------------- Engineer Table --------------------
-const EngineerTable = withMaterialTable(null, {
+const tableData = {
   title: "Engineers",
   columns: [
     { accessorKey: "name", header: "Name" },
@@ -73,91 +70,15 @@ const EngineerTable = withMaterialTable(null, {
       muiTableHeadCellProps: { style: { display: "none" } },
       enableEditing: true,
     },
-    {
-      accessorKey: "engineer_status",
-      header: "Status",
-      Cell: ({ row }) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-bold text-white ${
-            row.original.engineer_status ? "bg-green-500" : "bg-red-500"
-          }`}
-        >
-          {row.original.engineer_status ? "Active" : "Inactive"}
-        </span>
-      ),
-    },
-    {
-      id: "toggle",
-      header: "Toggle",
-      enableSorting: false,
-      enableColumnOrdering: false,
-      Cell: ({ row, table }) => {
-        const [loading, setLoading] = React.useState(false);
-
-        const handleToggle = async () => {
-          setLoading(true);
-          const { id, name, email, mobile, city, password, engineer_status } = row.original;
-
-          try {
-            // Toggle status
-            await table.options.updateData?.({
-              id,
-              name,
-              email,
-              mobile,
-              city,
-              password,
-              engineer_status: !engineer_status,
-            });
-
-            // Refresh table data
-            const updatedData = await table.options.getData?.();
-            table.setData(updatedData);
-          } catch (err) {
-            console.error("Failed to toggle engineer status", err);
-          } finally {
-            setLoading(false);
-          }
-        };
-
-        return (
-          <div className="flex items-center justify-center">
-            <button
-              onClick={handleToggle}
-              disabled={loading}
-              className={`relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none ${
-                row.original.engineer_status ? "bg-green-500" : "bg-red-500"
-              } ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-            >
-              <span
-                className={`absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                  row.original.engineer_status ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </button>
-            <span className="ml-2 text-sm font-medium text-gray-900">
-              {row.original.engineer_status ? "Active" : "Inactive"}
-            </span>
-          </div>
-        );
-      },
-    },
   ],
   getData: async () => {
     const res = await new ApiService().apiget(
       `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}/engineer`
     );
-    return (
-      res?.data.map(u => ({
-        ...u,
-        id: u._id,
-        _id: u._id,
-        engineer_status: u.engineer_status ?? true,
-      })) || []
-    );
+    return res?.data.map(u => ({ ...u, id: u._id, _id: u._id })) || [];
   },
   addData: async ({ name, email, mobile, city, password }) => {
-    const result = await new ApiService().apipost(ServerUrl.API_REGISTER, {
+    await new ApiService().apipost(ServerUrl.API_REGISTER, {
       name,
       email,
       mobile,
@@ -165,27 +86,24 @@ const EngineerTable = withMaterialTable(null, {
       password,
       role: "engineer",
     });
-    // Always return latest data
     return await EngineerTable.options.getData();
   },
-  updateData: async ({ _id, name, email, mobile, city, password, engineer_status }) => {
+  updateData: async ({ _id, name, email, mobile, city, password }) => {
     await new ApiService().apipatch(`${ServerUrl.API_UPDATE_USER}/${_id}`, {
       name,
       email,
       mobile,
       city,
       password,
-      engineer_status,
     });
-    // Always return latest data
     return await EngineerTable.options.getData();
   },
   deleteData: async (_id) => {
     await new ApiService().apidelete(`${ServerUrl.API_DELETE_USER}/${_id}`);
-    // Always return latest data
     return await EngineerTable.options.getData();
   },
-});
+};
+const EngineerTable = withMaterialTable(null, tableData);
 
 // -------------------- Manage Page --------------------
 export default function Manage() {
