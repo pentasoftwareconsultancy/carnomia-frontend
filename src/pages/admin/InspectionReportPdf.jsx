@@ -438,20 +438,26 @@ async function addProfilePhotosPage(doc, r) {
     "Your Car’s 360° View • Check each side for a complete visual record"
   );
 
+  const pageWidth = A4.w;
+  const photoBoxWidth = 50;
+  const gap = 16;
+  const gridWidth = photoBoxWidth * 2 + gap;
+  const startX = (pageWidth - gridWidth) / 2;
+
   const cells = [
-    { label: "1. Front Left View", x: mm(24), y: mm(50), url: r.front_left_imageUrl },
-    { label: "2. Rear Left View", x: mm(90), y: mm(50), url: r.rear_left_imageUrl },
-    { label: "3. Rear Right View", x: mm(24), y: mm(120), url: r.rear_right_imageUrl },
-    { label: "4. Front Right View", x: mm(90), y: mm(120), url: r.front_right_imageUrl },
+    { label: "1. Front Left View", x: startX, y: mm(50), url: r.front_left_imageUrl },
+    { label: "2. Rear Left View", x: startX + photoBoxWidth + gap, y: mm(50), url: r.rear_left_imageUrl },
+    { label: "3. Rear Right View", x: startX, y: mm(120), url: r.rear_right_imageUrl },
+    { label: "4. Front Right View", x: startX + photoBoxWidth + gap, y: mm(120), url: r.front_right_imageUrl },
   ];
 
   for (const c of cells) {
-    labeledPhotoBox(doc, c.label, c.x, c.y, 50, 50);
+    labeledPhotoBox(doc, c.label, c.x, c.y, photoBoxWidth, photoBoxWidth);
     if (typeof c.url === "string" && c.url.trim()) {
       const data = await urlToDataURL(c.url);
       if (data) {
         const format = data.match(/^data:image\/(\w+);base64,/)?.[1]?.toUpperCase() || "JPEG";
-        doc.addImage(data, format, c.x + 1.2, c.y + 1.2, 50 - 2.4, 50 - 2.4, undefined, "FAST");
+        doc.addImage(data, format, c.x + 1.2, c.y + 1.2, photoBoxWidth - 2.4, photoBoxWidth - 2.4, undefined, "FAST");
       } else {
         console.warn(`Image not loaded: ${c.label} (${c.url})`);
       }
@@ -462,7 +468,6 @@ async function addProfilePhotosPage(doc, r) {
 
   drawFooter(doc);
 }
-
 /** =========================================================================
  * PAGE 3: BODY PANELS (table with thumbnails)
  * ========================================================================= */
@@ -830,8 +835,12 @@ async function addSeatsBeltsPage(doc, r) {
     doc.text(issuesText, col.status, y);
 
     if (row.toggle !== undefined) {
-      doc.text("Available", col.status + 40, y);
-      checkmark(doc, col.status + 70, y - 2, !!row.toggle);
+      const textX = col.status + 40;
+      const checkX = textX + doc.getTextWidth("Available ") + 2; // 4 units gap
+      const checkY = y - 2; // vertical alignment for checkmark
+
+      doc.text("Available", textX, y);
+      checkmark(doc, checkX, checkY, !!row.toggle);
     }
     setText(doc);
 
@@ -903,9 +912,14 @@ async function addSeatsBeltsPage(doc, r) {
     doc.text(issuesText, col.status, y);
 
     if (row.toggle !== undefined) {
-      doc.text("Available", col.status + 40, y);
-      checkmark(doc, col.status + 70, y - 2, !!row.toggle);
+      const textX = col.status + 40;
+      const checkX = textX + doc.getTextWidth("Available ") + 2; // 4 units gap
+      const checkY = y - 2; // vertical alignment for checkmark
+
+      doc.text("Available", textX, y);
+      checkmark(doc, checkX, checkY, !!row.toggle);
     }
+
     setText(doc);
 
     let imgX = PAGE_PAD_X;
@@ -1105,7 +1119,7 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   const boxWidth = A4.w - PAGE_PAD_X * 2; // full width for stacked cards
   let y = mm(34);
 
-  // ----------------------------
+// ----------------------------
   // ---- Card 1: Live Parameters
   // ----------------------------
   const liveParamsHeight = mm(50);
@@ -1118,16 +1132,17 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   let tempY = y + 16; // start below title
 
   const live = [
-    ["Engine Load", r.live_engine_load_toggle],
-    ["Idle RPM", r.live_idle_rpm_toggle],
-    ["Battery Voltage", r.live_battery_voltage],
-    ["Distance Traveled Since Code Clear", r.live_distance_traveled_since_code_clear],
-    ["Distance Traveled Since 10K Block", r.live_distance_traveled_since_10k_block],
+    { name: "Engine Load", toggle: r.live_engine_load_toggle, value: r.live_engine_load },
+    { name: "Idle RPM", toggle: r.live_idle_rpm_toggle, value: r.live_idle_rpm },
+    { name: "Battery Voltage", value: r.live_battery_voltage },
+    { name: "Distance Traveled Since Code Clear", value: r.live_distance_since_code_clear },
+    { name: "Distance Traveled Since 10K Block", value: r.live_distance_in_current_lock_block },
   ];
 
-  for (const [k, v] of live) {
-    doc.text(k, leftX + 6, tempY); // label
-    doc.text(String(v ?? "—"), leftX + boxWidth - 6, tempY, { align: "right" }); // value right-aligned
+  for (const { name, toggle = true, value } of live) {
+    if (toggle !== undefined && !toggle) continue;
+    doc.text(name, leftX + 6, tempY); // label
+    doc.text(String(value ?? "—"), leftX + boxWidth - 6, tempY, { align: "right" }); // value right-aligned
     tempY += 8; // spacing
   }
 
@@ -1146,10 +1161,10 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   let rightY = y + 16;
 
   const issues = [
-    ["Engine", r.issue_engine],
-    ["Transmission", r.issue_transmission],
-    ["Brakes", r.issue_brakes],
-    ["Diagnostics Codes", r.diagnostic_codes?.join(", ")],
+    ["Engine", r.engine_issues],
+    ["Transmission", r.transmission_issues],
+    ["Brakes", r.brakes_issues],
+    ["Diagnostics Codes", (r.diagnostic_codes || []).join(", ")],
   ];
 
   for (const [part, issue] of issues) {
@@ -1163,25 +1178,40 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   // ----------------------------
   // ---- Card 3: Fluid Levels
   // ----------------------------
+
+  // 1. Before generating PDF content, load and add the Unicode font (DejaVuSans) once:
+
+  // base64 font data can be generated using tools or pre-encoded font file
+  const base64DejaVuSans = "<YOUR_BASE64_ENCODED_FONT_DATA_HERE>";
+
+  doc.addFileToVFS("DejaVuSans.ttf", base64DejaVuSans);
+  doc.addFont("DejaVuSans.ttf", "DejaVuSans", "normal");
+
+  // 2. Now generate fluid levels section with correct font set to display ticks:
+
   const fluidHeight = mm(50);
   doc.setFillColor(245, 245, 245);
   doc.rect(leftX, y, boxWidth, fluidHeight, "FD");
+
+  // Set font that supports Unicode symbols before drawing text
+  doc.setFont("DejaVuSans");
+
   setText(doc, THEME.text, 10.5);
   doc.text("Fluid Levels", leftX + 4, y + 6);
-  setText(doc, THEME.subtext, 9);
 
+  setText(doc, THEME.subtext, 9);
   y += 16; // start below title
 
   const fluids = [
-    ["Coolant", r.fluid_coolant_withinRange, r.fluid_coolant_contamination],
-    ["Engine Oil", r.fluid_engineOil_withinRange, r.fluid_engineOil_contamination],
-    ["Brake Oil", r.fluid_brakeOil_withinRange, r.fluid_brakeOil_contamination],
-    ["Washer Fluid", r.fluid_washerFluid_withinRange, r.fluid_washerFluid_contamination],
+    { name: "Coolant", withinRange: r.fluid_coolant_withinRange, contamination: r.fluid_coolant_contamination },
+    { name: "Engine Oil", withinRange: r.fluid_engineOil_withinRange, contamination: r.fluid_engineOil_contamination },
+    { name: "Brake Oil", withinRange: r.fluid_brakeOil_withinRange, contamination: r.fluid_brakeOil_contamination },
+    { name: "Washer Fluid", withinRange: r.fluid_washerFluid_withinRange, contamination: r.fluid_washerFluid_contamination },
   ];
 
-  const col1 = leftX + 6;             // Parts
-  const col2 = leftX + boxWidth / 3;  // Within Range
-  const col3 = leftX + (boxWidth / 3) * 2; // Contamination
+  const col1 = leftX + 6;                    // Parts
+  const col2 = leftX + boxWidth / 3;         // Within Range
+  const col3 = leftX + (boxWidth / 3) * 2;   // Contamination
 
   doc.text("Parts", col1, y);
   doc.text("Within Range", col2, y, { align: "center" });
@@ -1189,13 +1219,14 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   divider(doc, leftX, y + 4, leftX + boxWidth);
   y += 8;
 
-  for (const [part, within, cont] of fluids) {
-    doc.text(part, col1, y);
-    doc.text(within ? "✔" : "✖", col2, y, { align: "center" });
-    doc.text(cont ? "✔" : "✖", col3, y, { align: "center" });
+  for (const { name, withinRange, contamination } of fluids) {
+    doc.text(name, col1, y);
+    doc.text(withinRange ? "Y" : "N", col2, y, { align: "center" });
+    doc.text(contamination ? "Y" : "N", col3, y, { align: "center" });
     divider(doc, leftX, y + 3.5, leftX + boxWidth, THEME.faintLine);
     y += 8;
   }
+
 
   // ----------------------------
   drawFooter(doc);
@@ -1336,6 +1367,61 @@ async function addTyresPaymentPage(doc, r) {
 }
 
 /** =========================================================================
+ * PAGE 11: Other Observations
+ * ========================================================================= */
+
+async function addOtherObservationsPage(doc) {
+  doc.addPage("a4", "portrait");
+  
+  // Header
+  drawTopBand(doc);
+  sectionHeader(doc, "Other Observations", mm(28));
+
+  const leftX = PAGE_PAD_X;
+  const boxWidth = A4.w - PAGE_PAD_X * 2;
+  let y = mm(34);
+
+  // Title Box
+  const boxHeight = mm(80);
+  doc.setFillColor(245, 245, 245);
+  doc.rect(leftX, y, boxWidth, boxHeight, "FD");
+
+  setText(doc, THEME.text, 10.5);
+  doc.text("Summary of Other Observations", leftX + 6, y + 8);
+  setText(doc, THEME.subtext, 9);
+
+  y += 18;
+
+  // Dummy observations data
+  const observations = [
+    { category: " other_observations", notes: "No abnormal noise observed during inspection." },
+  ];
+
+  const col1 = leftX + 6;            // Category
+  const col2 = leftX + boxWidth / 3; // Notes (start from 1/3rd)
+  
+  doc.setFont("helvetica", "bold");
+  doc.text("Category", col1, y);
+  doc.text("Notes", col2, y);
+  doc.setFont("helvetica", "normal");
+  y += 8;
+
+  // Draw a line under headers
+  divider(doc, leftX, y - 4, leftX + boxWidth);
+
+  // Render each observation
+  for (const obs of observations) {
+    doc.text(obs.category, col1, y);
+    // Wrap notes text if long
+    const splitNotes = doc.splitTextToSize(obs.notes, boxWidth * 2 / 3 - 12);
+    doc.text(splitNotes, col2, y);
+    y += splitNotes.length * 7 + 4; // 7 units per line + spacing
+  }
+
+  drawFooter(doc);
+}
+
+/** =========================================================================
  * MAIN EXPORT
  * ========================================================================= */
 export default async function generateInspectionPDF(report) {
@@ -1348,12 +1434,8 @@ export default async function generateInspectionPDF(report) {
 
   // Cover
   await addCoverPage(doc, report);
-
-  // Profile Photos & Body Panels
   await addProfilePhotosPage(doc, report);
   await addBodyPanelsPage(doc, report);
-
-  // Remaining sections
   await addGlassesPage(doc, report);
   await addRubberPage(doc, report);
   await addSeatsBeltsPage(doc, report);
@@ -1361,6 +1443,7 @@ export default async function generateInspectionPDF(report) {
   await addFeaturesPage(doc, report);
   await addLiveFluidsDiagnosticsPage(doc, report);
   await addTyresPaymentPage(doc, report);
+  await addOtherObservationsPage(doc, report);
 
   // Save
   doc.save(`PDI_Report_${String(report.bookingId ?? "report")}.pdf`);

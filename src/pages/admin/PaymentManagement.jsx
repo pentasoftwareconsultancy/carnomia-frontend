@@ -339,7 +339,7 @@ const PaymentManagement = () => {
                     <FiDownload className="w-5 h-5" />
                   </button>
                   {/* Mark as Paid (only admin/superadmin) */}
-                  {isAdminRole && p.paymentStatus !== "Paid" && (
+                  {isAdminRole && p.paymentStatus !== "PAID" && (
                     <button
                       onClick={() => updatePaymentStatus(p)}
                       className="text-green-600 hover:text-green-800"

@@ -122,10 +122,11 @@ const handleViewReport = (report) => {
                         ${r.paymentStatus === 'PAID' && r.status === 'COMPLETED'
                           ? 'text-green-600 border-green-300 hover:bg-green-50'
                           : 'text-gray-400 border-gray-300 cursor-not-allowed hover:bg-transparent'}`}
-                     
+                      disabled={!(r.paymentStatus === 'PAID' && r.status === 'COMPLETED')}
                     >
                       <FiDownload size={16} /> Report
                     </button>
+
                   </td>
                 </tr>
               ))}
