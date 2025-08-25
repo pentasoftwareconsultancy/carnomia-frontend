@@ -45,15 +45,30 @@ const specialGlassPanels = new Set([
 
 const photoCountForPanel = (panel) => (specialGlassPanels.has(panel) ? 5 : 1);
 
-const brandOptions = ["Pilkington", "Saint-Gobain", "AGC", "Guardian", "NSG"];
+const brandOptions = [
+    "ASAHI GLASS(AIS)",
+    "FUYAO GLASS",
+    "NIPPON",
+    "PILKINGTON",
+    "SPLINTEX",
+    "KAC",
+    "CARLEX",
+    "GUARDIAN",
+    "SAINT GOBAIN",
+    "MAGNA",
+    "AGC",
+    "SCHOTT",
+    "XINYI GLASS",
+    "GENTEX",
+    "TEMPERLITE",
+    "LAMISAFE",
+    "OTHER"
+  ]
 
 const glassIssueOptions = [
-  "Crack",
-  "Scratch",
-  "Fitting Mismatch",
-  "Chipping",
-  "Clouding",
-  "Delamination"
+    "Fitting Mismatch",
+    "Scratch",
+    "Crack"
 ];
 
 const Glasses = ({ data = {}, onChange }) => {

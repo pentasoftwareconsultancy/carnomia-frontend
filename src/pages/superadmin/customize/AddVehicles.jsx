@@ -3,7 +3,8 @@ import { TextField, Box } from "@mui/material";
 import withMaterialTable from "../../../components/constants/withMaterialTable";
 import ApiService from "../../../core/services/api.service";
 import ServerUrl from "../../../core/constants/serverUrl.constant";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const VehicleTable = withMaterialTable(null, {
   title: "Manage Vehicles",
@@ -34,15 +35,12 @@ const VehicleTable = withMaterialTable(null, {
 
   getData: async () => {
     try {
-      const response = await new ApiService().apiget(
-        ServerUrl.API_GET_VEHICLES
-      );
-      const vehicles = Array.isArray(response?.data?.data)
-        ? response.data.data
-        : [];
+      const response = await new ApiService().apiget(ServerUrl.API_GET_VEHICLES);
+      const vehicles = Array.isArray(response?.data?.data) ? response.data.data : [];
       return vehicles.map((v) => ({ ...v, id: v._id }));
     } catch (err) {
       console.error("Vehicle fetch error:", err);
+      toast.error("Failed to fetch vehicles");
       return [];
     }
   },
@@ -56,15 +54,11 @@ const VehicleTable = withMaterialTable(null, {
         formData.append("documentType", "VEHICLE_IMAGES");
         formData.append("documents", data.imageFile);
 
-        const response = await new ApiService().apipost(
-          ServerUrl.API_UPLOAD_IMAGE,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const response = await new ApiService().apipost(ServerUrl.API_UPLOAD_IMAGE, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         imageUrl = response?.data?.files?.[0]?.fileUrl;
       }
@@ -72,16 +66,13 @@ const VehicleTable = withMaterialTable(null, {
       const payload = { ...data, imageUrl };
       delete payload.imageFile;
 
-      const response = await new ApiService().apipost(
-        ServerUrl.API_ADD_VEHICLE,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await new ApiService().apipost(ServerUrl.API_ADD_VEHICLE, payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      toast.success("Vehicle added successfully");
       return { ...response.data, id: response.data._id };
     } catch (err) {
       toast.error("Failed to add vehicle");
@@ -98,15 +89,11 @@ const VehicleTable = withMaterialTable(null, {
         formData.append("documentType", "VEHICLE_IMAGE_FRONT");
         formData.append("documents", data.imageFile);
 
-        const response = await new ApiService().apipost(
-          ServerUrl.API_UPLOAD_IMAGE,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const response = await new ApiService().apipost(ServerUrl.API_UPLOAD_IMAGE, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         imageUrl = response?.data?.files?.[0]?.fileUrl;
       }
@@ -114,15 +101,14 @@ const VehicleTable = withMaterialTable(null, {
       const payload = { ...data, imageUrl };
       delete payload.imageFile;
 
-      await new ApiService().apipatch(
-        `${ServerUrl.API_UPDATE_VEHICLES}/${data.id}`,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await new ApiService().apipatch(`${ServerUrl.API_UPDATE_VEHICLES}/${data.id}`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Vehicle updated successfully");
+      return payload; // or return updated vehicle data if available from response
     } catch (err) {
       toast.error("Failed to update vehicle");
       console.error("Update vehicle error:", err);
@@ -130,7 +116,13 @@ const VehicleTable = withMaterialTable(null, {
   },
 
   deleteData: async (id) => {
-    await new ApiService().apidelete(`${ServerUrl.API_DELETE_VEHICLES}/${id}`);
+    try {
+      await new ApiService().apidelete(`${ServerUrl.API_DELETE_VEHICLES}/${id}`);
+      toast.success("Vehicle deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete vehicle");
+      console.error("Delete vehicle error:", err);
+    }
   },
 
   customFormFields: (selectedRow, setSelectedRow) => {
@@ -143,27 +135,21 @@ const VehicleTable = withMaterialTable(null, {
           label="Brand"
           fullWidth
           value={selectedRow.brand || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, brand: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, brand: e.target.value }))}
         />
         <TextField
           margin="dense"
           label="Model"
           fullWidth
           value={selectedRow.model || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, model: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, model: e.target.value }))}
         />
         <TextField
           margin="dense"
           label="Variant"
           fullWidth
           value={selectedRow.variant || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, variant: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, variant: e.target.value }))}
         />
         <TextField
           margin="dense"
@@ -182,45 +168,35 @@ const VehicleTable = withMaterialTable(null, {
           label="Fuel Type"
           fullWidth
           value={selectedRow.fuelType || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, fuelType: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, fuelType: e.target.value }))}
         />
         <TextField
           margin="dense"
           label="BHPs"
           fullWidth
           value={selectedRow.BHPs || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, BHPs: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, BHPs: e.target.value }))}
         />
         <TextField
           margin="dense"
           label="Airbags"
           fullWidth
           value={selectedRow.Airbags || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, Airbags: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, Airbags: e.target.value }))}
         />
         <TextField
           margin="dense"
           label="Mileage"
           fullWidth
           value={selectedRow.Mileage || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, Mileage: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, Mileage: e.target.value }))}
         />
         <TextField
           margin="dense"
           label="NCAP"
           fullWidth
           value={selectedRow.NCAP || ""}
-          onChange={(e) =>
-            setSelectedRow((prev) => ({ ...prev, NCAP: e.target.value }))
-          }
+          onChange={(e) => setSelectedRow((prev) => ({ ...prev, NCAP: e.target.value }))}
         />
 
         <Box mt={2}>
@@ -256,6 +232,7 @@ export default function AddVehicles() {
   return (
     <div className="p-6">
       <VehicleTable />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
     </div>
   );
 }

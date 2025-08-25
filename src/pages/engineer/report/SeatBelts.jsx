@@ -21,7 +21,13 @@ const labelNames = {
 };
 
 const photoCount = 5;
-const issueOptions = ["Crack", "Chip", "Scratch"];
+const issueOptions = [      
+  "Soil Marks",
+  "Greese Marks",
+  "Thread Break & Stitching",
+  "Cuts",
+  "Torn"
+];
 
 const SeatBelts = ({ data = {}, onChange }) => {
   const [condition, setCondition] = useState(() => {

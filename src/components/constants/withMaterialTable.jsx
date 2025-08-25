@@ -86,8 +86,15 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
 
     const handleAddSubmit = async () => {
       try {
-        const newRow = await tableConfig.addData(selectedRow);
-        setData((prev) => [...prev, newRow]);
+        const result = await tableConfig.addData(selectedRow);
+
+        // if full dataset is returned
+        if (Array.isArray(result)) {
+          setData(result);
+        } else {
+          setData((prev) => [...prev, result]);
+        }
+
         closeDialogs();
       } catch (error) {
         console.error("Error adding data:", error);
@@ -96,12 +103,17 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
 
     const handleEditSubmit = async () => {
       try {
-        const updatedRow = await tableConfig.updateData(selectedRow);
-        setData((prev) =>
-          prev.map((item) =>
-            item.id === selectedRow.id ? updatedRow : item
-          )
-        );
+        const result = await tableConfig.updateData(selectedRow);
+
+        // if full dataset is returned
+        if (Array.isArray(result)) {
+          setData(result);
+        } else {
+          setData((prev) =>
+            prev.map((item) => (item.id === selectedRow.id ? result : item))
+          );
+        }
+
         closeDialogs();
       } catch (error) {
         console.error("Error updating data:", error);
@@ -111,9 +123,13 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
     const handleDelete = async (rowData) => {
       if (window.confirm("Are you sure you want to delete this item?")) {
         try {
-          const requestId = rowData.id;
-          await tableConfig.deleteData(requestId);
-          setData((prev) => prev.filter((item) => item.id !== requestId));
+          const result = await tableConfig.deleteData(rowData.id);
+
+          if (Array.isArray(result)) {
+            setData(result);
+          } else {
+            setData((prev) => prev.filter((item) => item.id !== rowData.id));
+          }
         } catch (error) {
           console.error("Error deleting data:", error);
         }
@@ -129,7 +145,10 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
         const value = selectedRow[col.accessorKey] || "";
 
         // Dropdown select
-        if (col.editVariant === "select" && Array.isArray(col.editSelectOptions)) {
+        if (
+          col.editVariant === "select" &&
+          Array.isArray(col.editSelectOptions)
+        ) {
           return (
             <TextField
               key={col.accessorKey}
@@ -206,9 +225,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
               </IconButton>
               <Menu
                 anchorEl={anchorEl}
-                open={
-                  Boolean(anchorEl) && currentRow?.id === row.original.id
-                }
+                open={Boolean(anchorEl) && currentRow?.id === row.original.id}
                 onClose={() => setAnchorEl(null)}
               >
                 <MenuItem
@@ -251,10 +268,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           spacing={2}
           sx={{ mb: 3 }}
         >
-          <Typography
-            variant="h5"
-            sx={{ color: "#81da5b" }}
-          >
+          <Typography variant="h5" sx={{ color: "#81da5b" }}>
             {tableConfig.title}
           </Typography>
 
