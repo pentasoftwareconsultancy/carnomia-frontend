@@ -5,6 +5,7 @@ import ServerUrl from "../../../core/constants/serverUrl.constant";
 
 const EngineerManagement = withMaterialTable(() => null, {
   title: "Engineers Management",
+  hideAddButton: true,   // 🔥 this hides the Add button
 
   columns: [
     {

@@ -121,25 +121,40 @@ useEffect(() => {
       toast.error(err.response?.data?.message || "OTP verification failed");
     }
   };
-
+   
   return (
     <>
-      <div className="flex flex-col lg:flex-row min-h-screen bg-primary items-center justify-center">
-        <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-10">
-          <h1 className="text-3xl font-extrabold text-black mb-2">We Inspect Before You Invest!</h1>
-          <h2 className="text-2xl text-button font-bold mb-4">Unlock the Unseen with Tech!</h2>
-          <p className="text-gray-700 leading-relaxed">
-            Full-Body Diagnostics | 5000+ Scan Points <br />
-            No Surprises. Just Smart Buying.
-          </p>
-          <img src={Car} alt="car" className="w-full h-auto max-h-[400px] object-contain" />
-        </div>
+    <div className="flex flex-col lg:flex-row min-h-screen bg-primary items-center justify-center">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-10">
+        <h1 className="text-3xl font-extrabold text-black mb-2">
+          We Inspect Before You Invest!
+        </h1>
+        <h2 className="text-2xl text-button font-bold mb-4">
+          Unlock the Unseen with Tech!
+        </h2>
+        <p className="text-gray-700 leading-relaxed">
+         Forensic checks | 3300+ Check points | Detailed Report<br />
+          The smarter way to buy a car. <span className="font-bold text-sm font-black">Pay Only After PDI</span>
+        </p>
+        <img
+          src={Car}
+          alt="car"
+          className="w-full h-auto max-h-[400px] object-contain"
+        />
+      </div>
 
-        <div className="w-full lg:w-1/2 px-4 py-10 flex justify-center items-center">
-          <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
-            {stage === "login" && (
-              <>
-                <h3 className="text-2xl font-bold text-button mb-2">Log in</h3>
+      <div className="w-full lg:w-1/2 px-4 py-10 flex justify-center items-center">
+        <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
+          {stage === "login" && (
+            <>
+              <h3 className="text-2xl font-bold text-button mb-2">Log in</h3>
+              {/* Form for login */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleProceed();
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Mobile Number"
@@ -148,29 +163,45 @@ useEffect(() => {
                   className="w-full mb-2 p-3 border rounded-lg border-gray-300"
                 />
                 <button
-                  onClick={handleProceed}
+                  type="submit"
                   className="w-full bg-button text-white py-2.5 rounded-lg hover:bg-green-600"
                 >
                   Proceed
                 </button>
-                <p className="text-center text-sm mt-6">
-                  Haven't created an account?{" "}
-                  <Link to="/signup" className="text-button font-body hover:underline">
-                    Signup
-                  </Link>
-                </p>
-                <p className="text-xs text-center text-gray-600 mt-6">
-                  By signing in, you agree to our{" "}
-                  <button onClick={() => setShowTerms(true)} className="font-body underline">
-                    Terms & Conditions
-                  </button>
-                </p>
-              </>
-            )}
+              </form>
+              <p className="text-center text-sm mt-6">
+                Haven't created an account?{" "}
+                <Link
+                  to="/signup"
+                  className="text-button font-body hover:underline"
+                >
+                  Signup
+                </Link>
+              </p>
+              <p className="text-xs text-center text-gray-600 mt-6">
+                By signing in, you agree to our{" "}
+                <button
+                  onClick={() => setShowTerms(true)}
+                  className="font-body underline"
+                >
+                  Terms & Conditions
+                </button>
+              </p>
+            </>
+          )}
 
-            {stage === "password" && (
-              <>
-                <h3 className="text-2xl font-bold text-button mb-2">Enter Password</h3>
+          {stage === "password" && (
+            <>
+              <h3 className="text-2xl font-bold text-button mb-2">
+                Enter Password
+              </h3>
+              {/* Form for password login */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handlePasswordLogin();
+                }}
+              >
                 <input
                   type="password"
                   placeholder="Password"
@@ -179,31 +210,42 @@ useEffect(() => {
                   className="w-full mb-2 p-3 border rounded-lg border-gray-300"
                 />
                 <button
-                  onClick={handlePasswordLogin}
+                  type="submit"
                   className="w-full bg-button text-white py-2.5 rounded-lg hover:bg-green-600"
                 >
                   Login
                 </button>
-                <p className="text-center text-sm mt-6">
-                  <button
-                    onClick={() => {
-                      setStage("login");
-                      setPassword("");
-                    }}
-                    className="text-button font-body hover:underline"
-                  >
-                    ← Back
-                  </button>
-                </p>
-              </>
-            )}
+              </form>
+              <p className="text-center text-sm mt-6">
+                <button
+                  onClick={() => {
+                    setStage("login");
+                    setPassword("");
+                  }}
+                  className="text-button font-body hover:underline"
+                >
+                  ← Back
+                </button>
+              </p>
+            </>
+          )}
 
-            {stage === "verify" && (
-              <>
-                <h3 className="text-2xl font-bold text-button mb-2">Verify OTP</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  OTP sent to <span className="font-body text-black">{identifier}</span>
-                </p>
+          {stage === "verify" && (
+            <>
+              <h3 className="text-2xl font-bold text-button mb-2">
+                Verify OTP
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                OTP sent to{" "}
+                <span className="font-body text-black">{identifier}</span>
+              </p>
+              {/* Form for OTP verification */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleVerifyOtp();
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Enter OTP"
@@ -217,39 +259,48 @@ useEffect(() => {
                   </p>
                 )}
                 {otpSent && timer === 0 && (
-                  <button onClick={handleProceed} className="text-sm text-button mb-2 underline">
+                  <button
+                    type="button"
+                    onClick={handleProceed}
+                    className="text-sm text-button mb-2 underline"
+                  >
                     Resend OTP
                   </button>
                 )}
                 <button
-                  onClick={handleVerifyOtp}
+                  type="submit"
                   className="w-full bg-button text-white py-2.5 rounded-lg hover:bg-green-600"
                 >
                   Verify & Login
                 </button>
-                <p className="text-center text-sm mt-6">
-                  <button
-                    onClick={() => {
-                      setStage("login");
-                      setOtp("");
-                    }}
-                    className="text-button font-body hover:underline"
-                  >
-                    ← Back to Login
-                  </button>
-                </p>
-              </>
-            )}
-          </div>
+              </form>
+              <p className="text-center text-sm mt-6">
+                <button
+                  onClick={() => {
+                    setStage("login");
+                    setOtp("");
+                  }}
+                  className="text-button font-body hover:underline"
+                >
+                  ← Back to Login
+                </button>
+              </p>
+            </>
+          )}
         </div>
       </div>
+    </div>
 
-      <AnimatePresence>
-        {showTerms && (
-          <TermsPopup onClose={() => setShowTerms(false)} onAgree={() => setShowTerms(false)} />
-        )}
-      </AnimatePresence>
-    </>
+    <AnimatePresence>
+      {showTerms && (
+        <TermsPopup
+          onClose={() => setShowTerms(false)}
+          onAgree={() => setShowTerms(false)}
+        />
+      )}
+    </AnimatePresence>
+  </>
+
   );
 }
 

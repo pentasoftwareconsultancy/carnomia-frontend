@@ -11,6 +11,6 @@ export class UserAuthService {
   }
 
   static logoutUser() {
-    StorageService.clear();
+    StorageService.clear(); 
   }
 }
