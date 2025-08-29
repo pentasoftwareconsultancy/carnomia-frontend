@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../../core/services/api.service';
+import { toast } from "react-toastify";
 import ServerUrl from '../../core/constants/serverUrl.constant';
 import StorageService from "../../core/services/storage.service";
 import { APPLICATION_CONSTANTS } from '../../core/constants/app.constant';
@@ -73,7 +74,7 @@ const AssignedJobs = () => {
       });
     } catch (err) {
       console.error("Failed to start PDI:", err);
-      alert("Failed to start PDI. Try again.");
+      toast.error("Failed to start PDI. Try again.");
     }
   };
 

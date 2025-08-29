@@ -127,7 +127,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!selectedBrand || !selectedModel || !selectedVariant || !carStatus) {
-    alert("Please fill all required fields.");
+    toast.error("Please fill all required fields.");
     return;
   }
 

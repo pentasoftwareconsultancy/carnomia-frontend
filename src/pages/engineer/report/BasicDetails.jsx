@@ -3,6 +3,7 @@ import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai"
 import ToggleButton from "./ToggleButton";
 import FullScreenPhotoViewer from "./FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
+import { toast } from "react-toastify";
 
 const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
   const videoRefs = useRef({
@@ -66,10 +67,10 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
         }
       } catch (error) {
         console.error("Image upload failed:", error);
-        alert("Failed to upload image. Please try again.");
+        toast.error("Failed to upload image. Please try again.");
       }
     } else {
-      alert("Please select a valid image file.");
+      toast.error("Please select a valid image file.");
     }
   };
 

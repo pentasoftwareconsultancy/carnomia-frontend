@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowBack, CheckCircle, LocationOn } from '@mui/icons-material';
 import ApiService from '../../../core/services/api.service';
 import ServerUrl from '../../../core/constants/serverUrl.constant';
+import { toast } from 'react-toastify';
 
 const timeSlots = [
   "09:00 AM - 11:00 AM",
@@ -25,6 +26,7 @@ const AssignEngineer = ({ request, onAssign, onBack, setModalOpen }) => {
         if (response?.data) setEngineers(response.data);
       } catch (err) {
         console.error("Failed to fetch engineers", err);
+        toast.error("Failed to fetch engineers");
       }
     };
 
@@ -35,6 +37,7 @@ const AssignEngineer = ({ request, onAssign, onBack, setModalOpen }) => {
         else setLocationFilter([]);
       } catch (err) {
         console.error("Failed to fetch Locations", err);
+        toast.error("Failed to fetch locations");
       }
     };
 
@@ -46,7 +49,7 @@ const AssignEngineer = ({ request, onAssign, onBack, setModalOpen }) => {
 
   const handleConfirmAssignment = async () => {
     if (!selectedEngineer || !selectedSlot || !selectedLocation) {
-      alert('Please select engineer, location and time slot correctly!');
+      toast.warn('Please select engineer, location and time slot correctly!');
       return;
     }
 
@@ -62,14 +65,14 @@ const AssignEngineer = ({ request, onAssign, onBack, setModalOpen }) => {
 
       const response = await new ApiService().apiput(ServerUrl.API_ASSIGN_ENGINEER, payload);
       if (response.data) {
-        alert('Engineer assigned successfully!');
+        toast.success('Engineer assigned successfully!');
         setModalOpen(false);
       } else {
-        alert('Failed to assign engineer: ' + (response.data.message || 'Unknown error'));
+        toast.error('Failed to assign engineer: ' + (response.data.message || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error assigning engineer:', error);
-      alert('An error occurred while assigning engineer');
+      toast.error('An error occurred while assigning engineer ');
     }
   };
 

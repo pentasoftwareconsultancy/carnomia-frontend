@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
 import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
+import { toast } from "react-toastify";
 
 const BodyPanels = ({ data, onChange }) => {
   const photoCount = 5;
@@ -107,10 +108,10 @@ const BodyPanels = ({ data, onChange }) => {
 
   const handleFileUpload = async (e, photoKey) => {
     const file = e.target.files[0];
-    if (!file || !file.type.startsWith("image/")) return alert("Select a valid image file");
+    if (!file || !file.type.startsWith("image/")) return toast.error("Select a valid image file");
 
     const arr = photos[photoKey] ? [...photos[photoKey]] : [];
-    if (arr.length >= photoCount) return alert(`Maximum ${photoCount} photos allowed`);
+    if (arr.length >= photoCount) return toast.error(`Maximum ${photoCount} photos allowed`);
 
     try {
       const uploaded = await FileUploaderService.uploadFileToServer(file, photoKey);
@@ -123,13 +124,13 @@ const BodyPanels = ({ data, onChange }) => {
       }
     } catch (err) {
       console.error("Upload failed:", err);
-      alert("Failed to upload image");
+      toast.error("Failed to upload image");
     }
   };
 
   const handleCameraClick = (photoKey) => {
     const arr = photos[photoKey] ? [...photos[photoKey]] : [];
-    if (arr.length >= photoCount) return alert(`Maximum ${photoCount} photos allowed`);
+    if (arr.length >= photoCount) return toast.error(`Maximum ${photoCount} photos allowed`);
 
     const slotKey = `${photoKey}-${arr.length}`;
     FileUploaderService.handleCameraClick(

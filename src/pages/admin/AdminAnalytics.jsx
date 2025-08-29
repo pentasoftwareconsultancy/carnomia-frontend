@@ -15,6 +15,7 @@ import * as XLSX from "xlsx";
 import ApiService from "../../core/services/api.service";
 import ServerUrl from "../../core/constants/serverUrl.constant";
 import PropTypes from "prop-types";
+import { toast } from "react-toastify";
 
 const COLORS = {
   // Use a large palette for multiple engineers (loop if engineers > palette length)
@@ -147,7 +148,7 @@ const AdminAnalytics = () => {
 
   const exportToExcel = useCallback(() => {
     if (!filteredData.inspections?.length) {
-      alert("No inspection data available to export.");
+      toast.error("No inspection data available to export.");
       return;
     }
     try {
@@ -167,7 +168,7 @@ const AdminAnalytics = () => {
       XLSX.writeFile(wb, "InspectionData.xlsx");
     } catch (err) {
       console.error("Export failed:", err);
-      alert("Failed to export data. Please try again.");
+      toast.error("Failed to export data. Please try again.");
     }
   }, [filteredData.inspections]);
 

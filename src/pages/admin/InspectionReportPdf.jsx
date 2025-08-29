@@ -208,11 +208,12 @@ function labeledPhotoBox(doc, label, x, y, w = 50, h = 50) {
 
 async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap = 4) {
   let i = 0;
-  // Filter out invalid URLs
+  // Filter out invalid URLs 
   const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
   for (let url of validUrls) {
     try {
-      const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
+      // const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
+      const finalUrl = url.startsWith("http") ? url : `https://api.carnomia.com${url}`;
       const dataURL = await urlToDataURL(finalUrl);
       if (dataURL) {
         const col = i % cols;

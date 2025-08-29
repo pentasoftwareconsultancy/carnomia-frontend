@@ -200,6 +200,7 @@ const PaymentManagement = () => {
         setPayments(mapped);
       } catch (err) {
         console.error("Error fetching payments:", err);
+        toast.error("Failed to fetch payments");
         setPayments([]);
       }
     };
@@ -233,7 +234,7 @@ const PaymentManagement = () => {
       );
 
       if (res.data && res.data.data) {
-        alert("Payment and request status updated successfully");
+        toast.success("Payment and request status updated successfully")
         setPayments((prev) =>
           prev.map((p) =>
             p.id === requestId
@@ -255,11 +256,11 @@ const PaymentManagement = () => {
           }));
         }
       } else {
-        alert("Failed to update payment/request status");
+        toast.error("Failed to update payment/request status");
       }
     } catch (err) {
       console.error("Error updating payment/request status:", err);
-      alert("Failed to update payment/request status");
+      toast.error("Failed to update payment/request status");
     }
   };
 
