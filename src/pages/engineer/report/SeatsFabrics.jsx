@@ -31,13 +31,7 @@ const labelNames = {
 };
 
 const photoCount = 5;
-const issueOptions = [      
-  "Soil Marks",
-  "Greese Marks",
-  "Thread Break & Stitching",
-  "Cuts",
-  "Torn"
-];
+const issueOptions = ["Crack", "Chip", "Scratch"];
 
 const SeatFabrics = ({ data = {}, onChange }) => {
   const [condition, setCondition] = useState(() => {
@@ -65,6 +59,22 @@ const SeatFabrics = ({ data = {}, onChange }) => {
   const [isCameraActive, setIsCameraActive] = useState({});
   const [streamStates, setStreamStates] = useState({});
   const videoRefs = useRef({});
+  const issueDropdownRefs = useRef({});
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (showIssueDropdown) {
+      const dropdownEl = issueDropdownRefs.current[showIssueDropdown];
+      if (dropdownEl && !dropdownEl.contains(event.target)) {
+        setShowIssueDropdown(null);
+      }
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, [showIssueDropdown]);
+
 
   useEffect(() => {
     return () => {
@@ -169,7 +179,8 @@ const SeatFabrics = ({ data = {}, onChange }) => {
             {(panel !== "seat_third_row" || thirdRowEnabled) && (
               <>
                 {/* Issues Dropdown with checkboxes */}
-                <div className="mb-4 relative">
+                <div className="mb-4 relative"   ref={(el) => (issueDropdownRefs.current[panel] = el)}
+>
                   <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                   <button
                     type="button"

@@ -2,21 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 
 // Toggle switch component
 const ToggleButton = ({ checked, onChange, label }) => {
-  const handleChange = () => {
-    const scrollY = window.scrollY;
-    onChange();
-    window.scrollTo(0, scrollY);
-  };
-
   return (
     <label className="flex flex-col items-center cursor-pointer">
       <div className="relative">
-        <input type="checkbox" checked={checked} onChange={handleChange} className="sr-only" />
-        <div
-          className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${
-            checked ? "bg-lime-500" : ""
-          }`}
-        >
+        <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+        <div className={`w-10 h-5 bg-gray-600 rounded-full shadow-inner ${checked ? "bg-lime-500" : ""}`}>
           <div
             className={`absolute w-5 h-5 bg-white rounded-full shadow -left-1 top-0 transition-transform duration-200 ease-in-out ${
               checked ? "transform translate-x-5" : ""
@@ -30,7 +20,7 @@ const ToggleButton = ({ checked, onChange, label }) => {
 };
 
 // Main FeaturesFunctions component
-const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
+const FeaturesFunctions = ({ data, onChange }) => {
   const featurePanels = [
     "feature_parking_sensors_front",
     "feature_parking_sensors_rear",
@@ -46,7 +36,6 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
     "feature_ventilated_seat_rear",
   ];
 
-  // Initialize toggle state
   const getInitialState = () => {
     const initState = {};
     featurePanels.forEach((key) => {
@@ -54,51 +43,20 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
         available: true,
         issueObserved: false,
       };
+      if (data && data[key]) {
+        initState[key] = { ...initState[key], ...data[key] };
+      }
     });
-    if (data) {
-      Object.keys(data).forEach((key) => {
-        if (initState[key]) {
-          initState[key] = { ...initState[key], ...data[key] };
-        }
-      });
-    }
     return initState;
   };
 
+  // Only initialize from data once
   const [toggleStates, setToggleStates] = useState(getInitialState);
 
-  // Reset toggleStates when resetTrigger changes
-  const prevReset = useRef(resetTrigger);
-  useEffect(() => {
-    if (resetTrigger !== undefined && prevReset.current !== resetTrigger) {
-      setToggleStates(getInitialState());
-      prevReset.current = resetTrigger;
-    }
-  }, [resetTrigger]);
-
-  // Sync with data prop changes
-  const prevData = useRef(data);
-  useEffect(() => {
-    if (data && data !== prevData.current) {
-      setToggleStates((prev) => {
-        const updated = { ...prev };
-        Object.keys(data).forEach((key) => {
-          if (updated[key]) updated[key] = { ...updated[key], ...data[key] };
-        });
-        return updated;
-      });
-      prevData.current = data;
-    }
-  }, [data]);
-
-  // Handle toggle change
   const handleToggleChange = (key, type) => {
     setToggleStates((prev) => {
-      const updated = {
-        ...prev,
-        [key]: { ...prev[key], [type]: !prev[key][type] },
-      };
-      // Sync updated state with parent after state has changed
+      const updated = { ...prev, [key]: { ...prev[key], [type]: !prev[key][type] } };
+      // Save to backend
       if (onChange) onChange(key, updated[key]);
       return updated;
     });
@@ -123,7 +81,7 @@ const FeaturesFunctions = ({ data, onChange, resetTrigger }) => {
             <label className="text-md text-white font-medium mb-2 text-left">
               {`${idx + 1}. ${formatLabel(key)}`}
             </label>
-            <div className="flex justify-start items-center gap-6">
+            <div className="flex justify-center items-center gap-20">
               <ToggleButton
                 checked={!!toggleStates[key]?.available}
                 onChange={() => handleToggleChange(key, "available")}

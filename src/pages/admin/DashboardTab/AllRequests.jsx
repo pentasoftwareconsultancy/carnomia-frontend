@@ -19,7 +19,7 @@ const AllRequests = () => {
   return withMaterialTable(() => null, {
     title: "All Requests",
     hideAddButton: true,
-    disableDefaultActions: false,
+    disableDefaultActions: true, // Disable default View/Edit/Delete actions
 
     columns: [
       { accessorKey: "bookingId", header: "Booking ID" },

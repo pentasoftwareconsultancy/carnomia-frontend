@@ -33,12 +33,7 @@ const labelNames = {
 };
 
 const photoCount = 5;
-const issueOptions = [
-      "Scratches",
-      "Plastic Chipping",
-      "Skim Marks",
-      "Sticky Surface"
-    ]
+const issueOptions = ["Crack", "Chip", "Scratch"];
 
 const PlasticPanel = ({ data = {}, onChange }) => {
   const [condition, setCondition] = useState(() => {
@@ -67,6 +62,29 @@ const PlasticPanel = ({ data = {}, onChange }) => {
   const [isCameraActive, setIsCameraActive] = useState({});
   const [streamStates, setStreamStates] = useState({});
   const videoRefs = useRef({});
+  const dropdownRefs = useRef({});
+
+
+  useEffect(() => {
+  function handleClickOutside(event) {
+    let clickedInside = false;
+
+    Object.values(dropdownRefs.current).forEach((ref) => {
+      if (ref && ref.contains(event.target)) {
+        clickedInside = true;
+      }
+    });
+
+    if (!clickedInside) {
+      setShowDropdown(null);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     return () => {
@@ -185,7 +203,8 @@ const PlasticPanel = ({ data = {}, onChange }) => {
               {(panel !== "third_row" || thirdRowEnabled) && (
                 <>
                   {/* Issues Dropdown with Checkboxes */}
-                  <div className="mb-4 relative">
+                  <div className="mb-4 relative"     ref={(el) => (dropdownRefs.current[panel] = el)}
+>
                     <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                     <button
                       type="button"
@@ -218,7 +237,7 @@ const PlasticPanel = ({ data = {}, onChange }) => {
 
                   {/* Photos */}
                   {condition[panel].length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-4 justify-left items-center relative">
+                    <div className="mt-2 flex flex-wrap gap-4 justify-left items-center relative"     ref={(el) => (dropdownRefs.current[`${panel}-${firstEmptyIdx}`] = el)}>
                       {panelPhotos.map((photo, i) =>
                         photo ? (
                           <img

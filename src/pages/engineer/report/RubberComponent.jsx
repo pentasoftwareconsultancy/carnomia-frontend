@@ -61,6 +61,23 @@ const RubberComponent = ({ data = {}, onChange }) => {
   const [isCameraActive, setIsCameraActive] = useState({});
   const [streamStates, setStreamStates] = useState({});
   const videoRefs = useRef({});
+const issueDropdownRefs = useRef({}); //add 
+
+useEffect(() => {     // add
+  const handleClickOutside = (event) => {
+    if (showIssueDropdown) {
+      const dropdownEl = issueDropdownRefs.current[showIssueDropdown];
+      if (dropdownEl && !dropdownEl.contains(event.target)) {
+        setShowIssueDropdown(null);
+      }
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showIssueDropdown]);
 
   useEffect(() => {
     return () => {
@@ -68,7 +85,8 @@ const RubberComponent = ({ data = {}, onChange }) => {
         if (stream) stream.getTracks().forEach((track) => track.stop());
       });
     };
-  }, [streamStates]);
+  }, [streamStates]);         
+  
 
   const handleConditionChange = (panel, issue) => {
     setCondition((prev) => {
@@ -175,11 +193,15 @@ const RubberComponent = ({ data = {}, onChange }) => {
             {(panel !== "rubber_rear_wiper" || rearWiperEnabled) && (
               <>
                 {/* Multi-select dropdown for issues */}
-                <div className="mb-4 relative">
+                <div className="mb-4 relative"     ref={el => (issueDropdownRefs.current[panel] = el)}
+>
+    
+
                   <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                   <button
                     type="button"
-                    onClick={() => setShowIssueDropdown(prev => (prev === panel ? null : panel))}
+                    onClick={() => setShowIssueDropdown(prev => (prev === panel ? null : panel))}  //add
+                    
                     className="w-full bg-gray-800 text-white p-2 rounded-md flex justify-between items-center focus:outline-none"
                   >
                     {condition[panel].length > 0 ? condition[panel].join(", ") : "Select Issues"}
@@ -260,17 +282,21 @@ const RubberComponent = ({ data = {}, onChange }) => {
                         autoPlay
                         className={isCameraActive[`${panel}-${i}`] ? "w-24 h-24 rounded-md" : "hidden"}
                       />
+                      
                     ))}
                   </div>
+                  
                 )}
               </>
             )}
           </div>
+          
         ))}
       </div>
 
       {showPhoto && <FullScreenPhotoViewer photo={showPhoto} onClose={() => setShowPhoto(null)} />}
     </div>
+    
   );
 };
 

@@ -21,13 +21,7 @@ const labelNames = {
 };
 
 const photoCount = 5;
-const issueOptions = [      
-  "Soil Marks",
-  "Greese Marks",
-  "Thread Break & Stitching",
-  "Cuts",
-  "Torn"
-];
+const issueOptions = ["Crack", "Chip", "Scratch"];
 
 const SeatBelts = ({ data = {}, onChange }) => {
   const [condition, setCondition] = useState(() => {
@@ -56,6 +50,29 @@ const SeatBelts = ({ data = {}, onChange }) => {
   const [isCameraActive, setIsCameraActive] = useState({});
   const [streamStates, setStreamStates] = useState({});
   const videoRefs = useRef({});
+  const dropdownRefs = useRef({});
+
+
+  useEffect(() => {
+  function handleClickOutside(event) {
+    let clickedInside = false;
+
+    Object.values(dropdownRefs.current).forEach((ref) => {
+      if (ref && ref.contains(event.target)) {
+        clickedInside = true;
+      }
+    });
+
+    if (!clickedInside) {
+      setShowDropdown(null);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     return () => {
@@ -174,7 +191,8 @@ const SeatBelts = ({ data = {}, onChange }) => {
               {(panel !== "third_row" || thirdRowEnabled) && (
                 <>
                   {/* Issues Dropdown */}
-                  <div className="mb-4 relative">
+                  <div className="mb-4 relative"     ref={(el) => (dropdownRefs.current[panel] = el)}
+>
                     <label className="text-md text-white font-medium text-left mb-2">Issues</label>
                     <button
                       type="button"
@@ -229,8 +247,9 @@ const SeatBelts = ({ data = {}, onChange }) => {
                             <AiOutlinePlus />
                           </button>
 
-                          {showDropdown === `${panel}-${firstEmptyIdx}` && (
-                            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
+                          {showDropdown === `${panel}-${firstEmptyIdx}` && ( 
+                            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48"     ref={(el) => (dropdownRefs.current[`${panel}-${firstEmptyIdx}`] = el)}
+>
                               <button
                                 onClick={() => handleCameraClick(panel, firstEmptyIdx)}
                                 className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 w-full text-left"

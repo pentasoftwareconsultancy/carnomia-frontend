@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import img from "../../assets/blog.png";
+import { Link } from 'react-router-dom';
 import {detailedSections} from "../../components/constants/publicData/BlogData";
 
 const Blog = () => {
@@ -154,12 +155,13 @@ const Blog = () => {
               friendly team.
             </p>
           </div>
-          <a
-            href="/contact"
-            className="bg-button hover:bg-green-500 text-white font-bold-bold text-lg px-5 py-2 rounded"
-          >
-            Contact Us
-          </a>
+            <Link
+              to="/contact-us"
+              className="bg-button hover:bg-green-500 text-white px-6 py-2 rounded-md font-heading-bold"
+            >
+              Contact Us
+            </Link>
+
         </div>
       </motion.div>
     </div>

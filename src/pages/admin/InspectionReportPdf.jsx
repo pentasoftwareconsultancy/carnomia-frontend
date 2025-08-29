@@ -10,7 +10,7 @@ const THEME = {
   brandDark: "#0b3c49",
   brandMid: "#1a6a7a",
   brandLight: "#e6f5f8",
-  good: "#10b981",
+  good: "#10b981", 
   softLine: "#e5e7eb",
   faintLine: "#f1f5f9",
   text: "#111827",
@@ -66,41 +66,78 @@ async function urlToDataURL(url, preferPngFallback = false, timeoutMs = 10000) {
   }
 
   // Fallback using <img> + canvas with timeout
-  try {
-    return await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
+  // try {
+  //   return await new Promise((resolve, reject) => {
+  //     const img = new Image();
+  //     img.crossOrigin = "anonymous";
 
-      const timer = setTimeout(() => {
-        img.src = ""; // Cancel loading
-        reject(new Error(`Image load timeout after ${timeoutMs}ms: ${url}`));
-      }, timeoutMs);
+  //     const timer = setTimeout(() => {
+  //       img.src = ""; // Cancel loading
+  //       reject(new Error(`Image load timeout after ${timeoutMs}ms: ${url}`));
+  //     }, timeoutMs);
 
-      img.onload = () => {
-        clearTimeout(timer);
-        try {
-          const canvas = document.createElement("canvas");
+  //     img.onload = () => {
+  //       clearTimeout(timer);
+  //       try {
+  //         const canvas = document.createElement("canvas");
+  //         canvas.width = img.naturalWidth;
+  //         canvas.height = img.naturalHeight;
+  //         const ctx = canvas.getContext("2d");
+  //         ctx.drawImage(img, 0, 0);
+  //         const format = preferPngFallback ? "image/png" : "image/jpeg";
+  //         resolve(canvas.toDataURL(format, 0.92));
+  //       } catch (ex) {
+  //         reject(ex);
+  //       }
+  //     };
+
+  //     img.onerror = () => {
+  //       clearTimeout(timer);
+  //       reject(new Error(`Image load failed (canvas fallback): ${url}`));
+  //     };
+  //     img.src = url;
+  //   });
+  // } catch (err) {
+  //   console.warn(`Canvas fallback failed for ${url}: ${err.message}`);
+  //   return null;
+  // }
+
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  const imageInput = document.getElementById('imageInput');
+  const preview = document.getElementById('preview');
+  const canvas = document.getElementById('imageCanvas');
+  const ctx = canvas.getContext("2d");
+
+  imageInput.addEventListener('change', function (event) {
+    preview.innerHTML = ""; // Clear previous images
+    Array.from(event.target.files).forEach(file => {
+      if (!allowedTypes.includes(file.type)) {
+        alert(`${file.name} is not a supported image type.`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        // Preview as <img>
+        const img = new Image();
+        img.src = e.target.result;
+        img.style.maxWidth = "200px";
+        img.onload = function () {
+          // Draw on Canvas
           canvas.width = img.naturalWidth;
           canvas.height = img.naturalHeight;
-          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0);
-          const format = preferPngFallback ? "image/png" : "image/jpeg";
-          resolve(canvas.toDataURL(format, 0.92));
-        } catch (ex) {
-          reject(ex);
-        }
+          // Display preview image (optional)
+          preview.appendChild(img.cloneNode());
+          // Optional: Get Base64 string from canvas
+          // const dataURL = canvas.toDataURL(file.type);
+        };
       };
-
-      img.onerror = () => {
-        clearTimeout(timer);
-        reject(new Error(`Image load failed (canvas fallback): ${url}`));
-      };
-      img.src = url;
+      reader.readAsDataURL(file);
     });
-  } catch (err) {
-    console.warn(`Canvas fallback failed for ${url}: ${err.message}`);
-    return null;
-  }
+  });
+
 }
 
 
@@ -255,175 +292,425 @@ function drawFooter(doc) {
   setText(doc);
 }
 
+/** =========================================================================
+ *   Cover Page
+ * ========================================================================= */
+
+// async function addCoverPage(doc, r) {
+//   drawTopBand(doc);
+
+//   /** ==============================
+//    * BOOKING HEADER
+//    * ============================== */
+//   setText(doc, THEME.subtext, 8.5);
+//   doc.text(`Booking ID: ${String(r.bookingId ?? "—")}`, PAGE_PAD_X, mm(18));
+//   setText(doc);
+
+//   /** ==============================
+//    * HERO IMAGE + SCORE CARD
+//    * ============================== */
+//   const TOP_OFFSET = 20;
+//   const HERO = { x: 18, y: TOP_OFFSET + 20, w: 110, h: 55 };
+//   const SCORE = { x: HERO.x + HERO.w + 10, y: HERO.y, w: 65, h: HERO.h };
+
+//   // Hero box
+//   roundedRect(doc, mm(HERO.x), mm(HERO.y), mm(HERO.w), mm(HERO.h), 6, "#fff", THEME.softLine);
+
+//   if (r.imageUrl) {
+//     try {
+//       doc.addImage(r.imageUrl, "JPEG", mm(HERO.x), mm(HERO.y), mm(HERO.w), mm(HERO.h), undefined, "FAST");
+//     } catch (err) {
+//       console.warn("Hero image failed:", err);
+//     }
+//   }
+
+//   // Score Card box
+//   roundedRect(doc, mm(SCORE.x), mm(SCORE.y), mm(SCORE.w), mm(SCORE.h), 6, "#fff", THEME.softLine);
+
+//   setText(doc, THEME.subtext, 8);
+//   doc.text("Overall Vehicle Score", mm(SCORE.x + 4), mm(SCORE.y + 8));
+
+//   // Circle
+//   doc.setDrawColor(THEME.good);
+//   doc.circle(mm(SCORE.x + SCORE.w / 2), mm(SCORE.y + 20), 10, "S");
+
+//   // Score value
+//   setText(doc, THEME.text, 16);
+//   doc.text(String(r.vehicleScore ?? "9.2"), mm(SCORE.x + SCORE.w / 2 - 4), mm(SCORE.y + 23));
+
+//   // Status "GOOD"
+//   setText(doc, THEME.good, 9);
+//   doc.text("GOOD", mm(SCORE.x + SCORE.w / 2 - 10), mm(SCORE.y + 35));
+
+//   // Description
+//   setText(doc, THEME.subtext, 6.5);
+//   const desc = r.scoreComment ??
+//     "This score signifies that the car is free of defects arising out of manufacturing, mishandling at dealer premise / during travel & shipment. Asset and Driver Safety is not compromised.";
+//   doc.text(desc, mm(SCORE.x + 4), mm(SCORE.y + 42), {
+//     maxWidth: mm(SCORE.w - 8),
+//     align: "left"
+//   });
+
+//   /** ==============================
+//    * METRICS ROW
+//    * ============================== */
+//   const metrics = [
+//     { label: "BHPs", value: String(r.BHPs ?? "150") },
+//     { label: "Airbags", value: String(r.Airbags ?? "6") },
+//     { label: "NCAP", value: String(r.NCAP ?? "5 Star") },
+//     { label: "Mileage", value: String(r.Mileage ?? "17 kmpl") },
+//   ];
+
+//   const METRIC_Y = HERO.y + HERO.h + 15;
+//   const BOX_W = 35, BOX_H = 14, SPACING = 6;
+
+//   metrics.forEach((m, i) => {
+//     const x = mm(HERO.x + i * (BOX_W + SPACING));
+//     roundedRect(doc, x, mm(METRIC_Y), mm(BOX_W), mm(BOX_H), 3, "#fff", THEME.softLine);
+
+//     setText(doc, THEME.subtext, 7.5);
+//     doc.text(m.label, x + mm(BOX_W / 2), mm(METRIC_Y + 5), { align: "center" });
+
+//     setText(doc, THEME.text, 10);
+//     doc.text(m.value, x + mm(BOX_W / 2), mm(METRIC_Y + 11), { align: "center" });
+//   });
+
+//   /** ==============================
+//    * INFO CARDS (Customer + Vehicle)
+//    * ============================== */
+//   const CARD_Y = METRIC_Y + BOX_H + 12;
+//   const CARD_W = 85, CARD_H = 68, GAP = 10;
+
+//   const leftX = HERO.x;
+//   const rightX = HERO.x + CARD_W + GAP;
+
+//   // CUSTOMER INFO
+//   roundedRect(doc, mm(leftX), mm(CARD_Y), mm(CARD_W), mm(CARD_H), 4, "#fff", THEME.softLine);
+//   setText(doc, THEME.text, 9.5);
+//   doc.text("Customer Info", mm(leftX + 5), mm(CARD_Y + 8));
+//   divider(doc, mm(leftX + 4), mm(CARD_Y + 10), mm(leftX + CARD_W - 4), THEME.faintLine);
+
+//   labelValue(doc, "Name", r.customerName, mm(leftX + 5), mm(CARD_Y + 16));
+//   labelValue(doc, "Location", r.address, mm(leftX + 45), mm(CARD_Y + 16));
+//   labelValue(doc, "Engineer Name", r.engineer_name, mm(leftX + 5), mm(CARD_Y + 24));
+//   labelValue(doc, "PDI Date & Time",
+//     `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`,
+//     mm(leftX + 5), mm(CARD_Y + 32)
+//   );
+//   labelValue(doc, "Address", r.address, mm(leftX + 5), mm(CARD_Y + 40));
+
+//   // VEHICLE INFO
+//   roundedRect(doc, mm(rightX), mm(CARD_Y), mm(CARD_W), mm(CARD_H), 4, "#fff", THEME.softLine);
+//   setText(doc, THEME.text, 9.5);
+//   doc.text("Vehicle Info", mm(rightX + 5), mm(CARD_Y + 8));
+//   divider(doc, mm(rightX + 4), mm(CARD_Y + 10), mm(rightX + CARD_W - 4), THEME.faintLine);
+
+//   labelValue(doc, "Brand", r.brand, mm(rightX + 5), mm(CARD_Y + 16));
+//   labelValue(doc, "Model", r.model, mm(rightX + 45), mm(CARD_Y + 16));
+//   labelValue(doc, "Car Status", r.carStatus, mm(rightX + 5), mm(CARD_Y + 24));
+//   labelValue(doc, "VIN No.", r.vinNumber, mm(rightX + 45), mm(CARD_Y + 24));
+//   labelValue(doc, "Variant", r.variant, mm(rightX + 5), mm(CARD_Y + 32));
+//   labelValue(doc, "Transmission", r.transmissionType, mm(rightX + 45), mm(CARD_Y + 32));
+//   labelValue(doc, "Fuel", r.fuelType, mm(rightX + 5), mm(CARD_Y + 40));
+//   labelValue(doc, "Engine", r.engineNumber, mm(rightX + 45), mm(CARD_Y + 40));
+//   // labelValue(doc, "Engine Type", r.engineType, mm(rightX + 5), mm(CARD_Y + 48));
+//   // labelValue(doc, "Emission", r.emission, mm(rightX + 45), mm(CARD_Y + 48));
+//   labelValue(doc, "Keys", String(r.keys), mm(rightX + 45), mm(CARD_Y + 56));
+
+//   /** ==============================
+//    * RUNNING BAR
+//    * ============================== */
+//   const BAR_Y = CARD_Y + CARD_H + 18;
+//   const BAR_W = 160, BAR_H = 8;
+
+//   sectionHeader(doc, "How Much Has My Car Been Driven Before The PDI Date?", BAR_Y);
+
+//   // Background bar
+//   roundedRect(doc, mm(leftX), mm(BAR_Y + 10), mm(BAR_W), mm(BAR_H), 3, "#e5e5e5", "#e5e5e5");
+
+//   // Foreground bar
+//   const kms = isNaN(parseInt(r.kmsDriven)) ? 55 : parseInt(r.kmsDriven);
+//   const fgWidth = Math.min((kms / 130) * BAR_W, BAR_W);
+//   roundedRect(doc, mm(leftX), mm(BAR_Y + 10), mm(fgWidth), mm(BAR_H), 3, "#4CAF50", "#4CAF50");
+
+//   // Labels
+//   setText(doc, "#065f46", 9);
+//   doc.text("My Car's Running", mm(leftX), mm(BAR_Y + 8));
+
+//   doc.setFont(undefined, "bold");
+//   doc.text(String(r.kmsDriven ?? "55 Kms"), mm(leftX + BAR_W), mm(BAR_Y + 8), { align: "right" });
+//   doc.setFont(undefined, "normal");
+
+//   // Chip
+//   chip(doc, String(r.tamperingStatus ?? "No Tampering"), mm(leftX + BAR_W - 40), mm(BAR_Y + 22));
+
+//   // Avg Running
+//   setText(doc, THEME.text, 9.5);
+//   doc.text("Avg. Running Before Delivery", mm(leftX), mm(BAR_Y + 38));
+//   doc.setFont(undefined, "bold");
+//   doc.text(String(r.avgRunning ?? "39 Kms"), mm(leftX), mm(BAR_Y + 44));
+
+//   // Details
+//   setText(doc, THEME.subtext, 8);
+//   doc.text(
+//     `Details - At the time of PDI, your car's ODO reading was ${String(r.kmsDriven ?? "55 Kms")}, which is slightly above the city average of ${String(r.avgRunning ?? "39 Kms")}.`,
+//     mm(leftX),
+//     mm(BAR_Y + 54),
+//     { maxWidth: mm(BAR_W) }
+//   );
+
+//   /** ==============================
+//    * FOOTER
+//    * ============================== */
+//   drawFooter(doc);
+// }
 
 async function addCoverPage(doc, r) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Top Band
   drawTopBand(doc);
 
-  /** ==============================
-   * BOOKING HEADER
-   * ============================== */
+  // Booking Header (centered)
   setText(doc, THEME.subtext, 8.5);
-  doc.text(`Booking ID: ${String(r.bookingId ?? "—")}`, PAGE_PAD_X, mm(18));
+  doc.text(`Booking ID: ${String(r.bookingId ?? "—")}`, pageWidth / 2, mm(18), { align: "center" });
   setText(doc);
 
-  /** ==============================
-   * HERO IMAGE + SCORE CARD
-   * ============================== */
-  const TOP_OFFSET = 20;
-  const HERO = { x: 18, y: TOP_OFFSET + 20, w: 110, h: 55 };
-  const SCORE = { x: HERO.x + HERO.w + 10, y: HERO.y, w: 65, h: HERO.h };
+  // Hero Image & Score Layout
+  const TOP_OFFSET = 40;
+  const HERO = { w: 94, h: 54 };
+  const cardWidth = mm(HERO.w);
+  const heroX = (pageWidth - cardWidth) / 2;
 
-  // Hero box
-  roundedRect(doc, mm(HERO.x), mm(HERO.y), mm(HERO.w), mm(HERO.h), 6, "#fff", THEME.softLine);
+  roundedRect(doc, heroX, mm(TOP_OFFSET + 16), cardWidth, mm(HERO.h), 6, "#fff", THEME.softLine);
 
   if (r.imageUrl) {
     try {
-      doc.addImage(r.imageUrl, "JPEG", mm(HERO.x), mm(HERO.y), mm(HERO.w), mm(HERO.h), undefined, "FAST");
+      doc.addImage(r.imageUrl, "JPEG", heroX, mm(TOP_OFFSET + 16), cardWidth, mm(HERO.h), undefined, "FAST");
     } catch (err) {
       console.warn("Hero image failed:", err);
     }
   }
 
-  // Score Card box
-  roundedRect(doc, mm(SCORE.x), mm(SCORE.y), mm(SCORE.w), mm(SCORE.h), 6, "#fff", THEME.softLine);
-
-  setText(doc, THEME.subtext, 8);
-  doc.text("Overall Vehicle Score", mm(SCORE.x + 4), mm(SCORE.y + 8));
-
-  // Circle
-  doc.setDrawColor(THEME.good);
-  doc.circle(mm(SCORE.x + SCORE.w / 2), mm(SCORE.y + 20), 10, "S");
-
-  // Score value
-  setText(doc, THEME.text, 16);
-  doc.text(String(r.vehicleScore ?? "9.2"), mm(SCORE.x + SCORE.w / 2 - 4), mm(SCORE.y + 23));
-
-  // Status "GOOD"
-  setText(doc, THEME.good, 9);
-  doc.text("GOOD", mm(SCORE.x + SCORE.w / 2 - 10), mm(SCORE.y + 35));
-
-  // Description
-  setText(doc, THEME.subtext, 6.5);
-  const desc = r.scoreComment ??
-    "This score signifies that the car is free of defects arising out of manufacturing, mishandling at dealer premise / during travel & shipment. Asset and Driver Safety is not compromised.";
-  doc.text(desc, mm(SCORE.x + 4), mm(SCORE.y + 42), {
-    maxWidth: mm(SCORE.w - 8),
-    align: "left"
-  });
-
-  /** ==============================
-   * METRICS ROW
-   * ============================== */
+  // Top Metrics Row
   const metrics = [
-    { label: "BHPs", value: String(r.BHPs ?? "150") },
+    { label: "BHPs", value: String(r.BHPs ?? "0") },
     { label: "Airbags", value: String(r.Airbags ?? "6") },
-    { label: "NCAP", value: String(r.NCAP ?? "5 Star") },
-    { label: "Mileage", value: String(r.Mileage ?? "17 kmpl") },
+    { label: "NCAP", value: String(r.NCAP ?? "0") },
+    { label: "Mileage (kmpl)", value: String(r.Mileage ?? "17.0") },
   ];
 
-  const METRIC_Y = HERO.y + HERO.h + 15;
-  const BOX_W = 35, BOX_H = 14, SPACING = 6;
+  const METRIC_Y = TOP_OFFSET - 10;
+  const BOX_W = 30,
+    BOX_H = 21,
+    SPACING = 12;
+  const shadowOffset = mm(0.8);
+  const shadowColor = "#aaa";
+
+  const metricsTotalWidth = metrics.length * BOX_W + (metrics.length - 1) * SPACING;
+  const metricsXStart = (pageWidth - mm(metricsTotalWidth)) / 2;
 
   metrics.forEach((m, i) => {
-    const x = mm(HERO.x + i * (BOX_W + SPACING));
+    const x = metricsXStart + i * (BOX_W + SPACING);
+
+    // Draw shadow rectangle offset to bottom-right
+    roundedRect(doc, x + shadowOffset, mm(METRIC_Y) + shadowOffset, mm(BOX_W), mm(BOX_H), 3, shadowColor, shadowColor);
+
+    // Draw main white box on top
     roundedRect(doc, x, mm(METRIC_Y), mm(BOX_W), mm(BOX_H), 3, "#fff", THEME.softLine);
 
-    setText(doc, THEME.subtext, 7.5);
-    doc.text(m.label, x + mm(BOX_W / 2), mm(METRIC_Y + 5), { align: "center" });
+    doc.setTextColor(THEME.subtext);
+    doc.text(m.label, x + mm(BOX_W / 2), mm(METRIC_Y + 6), { align: "center" });
 
-    setText(doc, THEME.text, 10);
-    doc.text(m.value, x + mm(BOX_W / 2), mm(METRIC_Y + 11), { align: "center" });
+    doc.setTextColor(THEME.text);
+    doc.text(m.value, x + mm(BOX_W / 2), mm(METRIC_Y + 15), { align: "center" });
   });
 
-  /** ==============================
-   * INFO CARDS (Customer + Vehicle)
-   * ============================== */
-  const CARD_Y = METRIC_Y + BOX_H + 12;
-  const CARD_W = 85, CARD_H = 68, GAP = 10;
+  // Combined Info Card (Customer, Vehicle, Overall Score)
+  const CARD_W = 60,
+    CARD_H = 80,
+    GAP = 2;
+  const TOTAL_CARD_W = 3 * CARD_W + 2 * GAP;
+  const cardXStart = (pageWidth - mm(TOTAL_CARD_W)) / 2;
+  const CARD_Y = TOP_OFFSET + HERO.h + 28;
+  const padding = 5;
 
-  const leftX = HERO.x;
-  const rightX = HERO.x + CARD_W + GAP;
+  // Shadow behind
+  const SHADOW_OFFSET_MM = 1;
+  const canAlpha = typeof doc.GState === "function" && typeof doc.setGState === "function";
 
-  // CUSTOMER INFO
-  roundedRect(doc, mm(leftX), mm(CARD_Y), mm(CARD_W), mm(CARD_H), 4, "#fff", THEME.softLine);
-  setText(doc, THEME.text, 9.5);
-  doc.text("Customer Info", mm(leftX + 5), mm(CARD_Y + 8));
-  divider(doc, mm(leftX + 4), mm(CARD_Y + 10), mm(leftX + CARD_W - 4), THEME.faintLine);
+  if (canAlpha) doc.setGState(new doc.GState({ opacity: 0.9 }));
 
-  labelValue(doc, "Name", r.customerName, mm(leftX + 5), mm(CARD_Y + 16));
-  labelValue(doc, "Location", r.address, mm(leftX + 45), mm(CARD_Y + 16));
-  labelValue(doc, "Engineer Name", r.engineer_name, mm(leftX + 5), mm(CARD_Y + 24));
-  labelValue(doc, "PDI Date & Time",
-    `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`,
-    mm(leftX + 5), mm(CARD_Y + 32)
+  roundedRect(doc, mm(cardXStart + SHADOW_OFFSET_MM), mm(CARD_Y + SHADOW_OFFSET_MM), mm(TOTAL_CARD_W), mm(CARD_H), 4, "#aaa", "#aaa");
+
+  if (canAlpha) doc.setGState(new doc.GState({ opacity: 1 }));
+
+  // Main card on top
+  roundedRect(doc, mm(cardXStart), mm(CARD_Y), mm(TOTAL_CARD_W), mm(CARD_H), 4, "#fff", THEME.softLine);
+
+  // Section Calculations
+  const section1X = cardXStart + padding;
+  const section2X = section1X + CARD_W + GAP;
+  const section3X = section2X + CARD_W + GAP;
+
+  // Utilities
+  function drawSectionHeader(title, x, y, width) {
+    setText(doc, THEME.text, 9.5);
+    doc.text(title, mm(x + 5), mm(y + 8));
+    divider(doc, mm(x + 4), mm(y + 10), mm(x + width - 4), THEME.faintLine);
+  }
+
+  function drawLabelValueColumn(label, value, x, y, gapY = 8) {
+    labelValue(doc, label, value, mm(x), mm(y));
+    return y + gapY;
+  }
+
+  // Customer Info Section
+  // Updated labelValue function to make labels bold and values normal
+  function labelValue(doc, label, value, x, y) {
+    doc.setFont('helvetica', 'bold'); // Bold for label
+    doc.text(label + ':', x, y);
+    const labelWidth = doc.getTextWidth(label + ': ');
+    doc.setFont('helvetica', 'normal'); // Normal for value
+    doc.text(String(value), x + labelWidth, y);
+  }
+
+  // Usage in Customer Info section
+  drawSectionHeader("Customer Info", section1X, CARD_Y, CARD_W);
+
+  let custY = CARD_Y + 20;
+  const lineHeight = 5; // line height between label and value
+  const gapAfterValue = 6; // gap after value before next label
+
+  const fields = [
+    ["Name", r.customerName],
+    ["Location", r.address],
+    ["Engineer Name", r.engineer_name],
+    [
+      "PDI Date & Time",
+      `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`
+    ],
+    ["Address", r.address],
+  ];
+
+  fields.forEach(([label, value]) => {
+    doc.setFont('helvetica', 'bold');
+    doc.text(label + ":", mm(section1X + 5), mm(custY));
+    custY += lineHeight;
+    doc.setFont('helvetica', 'normal');
+    doc.text(String(value), mm(section1X + 5), mm(custY));
+    custY += gapAfterValue;
+  });
+
+
+  // Vehicle Info Section
+  drawSectionHeader("Vehicle Info", section2X, CARD_Y, CARD_W);
+  doc.setFont('helvetica', 'bold');         // Bold font for label
+
+
+  const startX = section2X + 5;
+  const vehicleFields = [
+    ["Brand", r.brand],
+    ["Model", r.model],
+    ["Car Status", r.carStatus],
+    ["VIN No.", r.vinNumber],
+    ["Variant", r.variant],
+    ["Transmission", r.transmissionType],
+    ["Fuel", r.fuelType],
+    ["Engine", r.engineNumber],
+    ["Keys", String(r.keys ?? "2")],
+  ];
+
+  const labelWidth = 25; // Reserve space for label width
+  const valueXOffset = startX + labelWidth;
+
+  let rowY = CARD_Y + 20;
+
+  vehicleFields.forEach(([label, value]) => {
+    doc.setFont('helvetica', 'bold');         // Bold font for label
+    doc.text(label + ":", mm(startX), mm(rowY));
+    doc.setFont('helvetica', 'normal');       // Normal font for value
+    doc.text(String(value), mm(valueXOffset), mm(rowY));
+    rowY += 6;
+  });
+
+
+
+  // Overall Score Section
+  drawSectionHeader("Overall Vehicle Score", section3X, CARD_Y, CARD_W);
+
+  const circleX = mm(section3X + CARD_W / 2);
+  const circleY = mm(CARD_Y + 30);
+
+  doc.setDrawColor(THEME.good);
+  doc.circle(circleX, circleY, 13, "S");
+
+  setText(doc, THEME.text, 18);
+  doc.text(String(r.vehicleScore ?? "9.2"), circleX - 5, circleY + 3);
+
+  setText(doc, THEME.good, 10);
+  doc.text("GOOD", circleX - 25, circleY + 20);
+
+  setText(doc, THEME.subtext, 7);
+  doc.text(
+    r.scoreComment ??
+    "This score signifies that the car is free of defects arising out of manufacturing, mishandling at dealer premise / during travel & shipment. Asset and Driver Safety is not compromised.",
+    mm(section3X + 5),
+    mm(CARD_Y + 55),
+    { maxWidth: mm(CARD_W - 20), align: "left" }
   );
-  labelValue(doc, "Address", r.address, mm(leftX + 5), mm(CARD_Y + 40));
 
-  // VEHICLE INFO
-  roundedRect(doc, mm(rightX), mm(CARD_Y), mm(CARD_W), mm(CARD_H), 4, "#fff", THEME.softLine);
-  setText(doc, THEME.text, 9.5);
-  doc.text("Vehicle Info", mm(rightX + 5), mm(CARD_Y + 8));
-  divider(doc, mm(rightX + 4), mm(CARD_Y + 10), mm(rightX + CARD_W - 4), THEME.faintLine);
-
-  labelValue(doc, "Brand", r.brand, mm(rightX + 5), mm(CARD_Y + 16));
-  labelValue(doc, "Model", r.model, mm(rightX + 45), mm(CARD_Y + 16));
-  labelValue(doc, "Car Status", r.carStatus, mm(rightX + 5), mm(CARD_Y + 24));
-  labelValue(doc, "VIN No.", r.vinNumber, mm(rightX + 45), mm(CARD_Y + 24));
-  labelValue(doc, "Variant", r.variant, mm(rightX + 5), mm(CARD_Y + 32));
-  labelValue(doc, "Transmission", r.transmissionType, mm(rightX + 45), mm(CARD_Y + 32));
-  labelValue(doc, "Fuel", r.fuelType, mm(rightX + 5), mm(CARD_Y + 40));
-  labelValue(doc, "Engine", r.engineNumber, mm(rightX + 45), mm(CARD_Y + 40));
-  // labelValue(doc, "Engine Type", r.engineType, mm(rightX + 5), mm(CARD_Y + 48));
-  // labelValue(doc, "Emission", r.emission, mm(rightX + 45), mm(CARD_Y + 48));
-  labelValue(doc, "Keys", String(r.keys), mm(rightX + 45), mm(CARD_Y + 56));
-
-  /** ==============================
-   * RUNNING BAR
-   * ============================== */
+  // Running Bar and footer
   const BAR_Y = CARD_Y + CARD_H + 18;
-  const BAR_W = 160, BAR_H = 8;
+  const BAR_W = 160,
+    BAR_H = 8;
+  const barXStart = (pageWidth - mm(BAR_W)) / 2;
 
   sectionHeader(doc, "How Much Has My Car Been Driven Before The PDI Date?", BAR_Y);
 
   // Background bar
-  roundedRect(doc, mm(leftX), mm(BAR_Y + 10), mm(BAR_W), mm(BAR_H), 3, "#e5e5e5", "#e5e5e5");
+  roundedRect(doc, mm(barXStart), mm(BAR_Y + 10), mm(BAR_W), mm(BAR_H), 3, "#e5e5e5", "#e5e5e5");
 
-  // Foreground bar
+  // Foreground bar width by kmsDriven
   const kms = isNaN(parseInt(r.kmsDriven)) ? 55 : parseInt(r.kmsDriven);
   const fgWidth = Math.min((kms / 130) * BAR_W, BAR_W);
-  roundedRect(doc, mm(leftX), mm(BAR_Y + 10), mm(fgWidth), mm(BAR_H), 3, "#4CAF50", "#4CAF50");
+  roundedRect(doc, mm(barXStart), mm(BAR_Y + 10), mm(fgWidth), mm(BAR_H), 3, "#4CAF50", "#4CAF50");
 
   // Labels
   setText(doc, "#065f46", 9);
-  doc.text("My Car's Running", mm(leftX), mm(BAR_Y + 8));
+  doc.text("My Car's Running", mm(barXStart + 2), mm(BAR_Y + 8));
 
   doc.setFont(undefined, "bold");
-  doc.text(String(r.kmsDriven ?? "55 Kms"), mm(leftX + BAR_W), mm(BAR_Y + 8), { align: "right" });
+  doc.text(String(r.kmsDriven ?? "55 Kms"), mm(barXStart + BAR_W), mm(BAR_Y + 8), { align: "right" });
   doc.setFont(undefined, "normal");
 
-  // Chip
-  chip(doc, String(r.tamperingStatus ?? "No Tampering"), mm(leftX + BAR_W - 40), mm(BAR_Y + 22));
+  // Tampering chip
+  chip(doc, String(r.tamperingStatus ?? "No Tampering"), mm(barXStart + BAR_W - 40), mm(BAR_Y + 26));
 
-  // Avg Running
+  // Avg Running Before Delivery
   setText(doc, THEME.text, 9.5);
-  doc.text("Avg. Running Before Delivery", mm(leftX), mm(BAR_Y + 38));
-  doc.setFont(undefined, "bold");
-  doc.text(String(r.avgRunning ?? "39 Kms"), mm(leftX), mm(BAR_Y + 44));
+  doc.text("Avg. Running Before Delivery", mm(barXStart), mm(BAR_Y + 38));
 
-  // Details
+  doc.setFont(undefined, "bold");
+  doc.text(String(r.avgRunning ?? "39 Kms"), mm(barXStart), mm(BAR_Y + 44));
+
+  // Details text under bar
   setText(doc, THEME.subtext, 8);
   doc.text(
-    `Details - At the time of PDI, your car's ODO reading was ${String(r.kmsDriven ?? "55 Kms")}, which is slightly above the city average of ${String(r.avgRunning ?? "39 Kms")}.`,
-    mm(leftX),
+    `Details - At the time of PDI, your car's ODO reading was ${String(r.kmsDriven ?? "55 Kms")}, which is slightly above the city average of ${String(
+      r.avgRunning ?? "39 Kms"
+    )}.`,
+    mm(barXStart),
     mm(BAR_Y + 54),
     { maxWidth: mm(BAR_W) }
   );
 
-  /** ==============================
-   * FOOTER
-   * ============================== */
+  // Footer
   drawFooter(doc);
 }
+
+
+
 
 /** =========================================================================
  * PAGE 2: PROFILE PHOTOS (360)
@@ -474,6 +761,7 @@ async function addProfilePhotosPage(doc, r) {
  * ========================================================================= */
 
 async function addBodyPanelsPage(doc, r) {
+
   function renderHeaders(y, title = "Body Panels") {
     sectionHeader(doc, title, y); // Section title
     const headers = ["Parts", "Paint Thickness (mm)", "Issue", "Cladding", "Repaint"];
@@ -496,28 +784,28 @@ async function addBodyPanelsPage(doc, r) {
   let y = PAGE_TOP_SPACING + mm(22); // start below headers
 
   const rows = [
-     { label: "Bonnet", key: "bonnet", repaintKey: "bonnet_repaint" },
-    { label: "Bumper", key: "bumper" },
+    { label: "Bonnet", key: "bonnet", repaintKey: "bonnet_repaint" },
+    { label: "Bumper", key: "bumper", repaintKey: "rear_bumper_repaint" },
     { label: "Front Left Fender", key: "front_left_fender", claddingKey: "front_left_fender_cladding", repaintKey: "front_left_fender_repaint" },
-    { label: "Front Left Door", key: "front_left_door", claddingKey: "front_left_door_cladding" },
-    { label: "Rear Left Door", key: "rear_left_door", claddingKey: "rear_left_door_cladding" },
-    { label: "Rear Left Quarter Panel", key: "rear_left_quarter_panel", claddingKey: "rear_left_quarter_panel_cladding" },
+    { label: "Front Left Door", key: "front_left_door", claddingKey: "front_left_door_cladding", repaintKey: "front_left_door_repaint" },
+    { label: "Rear Left Door", key: "rear_left_door", claddingKey: "rear_left_door_cladding", repaintKey: "rear_left_door_repaint" },
+    { label: "Rear Left Quarter Panel", key: "rear_left_quarter_panel", claddingKey: "rear_left_quarter_panel_cladding", repaintKey: "rear_left_quarter_panel_repaint" },
     { label: "Boot", key: "boot" },
     { label: "Rear Bumper", key: "rear_bumper" },
-    { label: "Rear Right Quarter Panel", key: "rear_right_quarter_panel", claddingKey: "rear_right_quarter_panel_cladding" },
-    { label: "Rear Right Door", key: "rear_right_door", claddingKey: "rear_right_door_cladding" },
-    { label: "Front Right Door", key: "front_right_door", claddingKey: "front_right_door_cladding" },
-    { label: "Front Right Fender", key: "front_right_fender", claddingKey: "front_right_fender_cladding" },
-    { label: "Roof", key: "roof" },
+    { label: "Rear Right Quarter Panel", key: "rear_right_quarter_panel", claddingKey: "rear_right_quarter_panel_cladding", repaintKey: "rear_right_quarter_panel_repaint" },
+    { label: "Rear Right Door", key: "rear_right_door", claddingKey: "rear_right_door_cladding", repaintKey: "rear_right_door_repaint" },
+    { label: "Front Right Door", key: "front_right_door", claddingKey: "front_right_door_cladding", repaintKey: "front_right_door_repaint" },
+    { label: "Front Right Fender", key: "front_right_fender", claddingKey: "front_right_fender_cladding", repaintKey: "front_right_fender_repaint" },
+    { label: "Roof", key: "roof", repaintKey: "roof_repaint" },
     { label: "Front Windshield", key: "front_windshield" },
   ];
 
   for (const row of rows) {
     const urls = Array.isArray(r[`${row.key}_imageUrls`]) ? r[`${row.key}_imageUrls`] : [];
-    const cladding = Array.isArray(r[`${row.claddingKey}_issues`]) && r[`${row.claddingKey}_issues`].length > 0 
+    const cladding = row.claddingKey && Array.isArray(r[`${row.claddingKey}_issues`]) && r[`${row.claddingKey}_issues`].length > 0
       ? r[`${row.claddingKey}_issues`].join(", ")
       : "—";
-    const repaint = row.repaintKey ? (r[row.repaintKey] ? "Yes" : "No") : "—";
+
     const issue = Array.isArray(r[`${row.key}_issues`]) && r[`${row.key}_issues`].length > 0
       ? r[`${row.key}_issues`].join(", ")
       : "—";
@@ -526,9 +814,8 @@ async function addBodyPanelsPage(doc, r) {
     const paintText = doc.splitTextToSize(String(r[`${row.key}_paintThickness`] ?? "NA"), colX[2] - colX[1] - 2);
     const issueText = doc.splitTextToSize(issue, colX[3] - colX[2] - 2);
     const claddingText = doc.splitTextToSize(cladding, colX[4] - colX[3] - 2);
-    const repaintText = doc.splitTextToSize(repaint, colX[5] - colX[4] - 2);
 
-    const maxLines = Math.max(labelText.length, paintText.length, issueText.length, claddingText.length, repaintText.length);
+    const maxLines = Math.max(labelText.length, paintText.length, issueText.length, claddingText.length);
     const lineHeight = 5;
     const rowHeight = maxLines * lineHeight;
 
@@ -537,11 +824,20 @@ async function addBodyPanelsPage(doc, r) {
     doc.text(paintText, colX[1], y);
     doc.text(issueText, colX[2], y);
     doc.text(claddingText, colX[3], y);
-    doc.text(repaintText, colX[4], y);
+
+    // Draw repaint checkbox tick:
+    if (row.repaintKey !== undefined) {
+      const repaintTextX = colX[4];
+      const repaintCheckX = repaintTextX + doc.getTextWidth("Repaint ") + 1;
+      const repaintCheckY = y;
+
+      doc.text("Repaint", repaintTextX, y);
+      checkmark(doc, repaintCheckX, repaintCheckY, !!r[row.repaintKey]);
+    }
 
     y += rowHeight + 4;
 
-    // New row for images below text
+    // Images below text row
     if (urls.length > 0) {
       const maxImages = Math.min(5, urls.length);
       const imageSize = 20;
@@ -570,13 +866,14 @@ async function addBodyPanelsPage(doc, r) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
       drawTopBand(doc);
-      ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Body Panels")); // header on new page
-      y = PAGE_TOP_SPACING + mm(22); // reset Y below header
+      ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Body Panels"));
+      y = PAGE_TOP_SPACING + mm(22);
     }
   }
 
   drawFooter(doc);
 }
+
 
 /** =========================================================================
  * PAGE 4: GLASSES
@@ -632,7 +929,7 @@ async function addGlassesPage(doc, r) {
     const labelText = doc.splitTextToSize(row.label, colX[1] - colX[0] - 2);
     const brandText = doc.splitTextToSize(brand, colX[2] - colX[1] - 2);
     const dateText = doc.splitTextToSize(mfgDate, colX[3] - colX[2] - 2);
-    const issuesText = doc.splitTextToSize(issues, mm(192) - colX[3] - 2); // remaining width
+    const issuesText = doc.splitTextToSize(issues, colX[3] - colX[2] - 2);
 
     const maxLines = Math.max(labelText.length, brandText.length, dateText.length, issuesText.length);
     const lineHeight = 5;
@@ -677,7 +974,7 @@ async function addGlassesPage(doc, r) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
       drawTopBand(doc);
-      ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Glasses (contd.)"));
+      ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Glasses"));
       y = PAGE_TOP_SPACING + mm(22);
     }
   }
@@ -747,8 +1044,8 @@ async function addRubberPage(doc, r) {
     // Toggle/status if exists
     if (row.toggle !== undefined) {
       setText(doc, THEME.subtext, 8.5);
-      doc.text("Available", PAGE_PAD_X + 70, y + 0.3);
-      checkmark(doc, PAGE_PAD_X + 88, y + 0.6, !!row.toggle);
+      doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+      checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
       setText(doc);
     }
 
@@ -792,17 +1089,191 @@ async function addRubberPage(doc, r) {
 /** =========================================================================
  * PAGE 6: SEATS & Fabrics
  * ========================================================================= */
-async function addSeatsBeltsPage(doc, r) {
-  doc.addPage("a4", "portrait");
-  drawTopBand(doc);
-  sectionHeader(doc, "Seats & Fabrics", mm(28));
 
+
+// async function addSeatsBeltsPage(doc, r) {
+//   // Common columns for both sections
+//   const col = {
+//     part: PAGE_PAD_X,
+//     status: PAGE_PAD_X + 80,
+//   };
+
+//   // --- Seats & Fabrics Section ---
+//   doc.addPage("a4", "portrait");
+//   drawTopBand(doc);
+//   sectionHeader(doc, "Seats & Fabrics", mm(28));
+
+//   // Seats table headers
+//   setText(doc, THEME.header, 9.2);
+//   doc.text("Part", col.part, mm(36));
+//   doc.text("Issues", col.status, mm(36));
+//   setText(doc);
+
+//   let y = mm(42);
+//   const rowHeight = 24;
+//   const thumbSize = 24;
+//   const thumbGap = 6;
+
+//   const rows = [
+//     { label: "Driver Seat", key: "seat_driver", arr: r.seat_driver_imageUrls },
+//     { label: "Driver Head Rest", key: "seat_driver_head_rest", arr: r.seat_driver_head_rest_imageUrls },
+//     { label: "Co-driver Seat", key: "seat_codriver", arr: r.seat_codriver_imageUrls },
+//     { label: "Co-driver Head Rest", key: "seat_codriver_head_rest", arr: r.seat_codriver_head_rest_imageUrls },
+//     { label: "Rear Seat", key: "seat_rear", arr: r.seat_rear_imageUrls },
+//     { label: "Rear Head Rest", key: "seat_rear_head_rest", arr: r.seat_rear_head_rest_imageUrls },
+//     { label: "Third Row", key: "seat_third_row", arr: r.seat_third_row_imageUrls, toggle: r.seat_third_row_toggle },
+//     { label: "Third Row Head Rest", key: "seat_third_row_head_rest", arr: r.seat_third_row_head_rest_imageUrls },
+//     { label: "Roof Lining", key: "seat_roof", arr: r.seat_roof_imageUrls },
+//     { label: "Sunroof Cover", key: "seat_sunroof", arr: r.seat_sunroof_imageUrls },
+//   ];
+
+//   for (const row of rows) {
+//     setText(doc, THEME.text, 9.3);
+//     doc.text(row.label, col.part, y);
+
+//     setText(doc, THEME.subtext, 8.5);
+//     const issuesText = r[`${row.key}_issues`] ?? "—";
+//     doc.text(issuesText, col.status, y);
+
+//     // Toggle/status if exists
+//     if (row.toggle !== undefined) {
+//       setText(doc, THEME.subtext, 8.5);
+//       doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+//       checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
+//       setText(doc);
+//     }
+
+//     let imgX = PAGE_PAD_X;
+//     const imgY = y + 8;
+
+//     if (Array.isArray(row.arr) && row.arr.length > 0) {
+//       for (let i = 0; i < Math.min(row.arr.length, 5); i++) {
+//         if (row.arr[i]) {
+//           try {
+//             const imgData = await urlToDataURL(row.arr[i]);
+//             if (imgData) {
+//               doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
+//             }
+//           } catch {}
+//         }
+//         imgX += thumbSize + thumbGap;
+//       }
+//     } else {
+//       setText(doc, THEME.subtext, 8.4);
+//       doc.text("No photos available", imgX, imgY + 12);
+//       setText(doc);
+//     }
+
+//     y += rowHeight + thumbSize + 2;
+
+//     // Pagination for Seats & Fabrics section
+//     if (y > mm(270)) {
+//       drawFooter(doc);
+//       doc.addPage("a4", "portrait");
+//       drawTopBand(doc);
+//       sectionHeader(doc, "Seats & Fabrics (contd.)", mm(28));
+//       setText(doc, THEME.header, 9.2);
+//       doc.text("Part", col.part, mm(36));
+//       doc.text("Issues", col.status, mm(36));
+//       setText(doc);
+//       y = mm(42);
+//     }
+//   }
+
+//   // --- End of Seats & Fabrics Section ---
+//   drawFooter(doc);
+
+//   // --- Start Seatbelts Section on a new page ---
+//   doc.addPage("a4", "portrait");
+//   drawTopBand(doc);
+//   sectionHeader(doc, "Seatbelts", mm(28));
+
+//   // Seatbelts table headers
+//   setText(doc, THEME.header, 9.2);
+//   doc.text("Part", col.part, mm(36));
+//   doc.text("Issues / Status", col.status, mm(36));
+//   setText(doc);
+
+//   y = mm(42);
+
+//   const belts = [
+//     { label: "Driver Seatbelt", key: "seatbelt_driver", arr: r.seatbelt_driver_imageUrls },
+//     { label: "Co-driver Seatbelt", key: "seatbelt_codriver", arr: r.seatbelt_codriver_imageUrls },
+//     { label: "Rear Left Passenger Seatbelt", key: "seatbelt_rear_left_passenger", arr: r.seatbelt_rear_left_passenger_imageUrls },
+//     { label: "Rear Right Passenger Seatbelt", key: "seatbelt_rear_right_passenger", arr: r.seatbelt_rear_right_passenger_imageUrls },
+//     { label: "Third Row Seatbelts", key: "seatbelt_third_row", arr: r.seatbelt_third_row_imageUrls, toggle: r.seatbelt_third_row_toggle },
+//   ];
+
+//   for (const row of belts) {
+//     setText(doc, THEME.text, 9.3);
+//     doc.text(row.label, col.part, y);
+
+//     setText(doc, THEME.subtext, 8.5);
+//     const issuesText = r[`${row.key}_issues`] ?? "—";
+//     doc.text(issuesText, col.status, y);
+
+//     // Toggle/status if exists
+//     if (row.toggle !== undefined) {
+//       setText(doc, THEME.subtext, 8.5);
+//       doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+//       checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
+//       setText(doc);
+//     }
+
+//     let imgX = PAGE_PAD_X;
+//     const imgY = y + 8;
+
+//     if (Array.isArray(row.arr) && row.arr.length > 0) {
+//       for (let i = 0; i < Math.min(row.arr.length, 5); i++) {
+//         if (row.arr[i]) {
+//           try {
+//             const imgData = await urlToDataURL(row.arr[i]);
+//             if (imgData) {
+//               doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
+//             }
+//           } catch {}
+//         }
+//         imgX += thumbSize + thumbGap;
+//       }
+//     } else {
+//       setText(doc, THEME.subtext, 8.4);
+//       doc.text("No photos available", imgX, imgY + 12);
+//       setText(doc);
+//     }
+
+//     y += rowHeight + thumbSize + 2;
+
+//     // Pagination for Seatbelts section
+//     if (y > mm(270)) {
+//       drawFooter(doc);
+//       doc.addPage("a4", "portrait");
+//       drawTopBand(doc);
+//       sectionHeader(doc, "Seatbelts (contd.)", mm(28));
+//       setText(doc, THEME.header, 9.2);
+//       doc.text("Part", col.part, mm(36));
+//       doc.text("Issues / Status", col.status, mm(36));
+//       setText(doc);
+//       y = mm(42);
+//     }
+//   }
+
+//   // Draw footer on last page
+//   drawFooter(doc);
+// }
+
+
+async function addSeatsAndFabricsSection(doc, r) {
   const col = {
     part: PAGE_PAD_X,
     status: PAGE_PAD_X + 80,
   };
 
-  // Table headers for Seats
+  // Start first page for Seats & Fabrics
+  doc.addPage("a4", "portrait");
+  drawTopBand(doc);
+  sectionHeader(doc, "Seats & Fabrics", mm(28));
+
+  // Table headers
   setText(doc, THEME.header, 9.2);
   doc.text("Part", col.part, mm(36));
   doc.text("Issues", col.status, mm(36));
@@ -813,7 +1284,6 @@ async function addSeatsBeltsPage(doc, r) {
   const thumbSize = 24;
   const thumbGap = 6;
 
-  // Seats rows with issues field and toggle if exists
   const rows = [
     { label: "Driver Seat", key: "seat_driver", arr: r.seat_driver_imageUrls },
     { label: "Driver Head Rest", key: "seat_driver_head_rest", arr: r.seat_driver_head_rest_imageUrls },
@@ -836,21 +1306,17 @@ async function addSeatsBeltsPage(doc, r) {
     doc.text(issuesText, col.status, y);
 
     if (row.toggle !== undefined) {
-      const textX = col.status + 40;
-      const checkX = textX + doc.getTextWidth("Available ") + 2; // 4 units gap
-      const checkY = y - 2; // vertical alignment for checkmark
-
-      doc.text("Available", textX, y);
-      checkmark(doc, checkX, checkY, !!row.toggle);
+      setText(doc, THEME.subtext, 8.5);
+      doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+      checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
+      setText(doc);
     }
-    setText(doc);
 
     let imgX = PAGE_PAD_X;
     const imgY = y + 8;
 
     if (Array.isArray(row.arr) && row.arr.length > 0) {
       for (let i = 0; i < Math.min(row.arr.length, 5); i++) {
-        // roundedRect(doc, imgX, imgY, thumbSize, thumbSize, 3, "#f9fbfc", "#b8dadb");
         if (row.arr[i]) {
           try {
             const imgData = await urlToDataURL(row.arr[i]);
@@ -867,16 +1333,14 @@ async function addSeatsBeltsPage(doc, r) {
       setText(doc);
     }
 
-    // doc.setDrawColor("#e0e0e0");
-    // doc.line(PAGE_PAD_X, y + rowHeight, A4.w - PAGE_PAD_X, y + rowHeight);
-
     y += rowHeight + thumbSize + 2;
 
+    // Paginate if content exceeds page height
     if (y > mm(270)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
       drawTopBand(doc);
-      sectionHeader(doc, "Seats & Seatbelts", mm(28));
+      sectionHeader(doc, "Seats & Fabrics (contd.)", mm(28));
       setText(doc, THEME.header, 9.2);
       doc.text("Part", col.part, mm(36));
       doc.text("Issues", col.status, mm(36));
@@ -885,16 +1349,30 @@ async function addSeatsBeltsPage(doc, r) {
     }
   }
 
-  // Seatbelt Section Separation
-  // y += 10;
-  // doc.setDrawColor("#c0c0c0");
-  // doc.setLineWidth(0.7);
-  // doc.line(PAGE_PAD_X, y, A4.w - PAGE_PAD_X, y);
-  // y += 12;
+  // Final footer for last page
+  drawFooter(doc);
+}
 
-  // Seatbelt section header
-  // sectionHeader(doc, "Seatbelts", y);
-  // y += 14;
+
+async function addSeatbeltsSection(doc, r) {
+  const col = {
+    part: PAGE_PAD_X,
+    status: PAGE_PAD_X + 80,
+  };
+
+  doc.addPage("a4", "portrait");
+  drawTopBand(doc);
+  sectionHeader(doc, "Seatbelts", mm(28));
+
+  setText(doc, THEME.header, 9.2);
+  doc.text("Part", col.part, mm(36));
+  doc.text("Issues / Status", col.status, mm(36));
+  setText(doc);
+
+  let y = mm(42);
+  const rowHeight = 24;
+  const thumbSize = 24;
+  const thumbGap = 6;
 
   const belts = [
     { label: "Driver Seatbelt", key: "seatbelt_driver", arr: r.seatbelt_driver_imageUrls },
@@ -913,22 +1391,17 @@ async function addSeatsBeltsPage(doc, r) {
     doc.text(issuesText, col.status, y);
 
     if (row.toggle !== undefined) {
-      const textX = col.status + 40;
-      const checkX = textX + doc.getTextWidth("Available ") + 2; // 4 units gap
-      const checkY = y - 2; // vertical alignment for checkmark
-
-      doc.text("Available", textX, y);
-      checkmark(doc, checkX, checkY, !!row.toggle);
+      setText(doc, THEME.subtext, 8.5);
+      doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+      checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
+      setText(doc);
     }
-
-    setText(doc);
 
     let imgX = PAGE_PAD_X;
     const imgY = y + 8;
 
     if (Array.isArray(row.arr) && row.arr.length > 0) {
       for (let i = 0; i < Math.min(row.arr.length, 5); i++) {
-        // roundedRect(doc, imgX, imgY, thumbSize, thumbSize, 3, "#f9fbfc", "#b8dadb");
         if (row.arr[i]) {
           try {
             const imgData = await urlToDataURL(row.arr[i]);
@@ -944,9 +1417,6 @@ async function addSeatsBeltsPage(doc, r) {
       doc.text("No photos available", imgX, imgY + 12);
       setText(doc);
     }
-
-    // doc.setDrawColor("#e0e0e0");
-    // doc.line(PAGE_PAD_X, y + rowHeight, A4.w - PAGE_PAD_X, y + rowHeight);
 
     y += rowHeight + thumbSize + 2;
 
@@ -965,6 +1435,8 @@ async function addSeatsBeltsPage(doc, r) {
 
   drawFooter(doc);
 }
+
+
 
 /** =========================================================================
  * PAGE 7: PLASTICS
@@ -1024,11 +1496,11 @@ async function addPlasticsPage(doc, r) {
           doc.addImage(urls[i], "JPEG", x, y, imageSize, imageSize);
         } catch (err) {
           console.warn("Image load failed:", err);
-          
+
           doc.roundedRect(x, y, imageSize, imageSize, 2, 2);
         }
       } else {
-        
+
         doc.roundedRect(x, y, imageSize, imageSize, 2, 2);
       }
       x += imageSize + spacing;
@@ -1056,7 +1528,7 @@ async function addPlasticsPage(doc, r) {
 async function addFeaturesPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
-  sectionHeader(doc, "Parts", mm(28), );
+  sectionHeader(doc, "Parts", mm(28),);
 
   const items = [
     ["Parking Sensors (Front)", r.feature_parking_sensors_front_available, r.feature_parking_sensors_front_issueObserved],
@@ -1114,13 +1586,22 @@ async function addFeaturesPage(doc, r) {
 async function addLiveFluidsDiagnosticsPage(doc, r) {
   doc.addPage("a4", "portrait");
   drawTopBand(doc);
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Calculate horizontal centering
+  const baseCols = [20, 64, 97, 124, 142]; // mm positions of columns relative to left margin
+  const tableLeftMargin = 20;
+  const tableRight = 172; // e.g. 142 + ~30 for last col width
+  const tableWidth = mm(tableRight - tableLeftMargin);
+  const tableXOffset = (pageWidth - tableWidth) / 2;
   sectionHeader(doc, "Live Readings & Fluids", mm(28));
 
   const leftX = PAGE_PAD_X;
   const boxWidth = A4.w - PAGE_PAD_X * 2; // full width for stacked cards
   let y = mm(34);
 
-// ----------------------------
+  // ----------------------------
   // ---- Card 1: Live Parameters
   // ----------------------------
   const liveParamsHeight = mm(50);
@@ -1220,14 +1701,27 @@ async function addLiveFluidsDiagnosticsPage(doc, r) {
   divider(doc, leftX, y + 4, leftX + boxWidth);
   y += 8;
 
+  // for (const { name, withinRange, contamination } of fluids) {
+  //   doc.text(name, col1, y);
+  //   doc.text(withinRange ? "Y" : "N", col2, y, { align: "center" });
+  //   doc.text(contamination ? "Y" : "N", col3, y, { align: "center" });
+  //   divider(doc, leftX, y + 3.5, leftX + boxWidth, THEME.faintLine);
+  //   y += 8;
+  // }
+
+
   for (const { name, withinRange, contamination } of fluids) {
     doc.text(name, col1, y);
-    doc.text(withinRange ? "Y" : "N", col2, y, { align: "center" });
-    doc.text(contamination ? "Y" : "N", col3, y, { align: "center" });
+
+    // Use your checkmark helper for withinRange
+    checkmark(doc, col2, y + 0.6, !!withinRange);
+
+    // And for contamination
+    checkmark(doc, col3, y + 0.6, !!contamination);
+
     divider(doc, leftX, y + 3.5, leftX + boxWidth, THEME.faintLine);
     y += 8;
   }
-
 
   // ----------------------------
   drawFooter(doc);
@@ -1312,11 +1806,11 @@ async function addTyresPaymentPage(doc, r) {
 
     y += rowHeight + 4;
 
-    // Available toggle (for spare tyre)
+    // Toggle/status if exists
     if (row.toggle !== undefined) {
       setText(doc, THEME.subtext, 8.5);
-      doc.text("Available", colX[7] + 60, y - rowHeight - 2);
-      checkmark(doc, colX[1] + 80, y - rowHeight - 4, !!row.toggle);
+      doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+      checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
       setText(doc);
     }
 
@@ -1373,7 +1867,7 @@ async function addTyresPaymentPage(doc, r) {
 
 async function addOtherObservationsPage(doc) {
   doc.addPage("a4", "portrait");
-  
+
   // Header
   drawTopBand(doc);
   sectionHeader(doc, "Other Observations", mm(28));
@@ -1400,7 +1894,7 @@ async function addOtherObservationsPage(doc) {
 
   const col1 = leftX + 6;            // Category
   const col2 = leftX + boxWidth / 3; // Notes (start from 1/3rd)
-  
+
   doc.setFont("helvetica", "bold");
   doc.text("Category", col1, y);
   doc.text("Notes", col2, y);
@@ -1439,7 +1933,8 @@ export default async function generateInspectionPDF(report) {
   await addBodyPanelsPage(doc, report);
   await addGlassesPage(doc, report);
   await addRubberPage(doc, report);
-  await addSeatsBeltsPage(doc, report);
+  await addSeatsAndFabricsSection(doc, report);
+  await addSeatbeltsSection(doc, report);
   await addPlasticsPage(doc, report);
   await addFeaturesPage(doc, report);
   await addLiveFluidsDiagnosticsPage(doc, report);

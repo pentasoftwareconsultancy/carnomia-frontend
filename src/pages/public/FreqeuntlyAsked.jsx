@@ -15,7 +15,7 @@ const FreqeuntlyAsked = () => {
   })).filter(section => section.questions.length > 0);
 
   return (
-    <div className="bg-primary min-h-screen">
+    <div className="bg-primary min-h-screen font-body">
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -23,7 +23,7 @@ const FreqeuntlyAsked = () => {
         className="w-full bg-black text-center py-12 px-4"
       >
         <h3 className="text-gray-300 text-sm">FAQs</h3>
-        <h1 className="text-button text-3xl md:text-4xl font-bold mt-2">Ask us anything</h1>
+        <h1 className="text-button text-3xl md:text-4xl  font-heading-bold heading mt-2">Ask us anything</h1>
         <p className="text-white mt-2">Have any questions?</p>
 
         <div className="mt-6 relative w-72 md:w-96 mx-auto">
@@ -35,7 +35,7 @@ const FreqeuntlyAsked = () => {
             placeholder="Search here"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 rounded-md w-full bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="pl-10 pr-4 py-2 rounded-md w-full bg-white focus:outline-none focus:ring-2 focus:ring-button"
           />
         </div>
       </motion.div>
@@ -55,7 +55,7 @@ const FreqeuntlyAsked = () => {
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-xl font-bold text-regal-blue mb-4 border-b pb-1 border-button">{section.category}</h2>
+              <h2 className="text-xl  font-heading-bold text-gray-800 mb-4 border-b pb-1 border-button">{section.category}</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {section.questions.map((item, index) => {
                   const globalIndex = faqData
@@ -65,16 +65,16 @@ const FreqeuntlyAsked = () => {
                   return (
                     <motion.div
                       key={index}
-                      className="p-4 bg-white border border-button  rounded-md flex flex-col gap-2 shadow-sm hover:shadow-md transition"
+                      className="p-4 bg-white border border-button rounded-md flex flex-col gap-2 shadow-sm hover:shadow-md transition"
                       whileHover={{ scale: 1.02 }}
                     >
                       <div className="flex items-center gap-3 mb-1 text-button">
                         <span className="text-white bg-button p-2 rounded-full text-xl">
                           {item.icon}
                         </span>
-                        <span className="font-body">Q{globalIndex}.</span>
+                        <span className="font-heading-bold">Q{globalIndex}.</span>
                       </div>
-                      <div className="text-md font-medium text-gray-900 mb-1">{item.q}</div>
+                      <div className="text-md font-heading-bold text-gray-900 mb-1">{item.q}</div>
                       <p className="text-sm text-gray-700 whitespace-pre-line">{item.a}</p>
                     </motion.div>
                   );
@@ -83,26 +83,29 @@ const FreqeuntlyAsked = () => {
             </motion.div>
           ))
         )}
-      </div>
-
-      <motion.div
-        className="max-w-5xl mx-auto px-6 mt-16"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="bg-black text-white rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-body">Still have questions?</h3>
-            <p className="text-sm text-gray-400">
-              Can’t find the answer you’re looking for? Please chat to our friendly team.
-            </p>
+        
+        <motion.div
+          className="max-w-5xl mx-auto px-6 mt-16"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="bg-black text-white rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-heading-bold">Still have questions?</h3>
+              <p className="text-sm text-gray-400 font-body">
+                Can’t find the answer you’re looking for? Please chat to our friendly team.
+              </p>
+            </div>
+            <Link
+              to="/contact-us"
+              className="bg-button hover:bg-green-500 text-white px-6 py-2 rounded-md font-heading-bold"
+            >
+              Contact Us
+            </Link>
           </div>
-          <Link to="/contact-us" className="bg-button hover:bg-green-500 text-white px-6 py-2 rounded-md font-medium">
-            Contact Us
-          </Link>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };

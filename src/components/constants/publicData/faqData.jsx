@@ -49,7 +49,7 @@ export const faqData = [
     questions: [
       {
         q: 'How do I book a PDI with Carnomia?',
-        a: "It's simple:\n• Visit www.carnomia.com\n• Call/WhatsApp: ‪+91-9723280710‬\n• Choose your slot and share car details\n• We'll inspect the car at the location you choose",
+        a: "It's simple:\n• Visit www.carnomia.com\n• Call/WhatsApp: ‪+91-7385978109\n• Choose your slot and share car details\n• We'll inspect the car at the location you choose",
         icon: <FaQuestionCircle />
       },
       {

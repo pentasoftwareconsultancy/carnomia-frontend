@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
-import ToggleButton from "../report/ToggleButton";
-import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
+import ToggleButton from "./ToggleButton";
+import FullScreenPhotoViewer from "./FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
 
 const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {

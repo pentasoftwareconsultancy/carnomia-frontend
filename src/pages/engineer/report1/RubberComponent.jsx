@@ -271,7 +271,7 @@ const RubberComponent = ({ data = {}, onChange }) => {
 
       {showPhoto && <FullScreenPhotoViewer photo={showPhoto} onClose={() => setShowPhoto(null)} />}
     </div>
-  ); 
+  );
 };
 
 export default RubberComponent;

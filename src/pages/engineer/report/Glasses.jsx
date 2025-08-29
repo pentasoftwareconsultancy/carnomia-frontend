@@ -45,30 +45,15 @@ const specialGlassPanels = new Set([
 
 const photoCountForPanel = (panel) => (specialGlassPanels.has(panel) ? 5 : 1);
 
-const brandOptions = [
-    "ASAHI GLASS(AIS)",
-    "FUYAO GLASS",
-    "NIPPON",
-    "PILKINGTON",
-    "SPLINTEX",
-    "KAC",
-    "CARLEX",
-    "GUARDIAN",
-    "SAINT GOBAIN",
-    "MAGNA",
-    "AGC",
-    "SCHOTT",
-    "XINYI GLASS",
-    "GENTEX",
-    "TEMPERLITE",
-    "LAMISAFE",
-    "OTHER"
-  ]
+const brandOptions = ["Pilkington", "Saint-Gobain", "AGC", "Guardian", "NSG"];
 
 const glassIssueOptions = [
-    "Fitting Mismatch",
-    "Scratch",
-    "Crack"
+  "Crack",
+  "Scratch",
+  "Fitting Mismatch",
+  "Chipping",
+  "Clouding",
+  "Delamination"
 ];
 
 const Glasses = ({ data = {}, onChange }) => {
@@ -83,6 +68,8 @@ const Glasses = ({ data = {}, onChange }) => {
   const [isCameraActive, setIsCameraActive] = useState({});
   const [streamStates, setStreamStates] = useState({});
   const videoRefs = useRef({});
+  const issueDropdownRefs = useRef({});
+
 
   useEffect(() => {
     const initPhotos = {};
@@ -105,6 +92,22 @@ const Glasses = ({ data = {}, onChange }) => {
     setManufacturingDate(initManufacturingDate);
     setPanelIssues(initIssues);
   }, [data]);
+   
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (showIssueDropdown) {
+      const dropdownEl = issueDropdownRefs.current[showIssueDropdown];
+      if (dropdownEl && !dropdownEl.contains(event.target)) {
+        setShowIssueDropdown(null);
+      }
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showIssueDropdown]);
 
   // Cleanup camera streams
   useEffect(() => {
@@ -263,7 +266,11 @@ const Glasses = ({ data = {}, onChange }) => {
                   </button>
 
                   {showIssueDropdown === panel && (
-                    <div className="absolute z-20 bg-gray-800 border border-green-200 rounded-md mt-1 w-full max-h-64 overflow-y-auto p-2">
+                    
+ <div
+    ref={el => (issueDropdownRefs.current[panel] = el)}
+    className="absolute z-20 bg-gray-800 border border-green-200 rounded-md mt-1 w-full max-h-64 overflow-y-auto p-2"
+  >
                       {glassIssueOptions.map((issue) => (
                         <label key={issue} className="flex items-center mb-1 cursor-pointer text-white">
                           <input
