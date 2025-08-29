@@ -33,8 +33,12 @@ const labelNames = {
 };
 
 const photoCount = 5;
-const issueOptions = ["Crack", "Chip", "Scratch"];
-
+const issueOptions = [
+      "Scratches",
+      "Plastic Chipping",
+      "Skim Marks",
+      "Sticky Surface"
+    ]
 const PlasticPanel = ({ data = {}, onChange }) => {
   const [condition, setCondition] = useState(() => {
     const init = {};

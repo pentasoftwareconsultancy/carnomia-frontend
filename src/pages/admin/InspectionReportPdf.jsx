@@ -10,7 +10,7 @@ const THEME = {
   brandDark: "#0b3c49",
   brandMid: "#1a6a7a",
   brandLight: "#e6f5f8",
-  good: "#10b981", 
+  good: "#10b981",
   softLine: "#e5e7eb",
   faintLine: "#f1f5f9",
   text: "#111827",
@@ -212,8 +212,7 @@ async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap 
   const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
   for (let url of validUrls) {
     try {
-      // const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
-      const finalUrl = url.startsWith("http") ? url : `https://api.carnomia.com/api/${url}`;
+      const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
       const dataURL = await urlToDataURL(finalUrl);
       if (dataURL) {
         const col = i % cols;
@@ -501,9 +500,9 @@ async function addCoverPage(doc, r) {
   ];
 
   const METRIC_Y = TOP_OFFSET - 10;
-  const BOX_W = 30,
-    BOX_H = 21,
-    SPACING = 12;
+  const BOX_W = 25,
+    BOX_H = 15,
+    SPACING = 3;
   const shadowOffset = mm(0.8);
   const shadowColor = "#aaa";
 
@@ -523,7 +522,7 @@ async function addCoverPage(doc, r) {
     doc.text(m.label, x + mm(BOX_W / 2), mm(METRIC_Y + 6), { align: "center" });
 
     doc.setTextColor(THEME.text);
-    doc.text(m.value, x + mm(BOX_W / 2), mm(METRIC_Y + 15), { align: "center" });
+    doc.text(m.value, x + mm(BOX_W / 2), mm(METRIC_Y + 13), { align: "center" });
   });
 
   // Combined Info Card (Customer, Vehicle, Overall Score)
@@ -1768,15 +1767,18 @@ async function addTyresPaymentPage(doc, r) {
   for (const row of tyreRows) {
     // Gather text data using your schema fields
     const texts = [
-      row.label,
-      r[`${row.key}_brand`] ?? "NA",
-      r[`${row.key}_subBrand`] ?? "NA",
-      r[`${row.key}_variant`] ?? "NA",
-      r[`${row.key}_size`] ?? "NA",
-      r[`${row.key}_manufacturingDate`] ?? "NA",
-      r[`${row.key}_treadDepth`] != null ? String(r[`${row.key}_treadDepth`]) : "NA",
-      r[`${row.key}_issue`] ?? "—",
-    ];
+  row.label,
+  r[`${row.key}_brand`] ?? "NA",
+  r[`${row.key}_subBrand`] ?? "NA",
+  r[`${row.key}_variant`] ?? "NA",
+  r[`${row.key}_size`] ?? "NA",
+  r[`${row.key}_manufacturingDate`] ?? "NA",
+  r[`${row.key}_treadDepth`] != null ? String(r[`${row.key}_treadDepth`]) : "NA",
+  Array.isArray(r[`${row.key}_issues`]) && r[`${row.key}_issues`].length > 0
+    ? r[`${row.key}_issues`].join(", ")
+    : "—"
+];
+
 
     // Wrap text columns according to available widths
     const wrappedTexts = texts.map((txt, idx) => {
@@ -1933,6 +1935,7 @@ export default async function generateInspectionPDF(report) {
   await addBodyPanelsPage(doc, report);
   await addGlassesPage(doc, report);
   await addRubberPage(doc, report);
+  // await addSeatsBeltsPage(doc, report);
   await addSeatsAndFabricsSection(doc, report);
   await addSeatbeltsSection(doc, report);
   await addPlasticsPage(doc, report);

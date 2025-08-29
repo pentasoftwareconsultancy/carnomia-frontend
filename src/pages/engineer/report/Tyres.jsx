@@ -41,12 +41,32 @@ const TyreCard = ({
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [issueDropdownOpen, setIssueDropdownOpen] = useState(false);
+  const photoDropdownRef = useRef(null); //change
+const issueDropdownRef = useRef(null);//change
+
+
+useEffect(() => {  //change
+  const handleClickOutside = (event) => {
+    if (photoDropdownRef.current && !photoDropdownRef.current.contains(event.target)) {
+      setShowDropdown(false);
+    }
+    if (issueDropdownRef.current && !issueDropdownRef.current.contains(event.target)) {
+      setIssueDropdownOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     return () => {
       if (stream) stream.getTracks().forEach((t) => t.stop());
     };
   }, [stream]);
+  
 
   const toggleDropdown = () => setShowDropdown((curr) => !curr);
 
@@ -71,33 +91,53 @@ const TyreCard = ({
   };
 
   const handleCameraClick = async () => {
-    if (!isCameraActive) {
-      try {
-        const s = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoRef.current.srcObject = s;
-        setStream(s);
-        setIsCameraActive(true);
-      } catch {
-        alert("Camera not available.");
-      }
-    } else {
-      const canvas = document.createElement("canvas");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
-
-      const photo = canvas.toDataURL("image/png");
-      const emptyIndex = photos.findIndex((p) => !p);
-      if (emptyIndex !== -1) {
-        onPhotoChange(emptyIndex, photo);
-      }
-
-      stream?.getTracks().forEach((t) => t.stop());
-      setStream(null);
-      setIsCameraActive(false);
-      setShowDropdown(false);
+  if (!isCameraActive) {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = s;
+      setStream(s);
+      setIsCameraActive(true);
+    } catch {
+      alert("Camera not available.");
     }
-  };
+  } else {
+    const canvas = document.createElement("canvas");
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
+
+    // ✅ convert canvas to blob
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        try {
+          // make a File object from the blob
+          const file = new File([blob], "captured.png", { type: "image/png" });
+
+          // upload to server
+          const uploadedData = await FileUploaderService.uploadFileToServer(file, tyreKey);
+          const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
+
+          if (imageUrl) {
+            const emptyIndex = photos.findIndex((p) => !p);
+            if (emptyIndex !== -1) {
+              onPhotoChange(emptyIndex, imageUrl);
+            }
+          }
+        } catch (error) {
+          console.error("Upload failed:", error);
+          alert("Failed to upload image. Try again.");
+        }
+      }
+    }, "image/png");
+
+    // stop camera
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
+    setIsCameraActive(false);
+    setShowDropdown(false);
+  }
+};
+
 
   const toggleIssueOption = (option) => {
     let updated = [...(issue || [])];
@@ -205,7 +245,7 @@ const TyreCard = ({
       </div>
 
       {/* Issue (Multi-select with checkboxes) */}
-      <div className="relative">
+<div className="relative" ref={issueDropdownRef}>     
         <label className="text-sm text-white font-medium mb-1 block">Issue</label>
         <div
           className="p-2 bg-gray-800 text-white border border-green-200 rounded-md w-full cursor-pointer"

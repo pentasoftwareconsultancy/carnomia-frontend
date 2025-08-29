@@ -90,19 +90,12 @@ class FileUploaderService {
         this.streamStates[label] = stream;
         this.isCameraActive[label] = true;
         setIsCameraActive(prev => ({ ...prev, [label]: true }));
-} catch (err) {
-  console.error("Camera Error:", err.name, err.message);
-  if (err.name === "NotAllowedError") {
-    alert("Camera permission denied. Please allow it in browser settings.");
-  } else if (err.name === "NotFoundError") {
-    alert("No camera device found.");
-  } else if (err.name === "NotReadableError") {
-    alert("Camera is already in use by another app.");
-  } else {
-    alert(`Unexpected camera error: ${err.message}`);
-  }
-}
 
+        setIsCameraActive(prev => ({ ...prev, [label]: true }));
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        alert("Camera access denied. Please allow camera permissions.");
+      }
     } else {
       takePhoto(label);
     }
