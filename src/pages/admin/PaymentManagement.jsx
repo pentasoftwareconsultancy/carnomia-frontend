@@ -316,7 +316,7 @@ const PaymentManagement = () => {
                 <td className="p-3">
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                      p.paymentStatus === "Paid"
+                      p.paymentStatus === "PAID"
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
