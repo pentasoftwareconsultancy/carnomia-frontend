@@ -4,7 +4,7 @@ import {
   AiOutlineCamera,
   AiOutlineUpload,
 } from "react-icons/ai";
-import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
+import FullScreenPhotoViewer from "./FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
 
 const ProfilePhotos = ({data, onChange }) => {
@@ -80,56 +80,23 @@ const ProfilePhotos = ({data, onChange }) => {
   };
 
   // Handle camera capture
-  // Handle camera click (open on first click, capture on second click)
-const handleCameraClick = async (field) => {
-  if (!isCameraActive[field]) {
-    // 👉 First click: open camera
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRefs.current[field]) {
-        videoRefs.current[field].srcObject = stream;
-      }
-      setStreamStates((prev) => ({ ...prev, [field]: stream }));
-      setIsCameraActive((prev) => ({ ...prev, [field]: true }));
-    } catch {
-      alert("Camera not available.");
-    }
-  } else {
-    // 👉 Second click: capture photo
-    const video = videoRefs.current[field];
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-
-    canvas.toBlob(async (blob) => {
-      if (blob) {
-        try {
-          const file = new File([blob], `${field}.png`, { type: "image/png" });
-          const uploadedData = await FileUploaderService.uploadFileToServer(file, field);
-          const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
-
-          if (imageUrl) {
-            setPhotos((prev) => ({ ...prev, [field]: imageUrl }));
-            if (onChange) onChange(field, imageUrl);
-          }
-        } catch (err) {
-          console.error("Upload failed:", err);
-          alert("Failed to upload image. Try again.");
-        }
-      }
-    }, "image/png");
-
-    // 👉 stop camera after capture
-    const stream = streamStates[field];
-    if (stream) stream.getTracks().forEach((t) => t.stop());
-
-    setStreamStates((prev) => ({ ...prev, [field]: null }));
-    setIsCameraActive((prev) => ({ ...prev, [field]: false }));
-    setShowDropdown(null);
-  }
-};
-
+  const handleCameraClick = (field) =>
+    FileUploaderService.handleCameraClick(
+      field,
+      setStreamStates,
+      setIsCameraActive,
+      () =>
+        FileUploaderService.takePhoto(
+          field,
+          (photo) => {
+            setPhotos((prev) => ({ ...prev, [field]: photo }));
+            if (onChange) onChange(field, photo);
+            setShowDropdown(null);
+          },
+          setIsCameraActive,
+          () => setShowPhoto(null)
+        )
+    );
 
   const toggleDropdown = (label) => {
     setShowDropdown(showDropdown === label ? null : label);

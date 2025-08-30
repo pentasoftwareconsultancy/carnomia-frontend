@@ -135,33 +135,56 @@ const SeatFabrics = ({ data = {}, onChange }) => {
   };
 
   const handleCameraClick = async (panel, idx) => {
-    const slotKey = `${panel}-${idx}`;
-    if (!isCameraActive[slotKey]) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRefs.current[slotKey]) videoRefs.current[slotKey].srcObject = stream;
-        setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
-        setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
-      } catch {
-        alert("Camera access denied or not available.");
+  const slotKey = `${panel}-${idx}`;
+
+  if (!isCameraActive[slotKey]) {
+    // Start camera
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRefs.current[slotKey]) {
+        videoRefs.current[slotKey].srcObject = stream;
       }
-    } else {
-      const video = videoRefs.current[slotKey];
-      if (!video) return;
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-      const photo = canvas.toDataURL("image/png");
-      const arr = [...photos[panel]];
-      arr[idx] = photo;
-      updatePhotos(panel, arr);
-      streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
-      setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
-      setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
-      setShowPhotoDropdown(null);
+      setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
+      setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
+    } catch {
+      alert("Camera access denied or not available.");
     }
-  };
+  } else {
+    // Capture photo
+    const video = videoRefs.current[slotKey];
+    if (!video) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        try {
+          const file = new File([blob], `${slotKey}.png`, { type: "image/png" });
+          const uploaded = await FileUploaderService.uploadFileToServer(file, panel);
+          const imageUrl = uploaded.files?.[0]?.fileUrl || null;
+
+          if (imageUrl) {
+            const arr = [...photos[panel]];
+            arr[idx] = imageUrl;
+            updatePhotos(panel, arr);
+          }
+        } catch (err) {
+          console.error("Upload failed:", err);
+          alert("Failed to upload photo");
+        }
+      }
+    }, "image/png");
+
+    // Stop camera stream
+    streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
+    setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
+    setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
+    setShowPhotoDropdown(null);
+  }
+};
 
   const handlePlusClick = (panel) => {
     const idx = photos[panel].findIndex((p) => !p);

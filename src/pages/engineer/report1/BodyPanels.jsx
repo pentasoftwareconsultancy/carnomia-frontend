@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
-import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
+import FullScreenPhotoViewer from "./FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
 import { toast } from "react-toastify";
 
@@ -60,8 +60,6 @@ const BodyPanels = ({ data, onChange }) => {
   const [streamStates, setStreamStates] = useState({});
 
   const dropdownRefs = useRef({}); // ✅ track each dropdown
-  const videoRefs = useRef({});
-
 
   useEffect(() => {
     const initialPanelValues = {};
@@ -130,63 +128,30 @@ const BodyPanels = ({ data, onChange }) => {
     }
   };
 
- // Open camera on first click, capture on second click
-const handleCameraClick = async (photoKey) => {
-  const arr = photos[photoKey] ? [...photos[photoKey]] : [];
-  if (arr.length >= photoCount) {
-    return toast.error(`Maximum ${photoCount} photos allowed`);
-  }
+  const handleCameraClick = (photoKey) => {
+    const arr = photos[photoKey] ? [...photos[photoKey]] : [];
+    if (arr.length >= photoCount) return toast.error(`Maximum ${photoCount} photos allowed`);
 
-  const slotKey = `${photoKey}-${arr.length}`;
-
-  if (!isCameraActive[slotKey]) {
-    // 👉 First click: open camera preview
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRefs.current[slotKey]) {
-        videoRefs.current[slotKey].srcObject = stream;
-      }
-      setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
-      setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
-    } catch {
-      toast.error("Camera not available");
-    }
-  } else {
-    // 👉 Second click: capture photo
-    const video = videoRefs.current[slotKey];
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-
-    canvas.toBlob(async (blob) => {
-      if (blob) {
-        try {
-          const file = new File([blob], `${slotKey}.png`, { type: "image/png" });
-          const uploaded = await FileUploaderService.uploadFileToServer(file, photoKey);
-          const imageUrl = uploaded.files?.[0]?.fileUrl || null;
-
-          if (imageUrl) {
-            arr.push(imageUrl);
-            setPhotos((prev) => ({ ...prev, [photoKey]: arr }));
+    const slotKey = `${photoKey}-${arr.length}`;
+    FileUploaderService.handleCameraClick(
+      slotKey,
+      setStreamStates,
+      setIsCameraActive,
+      () =>
+        FileUploaderService.takePhoto(
+          slotKey,
+          photo => {
+            arr.push(photo);
+            setPhotos(prev => ({ ...prev, [photoKey]: arr }));
             if (onChange) onChange(photoKey, arr);
-          }
-        } catch (err) {
-          console.error("Upload failed:", err);
-          toast.error("Failed to upload image");
-        }
-      }
-    }, "image/png");
-
-    // 👉 Stop camera after capture
-    const stream = streamStates[slotKey];
-    if (stream) stream.getTracks().forEach((t) => t.stop());
-
-    setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
-    setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
-    setShowDropdown(null);
-  }
-};
+            setShowDropdown(null);
+            setIsCameraActive(prev => ({ ...prev, [slotKey]: false }));
+          },
+          setIsCameraActive,
+          () => setShowPhoto(null)
+        )
+    );
+  };
 
   const toggleDropdown = (slotKey) =>
     setShowDropdown(curr => (curr === slotKey ? null : slotKey));
@@ -258,14 +223,7 @@ const handleCameraClick = async (photoKey) => {
                         onClick={() => setShowPhoto(photoUrl)}
                       />
                     </div>
-                    
                   ))}
-                  <video
-  ref={(el) => (videoRefs.current[`${imageKeys[panelKey]}-${photosArr.length}`] = el)}
-  autoPlay
-  className={isCameraActive[`${imageKeys[panelKey]}-${photosArr.length}`] ? "w-24 h-24 rounded-md mt-2" : "hidden"}
-/>
-
 
                   {photosArr.length < photoCount && (
                     <div
@@ -285,9 +243,7 @@ const handleCameraClick = async (photoKey) => {
                             onClick={() => handleCameraClick(imageKeys[panelKey])}
                             className="flex items-center px-4 py-3 w-full text-left hover:bg-gray-700"
                           >
-                            <AiOutlineCamera className="mr-2" /> 
-                            {isCameraActive[`${imageKeys[panelKey]}-${photosArr.length}`] ? "Capture Photo" : "Take Photo"}
-
+                            <AiOutlineCamera className="mr-2" /> Take Photo
                           </button>
                           <label className="flex items-center px-4 py-3 w-full hover:bg-gray-700 cursor-pointer">
                             <AiOutlineUpload className="mr-2" /> Upload Photo
@@ -299,7 +255,6 @@ const handleCameraClick = async (photoKey) => {
                             />
                           </label>
                         </div>
-                        
                       )}
                     </div>
                   )}

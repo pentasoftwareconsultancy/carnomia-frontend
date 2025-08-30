@@ -74,58 +74,24 @@ const BasicDetails = ({ data, onChange, showPhoto, setShowPhoto }) => {
     }
   };
 
-const handleCameraClick = async (field) => {
-  if (!isCameraActive[field]) {
-    // 👉 Start camera
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRefs.current[field]) {
-        videoRefs.current[field].srcObject = stream;
-      }
-      setStreamStates((prev) => ({ ...prev, [field]: stream }));
-      setIsCameraActive((prev) => ({ ...prev, [field]: true }));
-    } catch (err) {
-      console.error("Camera error:", err);
-      toast.error("Camera access denied or not available");
-    }
-  } else {
-    // 👉 Take photo
-    const video = videoRefs.current[field];
-    if (!video) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      try {
-        const file = new File([blob], `${field}.png`, { type: "image/png" });
-        const uploadedData = await FileUploaderService.uploadFileToServer(file, field);
-        const imageUrl = uploadedData.files?.[0]?.fileUrl || null;
-
-        if (imageUrl) {
-          const photoKey = field + "_imageUrl";
-          setPhotos((prev) => ({ ...prev, [photoKey]: imageUrl }));
-          if (onChange) onChange(photoKey, imageUrl);
-          setShowDropdown(null);
-        }
-      } catch (error) {
-        console.error("Upload failed:", error);
-        toast.error("Failed to upload photo");
-      }
-    }, "image/png");
-
-    // 👉 Stop camera
-    if (streamStates[field]) {
-      streamStates[field].getTracks().forEach((track) => track.stop());
-    }
-    setIsCameraActive((prev) => ({ ...prev, [field]: false }));
-    setStreamStates((prev) => ({ ...prev, [field]: null }));
-  }
-};
-
+  const handleCameraClick = (field) =>
+    FileUploaderService.handleCameraClick(
+      field,
+      setStreamStates,
+      setIsCameraActive,
+      () =>
+        FileUploaderService.takePhoto(
+          field,
+          (photo) => {
+            const photoKey = field + "_imageUrl";
+            setPhotos((prev) => ({ ...prev, [photoKey]: photo }));
+            if (onChange) onChange(photoKey, photo);
+            setShowDropdown(null);
+          },
+          setIsCameraActive,
+          () => setShowPhoto(null)
+        )
+    );
 
   const toggleDropdown = (field) => {
     setShowDropdown(showDropdown === field ? null : field);

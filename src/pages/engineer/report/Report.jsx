@@ -464,7 +464,7 @@ const [popupMessage, setPopupMessage] = useState("");
       return true;
     } catch (err) {
       console.error("Save failed", err);
-      toast.success("Save failed");
+      toast.error("Save failed");
       return false;
     } finally {
       setSaving(false);

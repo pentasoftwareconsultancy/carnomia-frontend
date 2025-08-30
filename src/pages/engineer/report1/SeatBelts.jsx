@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
-import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
+import FullScreenPhotoViewer from "./FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
-import ToggleButton from "../report/ToggleButton";
+import ToggleButton from "./ToggleButton";
 
 const seatbeltPanels = [
   "driver",
@@ -133,55 +133,36 @@ const SeatBelts = ({ data = {}, onChange }) => {
   };
 
   const handleCameraClick = async (panel, idx) => {
-  const slotKey = `${panel}-${idx}`;
-
-  if (!isCameraActive[slotKey]) {
-    // 👉 Start camera
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRefs.current[slotKey]) {
-        videoRefs.current[slotKey].srcObject = stream;
-      }
-      setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
-      setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
-    } catch {
-      alert("Camera access denied or not available.");
-    }
-  } else {
-    // 👉 Take photo
-    const video = videoRefs.current[slotKey];
-    if (!video) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
+    const slotKey = `${panel}-${idx}`;
+    if (!isCameraActive[slotKey]) {
       try {
-        const file = new File([blob], `${slotKey}.png`, { type: "image/png" });
-        const uploaded = await FileUploaderService.uploadFileToServer(file, panel);
-        const imageUrl = uploaded.files?.[0]?.fileUrl || null;
-
-        if (imageUrl) {
-          const arr = [...photos[panel]];
-          arr[idx] = imageUrl; // 👉 Save server URL, not base64
-          updatePhotos(panel, arr);
-        }
-      } catch (err) {
-        console.error("Upload failed:", err);
-        alert("Failed to upload photo");
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (videoRefs.current[slotKey]) videoRefs.current[slotKey].srcObject = stream;
+        setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
+        setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
+      } catch {
+        alert("Camera access denied or not available.");
       }
-    }, "image/png");
+    } else {
+      const video = videoRefs.current[slotKey];
+      if (!video) return;
 
-    // 👉 Stop camera
-    streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
-    setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
-    setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
-    setShowDropdown(null);
-  }
-};
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const photo = canvas.toDataURL("image/png");
+      const arr = [...photos[panel]];
+      arr[idx] = photo;
+      updatePhotos(panel, arr);
+
+      streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
+      setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
+      setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
+      setShowDropdown(null);
+    }
+  };
 
   const toggleDropdown = (slotKey) => {
     setShowDropdown((curr) => (curr === slotKey ? null : slotKey));

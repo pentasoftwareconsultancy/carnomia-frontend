@@ -101,7 +101,7 @@ const Recent = () => {
 
 
   const handleAssistanceClick = (i) => {
-    if (i === 0) navigate("/customer/contact");
+    if (i === 0) navigate("/customer/dashboard/contact-support");
     else if (i === 2) handleState("showEditModal", true);
   };
 
@@ -172,7 +172,7 @@ const Recent = () => {
           </div>
 
           <button
-            onClick={() => navigate("/customer/contact")}
+            onClick={() => navigate("/customer/dashboard/contact-support")}
             className="px-3 py-1.5 sm:px-4 sm:py-2 bg-button text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
           >
             <FaPhoneAlt className="mr-1 sm:mr-2" /> Contact Support

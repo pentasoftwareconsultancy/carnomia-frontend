@@ -1,39 +1,49 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AiOutlinePlus, AiOutlineCamera, AiOutlineUpload } from "react-icons/ai";
-import FullScreenPhotoViewer from "../report/FullScreenPhotoViewer";
+import FullScreenPhotoViewer from "./FullScreenPhotoViewer";
 import FileUploaderService from "../../../services/upload-document.service";
-import ToggleButton from "../report/ToggleButton";
+import ToggleButton from "./ToggleButton";
 
-const seatbeltPanels = [
-  "driver",
-  "codriver",
-  "rear_left_passenger",
-  "rear_right_passenger",
+const plasticPanels = [
+  "driver_door",
+  "codriver_door",
+  "rear_left_passenger_door",
+  "rear_right_passenger_door",
   "third_row",
+  "dashboard",
+  "gear_console",
+  "steering",
+  "ac_vents",
+  "rear_ac_vents",
+  "irvm",
 ];
 
 const labelNames = {
-  driver: "Driver",
-  codriver: "Co-Driver",
-  rear_left_passenger: "Rear Left Passenger",
-  rear_right_passenger: "Rear Right Passenger",
+  driver_door: "Driver Door",
+  codriver_door: "Co-Driver Door",
+  rear_left_passenger_door: "Rear Left Passenger Door",
+  rear_right_passenger_door: "Rear Right Passenger Door",
   third_row: "Third Row",
+  dashboard: "Dashboard",
+  gear_console: "Gear Console",
+  steering: "Steering",
+  ac_vents: "AC Vents",
+  rear_ac_vents: "Rear AC Vents",
+  irvm: "IRVM",
 };
 
 const photoCount = 5;
-const issueOptions = [      
-  "Soil Marks",
-  "Greese Marks",
-  "Thread Break & Stitching",
-  "Cuts",
-  "Torn"
-];
-
-const SeatBelts = ({ data = {}, onChange }) => {
+const issueOptions = [
+      "Scratches",
+      "Plastic Chipping",
+      "Skim Marks",
+      "Sticky Surface"
+    ]
+const PlasticPanel = ({ data = {}, onChange }) => {
   const [condition, setCondition] = useState(() => {
     const init = {};
-    seatbeltPanels.forEach((panel) => {
-      const existing = data?.[`seatbelt_${panel}_issues`];
+    plasticPanels.forEach((panel) => {
+      const existing = data?.[`plastic_${panel}_issues`];
       init[panel] = Array.isArray(existing) ? existing : existing ? [existing] : [];
     });
     return init;
@@ -41,16 +51,16 @@ const SeatBelts = ({ data = {}, onChange }) => {
 
   const [photos, setPhotos] = useState(() => {
     const init = {};
-    seatbeltPanels.forEach((panel) => {
-      const imgs = Array.isArray(data?.[`seatbelt_${panel}_imageUrls`])
-        ? data[`seatbelt_${panel}_imageUrls`]
+    plasticPanels.forEach((panel) => {
+      const imgs = Array.isArray(data?.[`plastic_${panel}_imageUrls`])
+        ? data[`plastic_${panel}_imageUrls`]
         : [];
       init[panel] = [...imgs, ...Array(photoCount - imgs.length).fill(null)].slice(0, photoCount);
     });
     return init;
   });
 
-  const [thirdRowEnabled, setThirdRowEnabled] = useState(data?.seatbelt_third_row_toggle || false);
+  const [thirdRowEnabled, setThirdRowEnabled] = useState(data?.plastic_third_row_toggle || false);
   const [showDropdown, setShowDropdown] = useState(null);
   const [showPhoto, setShowPhoto] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState({});
@@ -94,7 +104,7 @@ const SeatBelts = ({ data = {}, onChange }) => {
       const updated = current.includes(issue)
         ? current.filter((i) => i !== issue)
         : [...current, issue];
-      onChange?.(`seatbelt_${panel}_issues`, updated);
+      onChange?.(`plastic_${panel}_issues`, updated);
       return { ...prev, [panel]: updated };
     });
   };
@@ -102,7 +112,7 @@ const SeatBelts = ({ data = {}, onChange }) => {
   const updatePhotos = (panel, newPhotos) => {
     setPhotos((prev) => {
       const updated = { ...prev, [panel]: newPhotos };
-      onChange?.(`seatbelt_${panel}_imageUrls`, newPhotos.filter(Boolean));
+      onChange?.(`plastic_${panel}_imageUrls`, newPhotos.filter(Boolean));
       return updated;
     });
   };
@@ -110,7 +120,7 @@ const SeatBelts = ({ data = {}, onChange }) => {
   const toggleThirdRow = () => {
     const newVal = !thirdRowEnabled;
     setThirdRowEnabled(newVal);
-    onChange?.("seatbelt_third_row_toggle", newVal);
+    onChange?.("plastic_third_row_toggle", newVal);
   };
 
   const handleFileUpload = async (e, panel, idx) => {
@@ -133,55 +143,36 @@ const SeatBelts = ({ data = {}, onChange }) => {
   };
 
   const handleCameraClick = async (panel, idx) => {
-  const slotKey = `${panel}-${idx}`;
-
-  if (!isCameraActive[slotKey]) {
-    // 👉 Start camera
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRefs.current[slotKey]) {
-        videoRefs.current[slotKey].srcObject = stream;
-      }
-      setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
-      setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
-    } catch {
-      alert("Camera access denied or not available.");
-    }
-  } else {
-    // 👉 Take photo
-    const video = videoRefs.current[slotKey];
-    if (!video) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
+    const slotKey = `${panel}-${idx}`;
+    if (!isCameraActive[slotKey]) {
       try {
-        const file = new File([blob], `${slotKey}.png`, { type: "image/png" });
-        const uploaded = await FileUploaderService.uploadFileToServer(file, panel);
-        const imageUrl = uploaded.files?.[0]?.fileUrl || null;
-
-        if (imageUrl) {
-          const arr = [...photos[panel]];
-          arr[idx] = imageUrl; // 👉 Save server URL, not base64
-          updatePhotos(panel, arr);
-        }
-      } catch (err) {
-        console.error("Upload failed:", err);
-        alert("Failed to upload photo");
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (videoRefs.current[slotKey]) videoRefs.current[slotKey].srcObject = stream;
+        setStreamStates((prev) => ({ ...prev, [slotKey]: stream }));
+        setIsCameraActive((prev) => ({ ...prev, [slotKey]: true }));
+      } catch {
+        alert("Camera access denied or not available.");
       }
-    }, "image/png");
+    } else {
+      const video = videoRefs.current[slotKey];
+      if (!video) return;
 
-    // 👉 Stop camera
-    streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
-    setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
-    setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
-    setShowDropdown(null);
-  }
-};
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const photo = canvas.toDataURL("image/png");
+      const arr = [...photos[panel]];
+      arr[idx] = photo;
+      updatePhotos(panel, arr);
+
+      streamStates[slotKey]?.getTracks().forEach((track) => track.stop());
+      setIsCameraActive((prev) => ({ ...prev, [slotKey]: false }));
+      setStreamStates((prev) => ({ ...prev, [slotKey]: null }));
+      setShowDropdown(null);
+    }
+  };
 
   const toggleDropdown = (slotKey) => {
     setShowDropdown((curr) => (curr === slotKey ? null : slotKey));
@@ -197,10 +188,10 @@ const SeatBelts = ({ data = {}, onChange }) => {
 
   return (
     <div className="bg-[#ffffff0a] backdrop-blur-[16px] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.2)] w-full max-w-4xl mx-auto text-white">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Seat Belts</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">Plastic Panels</h2>
 
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
-        {seatbeltPanels.map((panel, idx) => {
+        {plasticPanels.map((panel, idx) => {
           const panelPhotos = photos[panel] || [];
           const firstEmptyIdx = panelPhotos.findIndex((p) => !p);
 
@@ -215,7 +206,7 @@ const SeatBelts = ({ data = {}, onChange }) => {
 
               {(panel !== "third_row" || thirdRowEnabled) && (
                 <>
-                  {/* Issues Dropdown */}
+                  {/* Issues Dropdown with Checkboxes */}
                   <div className="mb-4 relative"     ref={(el) => (dropdownRefs.current[panel] = el)}
 >
                     <label className="text-md text-white font-medium text-left mb-2">Issues</label>
@@ -250,7 +241,7 @@ const SeatBelts = ({ data = {}, onChange }) => {
 
                   {/* Photos */}
                   {condition[panel].length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-4 justify-left items-center relative">
+                    <div className="mt-2 flex flex-wrap gap-4 justify-left items-center relative"     ref={(el) => (dropdownRefs.current[`${panel}-${firstEmptyIdx}`] = el)}>
                       {panelPhotos.map((photo, i) =>
                         photo ? (
                           <img
@@ -272,9 +263,8 @@ const SeatBelts = ({ data = {}, onChange }) => {
                             <AiOutlinePlus />
                           </button>
 
-                          {showDropdown === `${panel}-${firstEmptyIdx}` && ( 
-                            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48"     ref={(el) => (dropdownRefs.current[`${panel}-${firstEmptyIdx}`] = el)}
->
+                          {showDropdown === `${panel}-${firstEmptyIdx}` && (
+                            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-md shadow-lg z-10 w-48">
                               <button
                                 onClick={() => handleCameraClick(panel, firstEmptyIdx)}
                                 className="flex items-center px-4 py-3 text-sm text-white hover:bg-gray-700 w-full text-left"
@@ -317,4 +307,4 @@ const SeatBelts = ({ data = {}, onChange }) => {
   );
 };
 
-export default SeatBelts;
+export default PlasticPanel;

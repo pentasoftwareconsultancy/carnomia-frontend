@@ -1751,16 +1751,56 @@ await drawTopBand(doc);
  * ========================================================================= */
 async function addTyresPaymentPage(doc, r) {
   const PAGE_TOP_SPACING = mm(36);
+  const PAGE_PAD_X = mm(12);
+  const A4 = { w: mm(210), h: mm(297) };
+  const THEME = {
+    text: { color: [0, 0, 0] },
+    subtext: { color: [90, 90, 90] },
+    faintLine: { r: 220, g: 220, b: 220 },
+  };
 
-  // Header + column headers with divider
+  function setText(doc, theme = {}, size) {
+    if (size) doc.setFontSize(size);
+    if (theme.color) doc.setTextColor(...theme.color);
+    else doc.setTextColor(0, 0, 0);
+  }
+
+  function sectionHeader(doc, title, y) {
+    setText(doc, {}, 18);
+    doc.text(title, PAGE_PAD_X, y);
+  }
+
+  function divider(doc, x1, y, x2, color = { r: 180, g: 180, b: 180 }) {
+    doc.setDrawColor(color.r, color.g, color.b);
+    doc.setLineWidth(0.2);
+    doc.line(x1, y, x2, y);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.1);
+  }
+
+  // Assume drawTopBand, drawFooter, checkmark, urlToDataURL exist elsewhere in your codebase
+
   function renderHeaders(y, title = "Tyres") {
     sectionHeader(doc, title, y);
     const headers = [
-      "Part", "Brand", "Sub Brand", "Variant", "Size", "Manufacturing Date", "Tread Depth", "Issue"
+      "Part",
+      "Brand",
+      "Sub Brand",
+      "Variant",
+      "Issue",
+      "Size",
+      "Tread Depth",
+      "Manufacturing Date",
     ];
     const colX = [
-      PAGE_PAD_X, PAGE_PAD_X + 40, PAGE_PAD_X + 85, PAGE_PAD_X + 130,
-      PAGE_PAD_X + 170, PAGE_PAD_X + 200, PAGE_PAD_X + 230, PAGE_PAD_X + 270,
+      PAGE_PAD_X,
+      PAGE_PAD_X + 40,
+      PAGE_PAD_X + 65,
+      PAGE_PAD_X + 95,
+      PAGE_PAD_X + 115,
+      PAGE_PAD_X + 135,
+      PAGE_PAD_X + 155,
+      PAGE_PAD_X + 255,
     ];
     const headerY = y + mm(14);
     setText(doc, THEME.subtext, 8.5);
@@ -1771,7 +1811,7 @@ async function addTyresPaymentPage(doc, r) {
   }
 
   doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+  await drawTopBand(doc);
 
   let { colX, startY: y } = renderHeaders(PAGE_TOP_SPACING);
 
@@ -1785,137 +1825,110 @@ await drawTopBand(doc);
 
   const lineHeight = 5;
 
-for (const row of tyreRows) {
-  // Fetch raw manufacturing date value
-  const rawDate = r[`${row.key}_manufacturingDate`];
+  for (const row of tyreRows) {
+    const rawDate = r[`${row.key}_manufacturingDate`];
+    let formattedDate = "NA";
+    if (rawDate) {
+      const dateObj = new Date(rawDate);
+      if (!isNaN(dateObj.getTime())) {
+        formattedDate = dateObj.toLocaleDateString();
+      } else {
+        formattedDate = rawDate;
+      }
+    }
 
-  // Log to debug existence and format of raw date
-  console.log(`${row.key} manufacturingDate raw:`, rawDate);
+    const texts = [
+      row.label,
+      r[`${row.key}_brand`] ?? "NA",
+      r[`${row.key}_subBrand`] ?? "NA",
+      r[`${row.key}_variant`] ?? "NA",
+      Array.isArray(r[`${row.key}_issues`]) && r[`${row.key}_issues`].length > 0
+        ? r[`${row.key}_issues`].join(", ")
+        : "—",
+      r[`${row.key}_size`] ?? "NA",
+      r[`${row.key}_treadDepth`] != null ? String(r[`${row.key}_treadDepth`]) : "NA",
+    ];
 
-  // Format date if valid else fallback to raw value or "NA"
-  let formattedDate = "NA";
-  if (rawDate) {
-    const dateObj = new Date(rawDate);
-    if (!isNaN(dateObj.getTime())) {
-      formattedDate = dateObj.toLocaleDateString();
+    const wrappedTexts = texts.map((txt, idx) => {
+      let maxWidth;
+      if (idx < colX.length - 1) {
+        maxWidth = colX[idx + 1] - colX[idx] - 2;
+      } else {
+        maxWidth = A4.w - PAGE_PAD_X - colX[idx] - 5;
+      }
+      return doc.splitTextToSize(txt, maxWidth);
+    });
+
+    const dateLines = formattedDate !== "NA" ? 1 : 0;
+    const brandLines = wrappedTexts[1].length;
+    const maxTextLines = Math.max(
+      wrappedTexts.reduce((max, arr) => Math.max(max, arr.length), 0),
+      brandLines + dateLines
+    );
+    const rowHeight = maxTextLines * lineHeight;
+
+    const thumbHeight = 26;
+    if (y + rowHeight + thumbHeight + 20 > mm(280)) {
+      drawFooter(doc);
+      doc.addPage("a4", "portrait");
+      await drawTopBand(doc);
+      ({ colX, startY: y } = renderHeaders(PAGE_TOP_SPACING, "Tyres (contd.)"));
+    }
+
+    setText(doc, THEME.text, 9);
+    doc.text(wrappedTexts[0], colX[0], y);
+    doc.text(wrappedTexts[1], colX[1], y);
+
+    setText(doc, THEME.subtext, 7);
+    doc.text(formattedDate, colX[1], y + brandLines * lineHeight);
+    setText(doc);
+
+    setText(doc, THEME.text, 9);
+    for (let i = 2; i < wrappedTexts.length; i++) {
+      doc.text(wrappedTexts[i], colX[i], y);
+    }
+    setText(doc);
+
+    y += rowHeight + 6;
+
+    if (row.toggle !== undefined) {
+      setText(doc, THEME.subtext, 8.5);
+      doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+      checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
+      setText(doc);
+    }
+
+    if (row.arr && row.arr.length) {
+      let imgX = PAGE_PAD_X;
+      const imgY = y;
+      const thumbSize = 24;
+      const thumbGap = 8;
+      const maxImages = Math.min(row.arr.length, 5);
+      for (let i = 0; i < maxImages; i++) {
+        try {
+          const imgData = await urlToDataURL(row.arr[i]);
+          if (imgData) {
+            doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
+          }
+        } catch {}
+        imgX += thumbSize + thumbGap;
+      }
+      y += thumbSize + 6;
     } else {
-      formattedDate = rawDate; // fallback to raw if invalid date object
+      setText(doc, THEME.subtext, 8);
+      doc.text("No photos available", PAGE_PAD_X, y + 6);
+      setText(doc);
+      y += 14;
     }
+
+    divider(doc, PAGE_PAD_X, y, A4.w - PAGE_PAD_X, THEME.faintLine);
+    y += 10;
   }
-
-  // Build texts array without manufacturing date column
-  // Manufacturing date will not be displayed as column but below brand
-  const texts = [
-    row.label,
-    r[`${row.key}_brand`] ?? "NA",
-    r[`${row.key}_subBrand`] ?? "NA",
-    r[`${row.key}_variant`] ?? "NA",
-    r[`${row.key}_size`] ?? "NA",
-    // manufacturing date removed here
-    r[`${row.key}_treadDepth`] != null ? String(r[`${row.key}_treadDepth`]) : "NA",
-    Array.isArray(r[`${row.key}_issues`]) && r[`${row.key}_issues`].length > 0
-      ? r[`${row.key}_issues`].join(", ")
-      : "—"
-  ];
-
-  // Wrap text columns according to available widths
-  const wrappedTexts = texts.map((txt, idx) => {
-    const maxWidth = idx < colX.length - 1 ? colX[idx + 1] - colX[idx] - 2 : 50;
-    return doc.splitTextToSize(txt, maxWidth);
-  });
-
-  // Calculate max lines in this row for row height
-  const maxLines = wrappedTexts.reduce((max, arr) => Math.max(max, arr.length), 0);
-  const dateLineHeight = 5;
-  const rowHeight = Math.max(maxLines * lineHeight, dateLineHeight + (wrappedTexts[1].length * lineHeight));
-
-  // Page break check (reserve space for images and row height)
-  const thumbHeight = 26;
-  if (y + rowHeight + thumbHeight + 20 > mm(280)) {
-    drawFooter(doc);
-    doc.addPage("a4", "portrait");
-    await drawTopBand(doc);
-    ({ colX, startY: y } = renderHeaders(PAGE_TOP_SPACING, "Tyres (contd.)"));
-  }
-
-  // Draw part name (first column)
-  setText(doc, THEME.text, 9);
-  doc.text(wrappedTexts[0], colX[0], y);
-  setText(doc);
-
-  // Draw brand name (second column)
-  setText(doc, THEME.text, 9);
-  doc.text(wrappedTexts[1], colX[1], y);
-
-  // Draw manufacturing date below brand name with smaller font
-  setText(doc, THEME.subtext, 7);
-  doc.text(formattedDate, colX[1], y + 4);
-  setText(doc);
-
-  // Draw remaining columns starting from index 2
-  for (let i = 2; i < wrappedTexts.length; i++) {
-    doc.text(wrappedTexts[i], colX[i], y);
-  }
-  setText(doc);
-
-  y += rowHeight + 6;
-
-  // Toggle/status if exists
-  if (row.toggle !== undefined) {
-    setText(doc, THEME.subtext, 8.5);
-    doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
-    checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
-    setText(doc);
-  }
-
-  // Draw thumbnails below text
-  if (row.arr && row.arr.length) {
-    let imgX = PAGE_PAD_X;
-    const imgY = y;
-    const thumbSize = 24;
-    const thumbGap = 8;
-    const maxImages = Math.min(row.arr.length, 5);
-    for (let i = 0; i < maxImages; i++) {
-      try {
-        const imgData = await urlToDataURL(row.arr[i]);
-        if (imgData) {
-          doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
-        }
-      } catch {}
-      imgX += thumbSize + thumbGap;
-    }
-    y += thumbSize + 6;
-  } else {
-    setText(doc, THEME.subtext, 8);
-    doc.text("No photos available", PAGE_PAD_X, y + 6);
-    setText(doc);
-    y += 14;
-  }
-
-  // Divider
-  divider(doc, PAGE_PAD_X, y, A4.w - PAGE_PAD_X, THEME.faintLine);
-  y += 10;
-}
-
-
-
-
-  // // Payment Summary Section
-  // if (y + 40 > mm(280)) {
-  //   drawFooter(doc);
-  //   doc.addPage("a4", "portrait");
-  //   drawTopBand(doc);
-  //   sectionHeader(doc, "Payment Summary (contd.)", mm(24));
-  //   y = mm(38);
-  // }
-  // sectionHeader(doc, "Payment Summary", y);
-  // y += 16;
-  // labelValue(doc, "Amount", String(r.amount ?? "—"), PAGE_PAD_X, y);
-  // labelValue(doc, "Payment Status", String(r.paymentStatus ?? "—"), PAGE_PAD_X + 70, y);
-  // labelValue(doc, "Payment Mode", String(r.paymentMode ?? "—"), PAGE_PAD_X + 140, y);
 
   drawFooter(doc);
 }
+
+
 
 /** =========================================================================
  * PAGE 11: Other Observations
