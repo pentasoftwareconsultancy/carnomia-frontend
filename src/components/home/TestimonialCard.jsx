@@ -97,7 +97,7 @@ function TestimonialCard() {
       `}</style>
 
       <section className="bg-primary py-12">
-        <h2 className="text-2xl  font-bold text-center mb-10 text-gray-800">
+        <h2 className="text-2xl md:text-4xl font-heading-bold text-center mb-10 text-gray-800">
           What Our Customers Say
         </h2>
 

@@ -41,7 +41,7 @@ if (!isLoggedIn || !user) {
       />
 
       <div className="absolute inset-0 flex flex-col justify-between items-center text-center px-4 py-10">
-        <h1 className="text-white text-2xl md:text-4xl font-body italic">
+        <h1 className="text-white text-2xl md:text-4xl font-heading-bold italic">
           We Inspect Before You Invest!
         </h1>
 

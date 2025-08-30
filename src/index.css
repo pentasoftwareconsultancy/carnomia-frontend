@@ -53,3 +53,9 @@ animation: marquee 10s linear infinite;
   --color-button: #81da5b; 
 
 }
+
+/*heading with bold */
+.font-heading-bold {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}

@@ -12,7 +12,7 @@ export default function AboutUs() {
         }
       `}</style>
 
-      <h2 className="text-2xl  font-bold text-center mb-10 text-gray-800">
+      <h2 className="text-3xl md:text-4xl font-heading-bold text-center mb-10 text-gray-800">
           About Us
       </h2>
 
@@ -53,17 +53,17 @@ export default function AboutUs() {
 
         {/* Text Section */}
         <div className="text-sm text-slate-600 max-w-lg px-2">
-          <h1 className="text-xl uppercase font-body text-slate-700">
+          <h1 className="text-xl uppercase font-body text-black">
             Who we are?
           </h1>
           <div className="w-24 h-[3px] rounded-full bg-gradient-to-r from-primary to-white"></div>
-          <p className="mt-8">
+          <p className="mt-8 text-black ">
             <strong className="text-button">Carnomia</strong> is India's most trusted Pre‑Delivery Inspection (PDI) platform. We ensure your new or used car is mechanically and aesthetically flawless before it reaches you.
           </p>
-          <p className="mt-4">
+          <p className="mt-4 text-black ">
             Our certified technicians and tech‑driven model deliver comprehensive reports backed with real‑time photo and video evidence—giving buyers complete confidence.
           </p>
-          <p className="mt-4">
+          <p className="mt-4 text-black ">
             We operate across multiple cities and dealerships, offering fast, affordable, and professional PDI services to protect your investment and peace of mind.
           </p>
           <Link to="/about-us">

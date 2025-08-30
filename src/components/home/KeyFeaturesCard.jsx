@@ -31,7 +31,7 @@ const KeyFeaturesCard = () => {
               />
             ))}
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold italic">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-heading-bold italic">
             <span className="text-button">KEY</span>{" "}
             <span className="text-black">FEATURES</span>
           </h2>

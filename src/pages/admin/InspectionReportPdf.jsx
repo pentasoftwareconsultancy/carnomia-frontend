@@ -208,12 +208,11 @@ function labeledPhotoBox(doc, label, x, y, w = 50, h = 50) {
 
 async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap = 4) {
   let i = 0;
-  // Filter out invalid URLs 
+  // Filter out invalid URLs
   const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
   for (let url of validUrls) {
     try {
-      // const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
-      const finalUrl = url.startsWith("http") ? url : `https://api.carnomia.com${url}`;
+      const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
       const dataURL = await urlToDataURL(finalUrl);
       if (dataURL) {
         const col = i % cols;
@@ -469,12 +468,12 @@ async function addCoverPage(doc, r) {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // Top Band
-  drawTopBand(doc);
+await drawTopBand(doc);
 
   // Booking Header (centered)
-  setText(doc, THEME.subtext, 8.5);
-  doc.text(`Booking ID: ${String(r.bookingId ?? "—")}`, pageWidth / 2, mm(18), { align: "center" });
-  setText(doc);
+  // setText(doc, THEME.subtext, 8.5);
+  // doc.text(`Booking ID: ${String(r.bookingId ?? "—")}`, pageWidth / 2, mm(18), { align: "center" });
+  // setText(doc);
 
   // Hero Image & Score Layout
   const TOP_OFFSET = 40;
@@ -528,7 +527,7 @@ async function addCoverPage(doc, r) {
 
   // Combined Info Card (Customer, Vehicle, Overall Score)
   const CARD_W = 60,
-    CARD_H = 80,
+    CARD_H = 90,
     GAP = 2;
   const TOTAL_CARD_W = 3 * CARD_W + 2 * GAP;
   const cardXStart = (pageWidth - mm(TOTAL_CARD_W)) / 2;
@@ -583,15 +582,17 @@ async function addCoverPage(doc, r) {
   const gapAfterValue = 6; // gap after value before next label
 
   const fields = [
-    ["Name", r.customerName],
-    ["Location", r.address],
-    ["Engineer Name", r.engineer_name],
-    [
-      "PDI Date & Time",
-      `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`
-    ],
-    ["Address", r.address],
-  ];
+  ["Booking ID", String(r.bookingId ?? "—")],
+  ["Name", r.customerName],
+  ["Location", r.address],
+  ["Engineer Name", r.engineer_name],
+  [
+    "PDI Date & Time",
+    `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`
+  ],
+  ["Address", r.address],
+];
+
 
   fields.forEach(([label, value]) => {
     doc.setFont('helvetica', 'bold');
@@ -778,7 +779,7 @@ async function addBodyPanelsPage(doc, r) {
 
   const PAGE_TOP_SPACING = mm(36); // more space from top for first page and others
   doc.addPage("a4", "portrait");
-  drawTopBand(doc);
+await drawTopBand(doc);
 
   let { colX } = renderHeaders(PAGE_TOP_SPACING);
   let y = PAGE_TOP_SPACING + mm(22); // start below headers
@@ -865,7 +866,7 @@ async function addBodyPanelsPage(doc, r) {
     if (y > mm(250)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
-      drawTopBand(doc);
+await drawTopBand(doc);
       ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Body Panels"));
       y = PAGE_TOP_SPACING + mm(22);
     }
@@ -897,7 +898,7 @@ async function addGlassesPage(doc, r) {
 
   const PAGE_TOP_SPACING = mm(36); // space from top for header
   doc.addPage("a4", "portrait");
-  drawTopBand(doc);
+await drawTopBand(doc);
 
   let { colX } = renderHeaders(PAGE_TOP_SPACING);
   let y = PAGE_TOP_SPACING + mm(22); // start below headers
@@ -973,7 +974,7 @@ async function addGlassesPage(doc, r) {
     if (y > mm(250)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
-      drawTopBand(doc);
+      await drawTopBand(doc);
       ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Glasses"));
       y = PAGE_TOP_SPACING + mm(22);
     }
@@ -1270,7 +1271,7 @@ async function addSeatsAndFabricsSection(doc, r) {
 
   // Start first page for Seats & Fabrics
   doc.addPage("a4", "portrait");
-  drawTopBand(doc);
+  await drawTopBand(doc);
   sectionHeader(doc, "Seats & Fabrics", mm(28));
 
   // Table headers
@@ -1339,7 +1340,7 @@ async function addSeatsAndFabricsSection(doc, r) {
     if (y > mm(270)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
-      drawTopBand(doc);
+      await drawTopBand(doc);
       sectionHeader(doc, "Seats & Fabrics (contd.)", mm(28));
       setText(doc, THEME.header, 9.2);
       doc.text("Part", col.part, mm(36));
@@ -1441,18 +1442,19 @@ async function addSeatbeltsSection(doc, r) {
 /** =========================================================================
  * PAGE 7: PLASTICS
  * ========================================================================= */
+
 async function addPlasticsPage(doc, r) {
   const PAGE_TOP_SPACING = mm(28);
 
-  function startNewPage(title = "Plastic Panel") {
+  async function startNewPage(title = "Plastic Panel") {
     doc.addPage("a4", "portrait");
-    drawTopBand(doc);
+    await drawTopBand(doc);  // Await here to ensure logo is drawn before continuing
     setText(doc, THEME.text, 11, "bold");
     doc.text(title, PAGE_PAD_X, PAGE_TOP_SPACING);
     return PAGE_TOP_SPACING + 8;
   }
 
-  let y = startNewPage();
+  let y = await startNewPage();
 
   y += 10;
 
@@ -1464,27 +1466,50 @@ async function addPlasticsPage(doc, r) {
   divider(doc, PAGE_PAD_X + 4, y, A4.w - PAGE_PAD_X - 4, THEME.faintLine);
   y += 6;
 
-  // Define rows (example data: adjust mapping to your API fields)
-  const rows = [
-    { part: "Driver Door", issue: "Crack", key: "plastic_driver_door_imageUrls" },
-    { part: "Co-driver Door", issue: "Chip", key: "plastic_codriver_door_imageUrls" },
-    { part: "Rear Left Passenger Door", issue: "Scratch", key: "plastic_rear_left_passenger_door_imageUrls" },
+  // Define all parts mapping to issues array keys and image URL keys
+  const parts = [
+    { part: "Driver Door", issueKey: "plastic_driver_door_issues", imageKey: "plastic_driver_door_imageUrls" },
+    { part: "Co-driver Door", issueKey: "plastic_codriver_door_issues", imageKey: "plastic_codriver_door_imageUrls" },
+    { part: "Rear Left Passenger Door", issueKey: "plastic_rear_left_passenger_door_issues", imageKey: "plastic_rear_left_passenger_door_imageUrls" },
+    { part: "Rear Right Passenger Door", issueKey: "plastic_rear_right_passenger_door_issues", imageKey: "plastic_rear_right_passenger_door_imageUrls" },
+    { part: "Third Row", issueKey: "plastic_third_row_issues", imageKey: "plastic_third_row_imageUrls", toggleKey: "plastic_third_row_toggle" },
+    { part: "Dashboard", issueKey: "plastic_dashboard_issues", imageKey: "plastic_dashboard_imageUrls" },
+    { part: "Gear Console", issueKey: "plastic_gear_console_issues", imageKey: "plastic_gear_console_imageUrls" },
+    { part: "Steering", issueKey: "plastic_steering_issues", imageKey: "plastic_steering_imageUrls" },
+    { part: "AC Vents", issueKey: "plastic_ac_vents_issues", imageKey: "plastic_ac_vents_imageUrls" },
+    { part: "Rear AC Vents", issueKey: "plastic_rear_ac_vents_issues", imageKey: "plastic_rear_ac_vents_imageUrls" },
+    { part: "IRVM", issueKey: "plastic_irvm_issues", imageKey: "plastic_irvm_imageUrls" },
   ];
 
-  for (const row of rows) {
-    // Row: part + issue
-    setText(doc, THEME.text, 9.5);
-    doc.text(row.part, PAGE_PAD_X + 6, y);
+  for (const item of parts) {
+    // Extract issues array and convert to string, or "—" if empty
+    const issuesArr = Array.isArray(r[item.issueKey]) ? r[item.issueKey] : [];
+    const issuesStr = issuesArr.length > 0 ? issuesArr.join(", ") : "—";
+    const urls = Array.isArray(r[item.imageKey]) ? r[item.imageKey] : [];
 
+    setText(doc, THEME.text, 9.5);
+
+    // Print part name
+    doc.text(item.part, PAGE_PAD_X + 6, y);
+
+    // Print issues, bold
     setText(doc, THEME.text, 9.5, "bold");
-    doc.text(row.issue, A4.w / 2, y);
+    doc.text(issuesStr, A4.w / 2, y);
+
+    // If toggleKey exists, print toggle status (boolean)
+    if (item.toggleKey !== undefined) {
+      setText(doc, THEME.subtext, 8.5);
+      const toggleVal = r[item.toggleKey];
+      doc.text("Available", A4.w / 2 + 90, y);
+      checkmark(doc, A4.w / 2 + 130, y - 3, !!toggleVal);
+      setText(doc);
+    }
 
     y += 6;
     divider(doc, PAGE_PAD_X + 4, y, A4.w - PAGE_PAD_X - 4, THEME.faintLine);
     y += 6;
 
     // Photos row
-    const urls = Array.isArray(r[row.key]) ? r[row.key] : [];
     const maxImages = 5;
     const imageSize = 22;
     const spacing = 6;
@@ -1496,11 +1521,9 @@ async function addPlasticsPage(doc, r) {
           doc.addImage(urls[i], "JPEG", x, y, imageSize, imageSize);
         } catch (err) {
           console.warn("Image load failed:", err);
-
           doc.roundedRect(x, y, imageSize, imageSize, 2, 2);
         }
       } else {
-
         doc.roundedRect(x, y, imageSize, imageSize, 2, 2);
       }
       x += imageSize + spacing;
@@ -1508,26 +1531,23 @@ async function addPlasticsPage(doc, r) {
 
     y += imageSize + 10;
 
-    // Divider between parts
-    divider(doc, PAGE_PAD_X + 4, y, A4.w - PAGE_PAD_X - 4, THEME.faintLine);
-    y += 10;
-
     // Pagination check
     if (y > mm(250)) {
       drawFooter(doc);
-      y = startNewPage("Plastic Panel (contd.)");
+      y = await startNewPage("Plastic Panel (contd.)");
     }
   }
 
   drawFooter(doc);
 }
 
+
 /** =========================================================================
  * PAGE 8: FEATURES
  * ========================================================================= */
 async function addFeaturesPage(doc, r) {
   doc.addPage("a4", "portrait");
-  drawTopBand(doc);
+await drawTopBand(doc);
   sectionHeader(doc, "Parts", mm(28),);
 
   const items = [
@@ -1565,7 +1585,7 @@ async function addFeaturesPage(doc, r) {
     if (y > mm(275)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
-      drawTopBand(doc);
+await drawTopBand(doc);
       sectionHeader(doc, "Features (contd.)", mm(24));
       setText(doc, THEME.subtext, 9);
       doc.text("Feature", PAGE_PAD_X, mm(34));
@@ -1585,7 +1605,7 @@ async function addFeaturesPage(doc, r) {
  * ========================================================================= */
 async function addLiveFluidsDiagnosticsPage(doc, r) {
   doc.addPage("a4", "portrait");
-  drawTopBand(doc);
+await drawTopBand(doc);
 
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -1751,7 +1771,7 @@ async function addTyresPaymentPage(doc, r) {
   }
 
   doc.addPage("a4", "portrait");
-  drawTopBand(doc);
+await drawTopBand(doc);
 
   let { colX, startY: y } = renderHeaders(PAGE_TOP_SPACING);
 
@@ -1765,87 +1785,120 @@ async function addTyresPaymentPage(doc, r) {
 
   const lineHeight = 5;
 
-  for (const row of tyreRows) {
-    // Gather text data using your schema fields
-    const texts = [
-  row.label,
-  r[`${row.key}_brand`] ?? "NA",
-  r[`${row.key}_subBrand`] ?? "NA",
-  r[`${row.key}_variant`] ?? "NA",
-  r[`${row.key}_size`] ?? "NA",
-  r[`${row.key}_manufacturingDate`] ?? "NA",
-  r[`${row.key}_treadDepth`] != null ? String(r[`${row.key}_treadDepth`]) : "NA",
-  Array.isArray(r[`${row.key}_issues`]) && r[`${row.key}_issues`].length > 0
-    ? r[`${row.key}_issues`].join(", ")
-    : "—"
-];
+for (const row of tyreRows) {
+  // Fetch raw manufacturing date value
+  const rawDate = r[`${row.key}_manufacturingDate`];
 
+  // Log to debug existence and format of raw date
+  console.log(`${row.key} manufacturingDate raw:`, rawDate);
 
-    // Wrap text columns according to available widths
-    const wrappedTexts = texts.map((txt, idx) => {
-      const maxWidth = idx < colX.length - 1 ? colX[idx + 1] - colX[idx] - 2 : 50;
-      return doc.splitTextToSize(txt, maxWidth);
-    });
-
-    // Calculate max lines in this row for row height
-    const maxLines = wrappedTexts.reduce((max, arr) => Math.max(max, arr.length), 0);
-    const rowHeight = maxLines * lineHeight;
-
-    // Page break check (reserve space for images and row height)
-    const thumbHeight = 26;
-    if (y + rowHeight + thumbHeight + 20 > mm(280)) {
-      drawFooter(doc);
-      doc.addPage("a4", "portrait");
-      drawTopBand(doc);
-      ({ colX, startY: y } = renderHeaders(PAGE_TOP_SPACING, "Tyres (contd.)"));
-    }
-
-    // Draw text columns
-    setText(doc, THEME.text, 9);
-    wrappedTexts.forEach((lines, i) => {
-      doc.text(lines, colX[i], y);
-    });
-    setText(doc);
-
-    y += rowHeight + 4;
-
-    // Toggle/status if exists
-    if (row.toggle !== undefined) {
-      setText(doc, THEME.subtext, 8.5);
-      doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
-      checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
-      setText(doc);
-    }
-
-    // Draw thumbnails below text
-    if (row.arr && row.arr.length) {
-      let imgX = PAGE_PAD_X;
-      const imgY = y;
-      const thumbSize = 24;
-      const thumbGap = 8;
-      const maxImages = Math.min(row.arr.length, 5);
-      for (let i = 0; i < maxImages; i++) {
-        // roundedRect(doc, imgX, imgY, thumbSize, thumbSize, 3, "#f9fbfc", "#b8dadb");
-        try {
-          const imgData = await urlToDataURL(row.arr[i]);
-          if (imgData) {
-            doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
-          }
-        } catch { }
-        imgX += thumbSize + thumbGap;
-      }
-      y += thumbSize + 6;
+  // Format date if valid else fallback to raw value or "NA"
+  let formattedDate = "NA";
+  if (rawDate) {
+    const dateObj = new Date(rawDate);
+    if (!isNaN(dateObj.getTime())) {
+      formattedDate = dateObj.toLocaleDateString();
     } else {
-      setText(doc, THEME.subtext, 8);
-      doc.text("No photos available", PAGE_PAD_X, y + 6);
-      setText(doc);
-      y += 14;
+      formattedDate = rawDate; // fallback to raw if invalid date object
     }
-
-    // Divider
-    divider(doc, PAGE_PAD_X, y, A4.w - PAGE_PAD_X, THEME.faintLine);
-    y += 10;
   }
+
+  // Build texts array without manufacturing date column
+  // Manufacturing date will not be displayed as column but below brand
+  const texts = [
+    row.label,
+    r[`${row.key}_brand`] ?? "NA",
+    r[`${row.key}_subBrand`] ?? "NA",
+    r[`${row.key}_variant`] ?? "NA",
+    r[`${row.key}_size`] ?? "NA",
+    // manufacturing date removed here
+    r[`${row.key}_treadDepth`] != null ? String(r[`${row.key}_treadDepth`]) : "NA",
+    Array.isArray(r[`${row.key}_issues`]) && r[`${row.key}_issues`].length > 0
+      ? r[`${row.key}_issues`].join(", ")
+      : "—"
+  ];
+
+  // Wrap text columns according to available widths
+  const wrappedTexts = texts.map((txt, idx) => {
+    const maxWidth = idx < colX.length - 1 ? colX[idx + 1] - colX[idx] - 2 : 50;
+    return doc.splitTextToSize(txt, maxWidth);
+  });
+
+  // Calculate max lines in this row for row height
+  const maxLines = wrappedTexts.reduce((max, arr) => Math.max(max, arr.length), 0);
+  const dateLineHeight = 5;
+  const rowHeight = Math.max(maxLines * lineHeight, dateLineHeight + (wrappedTexts[1].length * lineHeight));
+
+  // Page break check (reserve space for images and row height)
+  const thumbHeight = 26;
+  if (y + rowHeight + thumbHeight + 20 > mm(280)) {
+    drawFooter(doc);
+    doc.addPage("a4", "portrait");
+    await drawTopBand(doc);
+    ({ colX, startY: y } = renderHeaders(PAGE_TOP_SPACING, "Tyres (contd.)"));
+  }
+
+  // Draw part name (first column)
+  setText(doc, THEME.text, 9);
+  doc.text(wrappedTexts[0], colX[0], y);
+  setText(doc);
+
+  // Draw brand name (second column)
+  setText(doc, THEME.text, 9);
+  doc.text(wrappedTexts[1], colX[1], y);
+
+  // Draw manufacturing date below brand name with smaller font
+  setText(doc, THEME.subtext, 7);
+  doc.text(formattedDate, colX[1], y + 4);
+  setText(doc);
+
+  // Draw remaining columns starting from index 2
+  for (let i = 2; i < wrappedTexts.length; i++) {
+    doc.text(wrappedTexts[i], colX[i], y);
+  }
+  setText(doc);
+
+  y += rowHeight + 6;
+
+  // Toggle/status if exists
+  if (row.toggle !== undefined) {
+    setText(doc, THEME.subtext, 8.5);
+    doc.text("Available", PAGE_PAD_X + 40, y + 0.3);
+    checkmark(doc, PAGE_PAD_X + 54, y + 0.6, !!row.toggle);
+    setText(doc);
+  }
+
+  // Draw thumbnails below text
+  if (row.arr && row.arr.length) {
+    let imgX = PAGE_PAD_X;
+    const imgY = y;
+    const thumbSize = 24;
+    const thumbGap = 8;
+    const maxImages = Math.min(row.arr.length, 5);
+    for (let i = 0; i < maxImages; i++) {
+      try {
+        const imgData = await urlToDataURL(row.arr[i]);
+        if (imgData) {
+          doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
+        }
+      } catch {}
+      imgX += thumbSize + thumbGap;
+    }
+    y += thumbSize + 6;
+  } else {
+    setText(doc, THEME.subtext, 8);
+    doc.text("No photos available", PAGE_PAD_X, y + 6);
+    setText(doc);
+    y += 14;
+  }
+
+  // Divider
+  divider(doc, PAGE_PAD_X, y, A4.w - PAGE_PAD_X, THEME.faintLine);
+  y += 10;
+}
+
+
+
 
   // // Payment Summary Section
   // if (y + 40 > mm(280)) {
@@ -1872,7 +1925,7 @@ async function addOtherObservationsPage(doc) {
   doc.addPage("a4", "portrait");
 
   // Header
-  drawTopBand(doc);
+await drawTopBand(doc);
   sectionHeader(doc, "Other Observations", mm(28));
 
   const leftX = PAGE_PAD_X;
