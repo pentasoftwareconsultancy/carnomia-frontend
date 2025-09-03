@@ -89,7 +89,7 @@ const AllCustomerRequests = () => {
     <div className="min-h-screen bg-primary py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
         <h1 className="text-3xl font-bold text-regal-blue">
-          Completed Inspections
+          All Inspections
         </h1>
 
         {loading && (

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import QRCode from "../../assets/Car.png";
 import DrivestaLogo from "../../assets/logos/drivesta.png";
+import airbagImg from "../../assets/airbagImg.png"
+
 import {
   FaCar,
   FaWhatsapp,
@@ -68,11 +70,17 @@ const Recent = () => {
       value: `${state.BHPs || "525"} BHP`,
       label: "Power",
     },
-    {
-      icon: <FaShieldAlt className="text-2xl text-button" />,
-      value: `${state.Airbags || "4"} Airbags`,
-      label: "Safety",
-    },
+  {
+    icon: (
+      <img
+        src={airbagImg}
+        alt="Airbags"
+        className="w-6 h-6 object-contain"
+      />
+    ),
+    value: `${state.Airbags || "4"} Airbags`,
+    label: "Safety",
+  },
     {
       icon: <FaGasPump className="text-2xl text-button" />,
       value: `${state.Mileage || "25.4"} kmpl`,
@@ -153,9 +161,9 @@ const Recent = () => {
           className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8"
         >
           <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading text-gray-900">
-              Welcome back,{" "}
-              <span className="text-button">{state.userName}</span>
+            <h1 className="text-xl sm:text-2xl md:text-2xl font-semibold text-gray-900">
+              Booking ID:{" "}
+              <span className="text-button">{state.bookingId}</span>
             </h1>
 
     {state == null ? (
@@ -170,13 +178,15 @@ const Recent = () => {
             </p>) : '' }
             
           </div>
+         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm 
+  px-3 py-1 rounded-full text-xs sm:text-sm font-medium shadow-sm flex items-center 
+  gap-2 border border-gray-200 min-w-[120px] justify-center">
+  <span className="w-2.5 h-2.5 bg-button rounded-full"></span>
+  <span>{APPLICATION_CONSTANTS.REQUEST_STATUS[state['status']].label}</span>
+</div>
 
-          <button
-            onClick={() => navigate("/customer/dashboard/contact-support")}
-            className="px-3 py-1.5 sm:px-4 sm:py-2 bg-button text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
-          >
-            <FaPhoneAlt className="mr-1 sm:mr-2" /> Contact Support
-          </button>
+
+         
         </motion.div>
 
     
@@ -190,28 +200,17 @@ const Recent = () => {
             transition={{ delay: 0.3 }}
             className="lg:col-span-2 bg-primary rounded-xl shadow-xl overflow-hidden border border-gray-100"
           >
-            <div className="relative h-48 sm:h-64 md:h-80 w-full">
-              <img
-                src={
-                  state.imageUrl ||
-                  "https://via.placeholder.com/800x400?text=No+Image"
-                }
-                alt="Vehicle"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
-                <h3 className="text-lg sm:text-xl font-heading text-white">
-                  {state.brand} {state.model}
-                </h3>
-                <p className="text-gray-300 text-xs sm:text-sm">
-                  {state.variant}
-                </p>
-              </div>
-              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium shadow-sm flex items-center">
-                <span className="w-2 h-2 bg-button rounded-full mr-1 sm:mr-2"></span>
-                {APPLICATION_CONSTANTS.REQUEST_STATUS[state['status']].label}
-              </div>
-            </div>
+            <div className="relative w-full flex justify-center bg-white items-center">
+  <img
+    src={
+      state.imageUrl ||
+      "https://via.placeholder.com/800x400?text=No+Image"
+    }
+    alt="Vehicle"
+    className="max-h-80 w-auto object-contain"
+  />
+</div>
+
           </motion.div>
 
           {/* Key Metrics - Grid layout responsive */}
