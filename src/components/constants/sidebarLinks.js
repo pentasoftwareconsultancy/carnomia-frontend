@@ -32,7 +32,6 @@ export const sidebarLinks = {
     { label: "Inspection Reports", to: "inspection-report", icon: FiFileText },
     { label: "Payment Management", to: "payment-management", icon: FiDollarSign },
     { label: "Analytics", to: "analytics", icon: FiBarChart2 },
-    { label: "Cust Reports", to: "customer-report", icon: FiBarChart2 },
   ],
   superadmin: [
     { label: "Dashboard", to: "dashboard", icon: FiBarChart2 },
