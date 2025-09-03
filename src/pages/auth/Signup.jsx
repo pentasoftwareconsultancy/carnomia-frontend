@@ -339,18 +339,48 @@ const Signup = () => {
     try {
       setLoading(true);
       await new ApiService().apipost(ServerUrl.API_REGISTER, {
-        ...form,
+        name: form.name, // explicitly send name
+        email: form.email,
+        city: form.city,
+        mobile: form.mobile,
+        password: form.password,
         role: "customer",
       });
+
       toast.success("Signup successful. Redirecting...");
       setTimeout(() => {
         navigate("/login");
       }, 1500);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Signup failed");
-    } finally {
-      setLoading(false);
+  let errorMessage = "Signup failed";
+
+  // If backend sends { error: "Email already exists" }
+  if (err?.response?.data) {
+    if (typeof err.response.data === "string") {
+      errorMessage = err.response.data;
+    } else if (err.response.data.error) {
+      errorMessage = err.response.data.error;
+    } else if (err.response.data.message) {
+      errorMessage = err.response.data.message;
     }
+  }
+
+  // Now check for duplicate cases
+  if (
+    errorMessage.toLowerCase().includes("email") &&
+    errorMessage.toLowerCase().includes("exist")
+  ) {
+    toast.error("Email is already registered");
+  } else if (
+    errorMessage.toLowerCase().includes("mobile") &&
+    errorMessage.toLowerCase().includes("exist")
+  ) {
+    toast.error("Mobile number is already registered");
+  } else {
+    toast.error(errorMessage);
+  }
+}
+
   };
 
   return (
