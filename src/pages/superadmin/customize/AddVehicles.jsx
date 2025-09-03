@@ -75,9 +75,31 @@ const VehicleTable = withMaterialTable(null, {
       toast.success("Vehicle added successfully");
       return { ...response.data, id: response.data._id };
     } catch (err) {
-      toast.error("Failed to add vehicle");
-      console.error("Add vehicle error:", err);
+    // Default error message
+    let errorMessage = "Failed to add vehicle";
+
+    if (err?.response?.data) {
+      if (typeof err.response.data === "string") {
+        errorMessage = err.response.data;
+      } else if (err.response.data.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
     }
+
+    // Specific duplicate check
+    if (
+      errorMessage.toLowerCase().includes("vehicle") &&
+      errorMessage.toLowerCase().includes("exist")
+    ) {
+      toast.error("Vehicle already exists");
+    } else {
+      toast.error(errorMessage);
+    }
+
+    console.error("Add vehicle error:", err);
+  }
   },
 
   updateData: async (data) => {
