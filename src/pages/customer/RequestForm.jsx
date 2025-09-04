@@ -45,6 +45,7 @@ useEffect(() => {
   const fetchVehicles = async () => {
     try {
       const response = await new ApiService().apiget(ServerUrl.API_GET_VEHICLES);
+
       if (response?.data?.data) {
         const uniqueBrands = Object.values(
           response.data.data.reduce((acc, curr) => {
@@ -54,7 +55,17 @@ useEffect(() => {
             return acc;
           }, {})
         );
+        const uniqueModels = Object.values(
+          response.data.data.reduce((acc, curr) => {
+            if (!acc[curr.model]) {
+              acc[curr.model] = curr;
+            }
+            return acc;
+          }, {})
+        );
+
         setBrands(uniqueBrands);
+        setModels(uniqueModels); 
         setVehicles(response.data.data);
       }
     } catch (err) {
@@ -85,42 +96,103 @@ useEffect(() => {
   const today = new Date().toISOString().split("T")[0];
 
   // handlers
-  const handleBrandChange = (e) => {
-    setSelectedBrand(e.target.value);
-    setModels(vehicles.filter((v) => v.brand === e.target.value).map((v) => ({ name: v.model, image: v.imageUrl })));
-    setSelectedModel("");
-    setSelectedVariant("");
-    setSelectedImage(jeepImage);
-    setTransmission("");
-    setFuel("");
-  };
+  // const handleBrandChange = (e) => {
+  //   setSelectedBrand(e.target.value);
+  //   setModels(vehicles.filter((v) => v.brand === e.target.value).map((v) => ({ name: v.model, image: v.imageUrl })));
+  //   setSelectedModel("");
+  //   setSelectedVariant("");
+  //   setSelectedImage(jeepImage);
+  //   setTransmission("");
+  //   setFuel("");
+  // };
 
-  const handleModelChange = (e) => {
-    const m = e.target.value;
-    setSelectedModel(m);
-    setVariants(vehicles.filter((x) => x.model === m).map((v) => ({ name: v.variant })));
-    setSelectedVariant("");
-    const img = vehicles.find((x) => x.model === m)?.imageUrl || jeepImage;
-    setSelectedImage(img);
+  // const handleModelChange = (e) => {
+  //   const m = e.target.value;
+  //   setSelectedModel(m);
+  //   setVariants(vehicles.filter((x) => x.model === m).map((v) => ({ name: v.variant })));
+  //   setSelectedVariant("");
+  //   const img = vehicles.find((x) => x.model === m)?.imageUrl || jeepImage;
+  //   setSelectedImage(img);
     
-    setSelectedVariant("");
-    setTransmission("");
-    setFuel("");
-  };
+  //   setSelectedVariant("");
+  //   setTransmission("");
+  //   setFuel("");
+  // };
 
-  const handleVariantChange = (e) => {
-    const v = e.target.value;
-    setSelectedVariant(v);
-    setTransmission(vehicles.find((x) => x.variant === v)?.transmissionType || "");
-    setFuel(vehicles.find((x) => x.variant === v)?.fuelType || "");
-    // const vObj = variants.find((x) => x.name === v);
-    // if (vObj) {
-    //   setTransmission(vObj.transmission);
-    //   setFuel(vObj.fuel);
-    // }
-    // setTransmission("");
-    // setFuel("");
-  };
+  // const handleVariantChange = (e) => {
+  //   const v = e.target.value;
+  //   setSelectedVariant(v);
+  //   setTransmission(vehicles.find((x) => x.variant === v)?.transmissionType || "");
+  //   setFuel(vehicles.find((x) => x.variant === v)?.fuelType || "");
+  //   // const vObj = variants.find((x) => x.name === v);
+  //   // if (vObj) {
+  //   //   setTransmission(vObj.transmission);
+  //   //   setFuel(vObj.fuel);
+  //   // }
+  //   // setTransmission("");
+  //   // setFuel("");
+  // };
+
+  const handleBrandChange = (e) => {
+  const brand = e.target.value;
+  setSelectedBrand(brand);
+
+  // ✅ unique models per brand
+  const uniqueModelsForBrand = Object.values(
+    vehicles
+      .filter((v) => v.brand === brand)
+      .reduce((acc, curr) => {
+        if (!acc[curr.model]) {
+          acc[curr.model] = { name: curr.model, image: curr.imageUrl };
+        }
+        return acc;
+      }, {})
+  );
+
+  setModels(uniqueModelsForBrand);
+  setSelectedModel("");
+  setSelectedVariant("");
+  setSelectedImage(jeepImage);
+  setTransmission("");
+  setFuel("");
+};
+
+const handleModelChange = (e) => {
+  const m = e.target.value;
+  setSelectedModel(m);
+
+  // ✅ unique variants per model
+  const uniqueVariantsForModel = Object.values(
+    vehicles
+      .filter((x) => x.model === m)
+      .reduce((acc, curr) => {
+        if (!acc[curr.variant]) {
+          acc[curr.variant] = { name: curr.variant };
+        }
+        return acc;
+      }, {})
+  );
+
+  setVariants(uniqueVariantsForModel);
+
+  // update image for model
+  const img = vehicles.find((x) => x.model === m)?.imageUrl || jeepImage;
+  setSelectedImage(img);
+
+  setSelectedVariant("");
+  setTransmission("");
+  setFuel("");
+};
+
+const handleVariantChange = (e) => {
+  const v = e.target.value;
+  setSelectedVariant(v);
+
+  const variantObj = vehicles.find((x) => x.variant === v);
+
+  setTransmission(variantObj?.transmissionType || "");
+  setFuel(variantObj?.fuelType || "");
+};
 
   // submit
 const handleSubmit = async (e) => {

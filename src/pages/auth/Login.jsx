@@ -368,7 +368,7 @@ export default function Login() {
       const { user, token } = response.data;
       login({ user, token });
 
-      toast.success(`Welcome back, ${user?.name || "User"}!`);
+      toast.success(`Welcome back, ${user?.userName || "User"}!`);
       const redirectTo = roleRedirectMap[user?.role] || "/";
       navigate(redirectTo, { replace: true });
     } catch (err) {

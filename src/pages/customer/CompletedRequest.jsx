@@ -7,6 +7,7 @@ import {
   FiDollarSign,
   FiCreditCard,
   FiCheckCircle,
+  FiPhone,
 } from "react-icons/fi";
 import ApiService from "../../core/services/api.service";
 import ServerUrl from "../../core/constants/serverUrl.constant";
@@ -82,11 +83,18 @@ const CompletedRequests = () => {
 
   return (
     <div className="min-h-screen bg-primary py-6 px-2 sm:px-4 md:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <h1 className="text-3xl font-heading-bold text-button">
+          Completed Inspections
+        </h1>
+
         {loading ? (
-          <p className="text-center text-gray-500">
-            Loading completed inspections...
-          </p>
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <p className="ml-4 text-lg text-gray-600">
+              Loading completed inspections...
+            </p>
+          </div>
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
         ) : completedOrders.length === 0 ? (
@@ -94,49 +102,50 @@ const CompletedRequests = () => {
             No completed inspections found.
           </p>
         ) : (
-          completedOrders.map((order, index) => {
-            const vehicle = order.vehicleDetails || {};
-            const topInfoCards = [
-              {
-                label: "Customer",
-                icon: <FiUser />,
-                value: `${order.customerName || "N/A"} (${
-                  order.customerMobile || "N/A"
-                })`,
-              },
-              {
-                label: "Engineer",
-                icon: <FiUser />,
-                value: `${order.engineer_name || "N/A"} (${
-                  order.engineer_mobile || "N/A"
-                })`,
-              },
-              {
-                label: "Contact No.",
-                icon: <FiUser />,
-                value: order.engineer_mobile || "N/A",
-              },
-              {
-                label: "Location",
-                icon: <FiMapPin />,
-                value: order.engineer_location || "N/A",
-              },
-              {
-                label: "Inspection",
-                icon: <FiCalendar />,
-                value: order.inspection_date_time || "N/A",
-              },
-              {
-                label: "Amount",
-                icon: <FiDollarSign />,
-                value: order.amount || "N/A",
-              },
-              {
-                label: "Payment Mode",
-                icon: <FiCreditCard />,
-                value: order.payment_mode || "N/A",
-              },
-            ];
+          <div className="max-w-4xl mx-auto space-y-6">
+            {completedOrders.map((order, index) => {
+              const vehicle = order.vehicleDetails || {};
+              const topInfoCards = [
+                {
+                  label: "Customer",
+                  icon: <FiUser />,
+                  value: `${order.customerName || "N/A"} (${
+                    order.customerMobile || "N/A"
+                  })`,
+                },
+                {
+                  label: "Engineer",
+                  icon: <FiUser />,
+                  value: `${order.engineer_name || "N/A"} (${
+                    order.engineer_mobile || "N/A"
+                  })`,
+                },
+                {
+                  label: "Contact No.",
+                  icon: <FiPhone />,
+                  value: order.engineer_mobile || "N/A",
+                },
+                {
+                  label: "Location",
+                  icon: <FiMapPin />,
+                  value: order.engineer_location || "N/A",
+                },
+                {
+                  label: "Inspection",
+                  icon: <FiCalendar />,
+                  value: order.inspection_date_time || "N/A",
+                },
+                {
+                  label: "Amount",
+                  icon: <FiDollarSign />,
+                  value: order.amount || "N/A",
+                },
+                {
+                  label: "Payment Mode",
+                  icon: <FiCreditCard />,
+                  value: order.payment_mode || "N/A",
+                },
+              ];
 
             return (
               <div
@@ -213,12 +222,13 @@ const CompletedRequests = () => {
                       <span>
                         Time: <strong>{order.payment_time || "N/A"}</strong>
                       </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

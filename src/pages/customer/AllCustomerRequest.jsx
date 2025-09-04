@@ -88,7 +88,7 @@ const AllCustomerRequests = () => {
   return (
     <div className="min-h-screen bg-primary py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-regal-blue">
+        <h1 className="text-3xl font-heading-bold text-button">
           All Inspections
         </h1>
 
@@ -96,10 +96,10 @@ const AllCustomerRequests = () => {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             <p className="ml-4 text-lg text-gray-600">
-              Loading completed inspections...
+              Loading All Inspections...
             </p>
           </div>
-        )}
+        )} 
 
         {!loading && error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
