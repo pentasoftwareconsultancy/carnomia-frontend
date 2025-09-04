@@ -108,7 +108,7 @@ const VehicleTable = withMaterialTable(null, {
 
       if (data.imageFile instanceof File) {
         const formData = new FormData();
-        formData.append("documentType", "VEHICLE_IMAGE_FRONT");
+        formData.append("documentType", "VEHICLE_IMAGES");
         formData.append("documents", data.imageFile);
 
         const response = await new ApiService().apipost(ServerUrl.API_UPLOAD_IMAGE, formData, {
