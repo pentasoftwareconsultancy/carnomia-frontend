@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import QRCode from "../../assets/Car.png";
-import DrivestaLogo from "../../assets/logos/drivesta.png";
 import airbagImg from "../../assets/airbagImg.png";
 
 import {

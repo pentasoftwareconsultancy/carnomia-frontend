@@ -12,28 +12,67 @@ import {
 import ApiService from "../../core/services/api.service";
 import ServerUrl from "../../core/constants/serverUrl.constant";
 import { APPLICATION_CONSTANTS } from "../../core/constants/app.constant";
+import { useLocation } from "react-router-dom";
+import { useAuth } from "../../core/contexts/AuthContext";
 
 const CompletedRequests = () => {
-  const [customerName, setCustomerName] = useState("Guest");
+
+  const location = useLocation();
+  const { user } = useAuth();
+
+  const userName = location.state?.name || user?.name || "Guest";
+
   const [completedOrders, setCompletedOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (user?.customerName) setCustomerName(user.customerName);
-
     const fetchCompleted = async () => {
       try {
         setLoading(true);
         const payload = [
-          APPLICATION_CONSTANTS.REQUEST_STATUS.COMPLETED.value,
+          APPLICATION_CONSTANTS.REQUEST_STATUS.COMPLETED.value,,
+          APPLICATION_CONSTANTS.REQUEST_STATUS.CUSTOMER_PAID.value,
         ];
-        const res = await new ApiService().apipost(
+
+        const response = await new ApiService().apipost(
           ServerUrl.API_GET_ALL_PDIREQUEST_STATUSES,
           payload
         );
-        setCompletedOrders(res.data?.data || []);
+
+        const normalizedOrders = (response.data?.data || []).map((order) => {
+          // Customer
+          let customerName =
+            order.customerName ||
+            order.name ||
+            userName;
+
+          let customerMobile =
+            order.customerMobile ||
+            order.customer?.mobile ||
+            "";
+
+          if (customerMobile) {
+            customerName = `${customerName}`;
+          }
+
+          // Engineer
+          const engineerName = order.engineer_name || order.engineer?.name || null;
+          const engineerMobile = order.engineer_mobile || order.engineer?.mobile || "";
+          const engineerDisplay = engineerName
+            ? engineerMobile
+              ? `${engineerName} (${engineerMobile})`
+              : engineerName
+            : "N/A";
+
+          return {
+            ...order,
+            customerName,
+            engineerName: engineerDisplay,
+          };
+        });
+
+        setCompletedOrders(normalizedOrders);
       } catch (err) {
         console.error("Fetch error:", err);
         setError("Failed to fetch completed inspections.");
@@ -43,7 +82,7 @@ const CompletedRequests = () => {
     };
 
     fetchCompleted();
-  }, []);
+  }, [userName]);
 
   const downloadReport = (order) => {
     const vehicle = order.vehicleDetails || {};
@@ -90,7 +129,7 @@ const CompletedRequests = () => {
 
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button"></div>
             <p className="ml-4 text-lg text-gray-600">
               Loading completed inspections...
             </p>
@@ -109,9 +148,8 @@ const CompletedRequests = () => {
                 {
                   label: "Customer",
                   icon: <FiUser />,
-                  value: `${order.customerName || "N/A"} (${
-                    order.customerMobile || "N/A"
-                  })`,
+                  value: `${order.customerName || "N/A"} 
+                  (${order.customerMobile || "N/A"})`,
                 },
                 {
                   label: "Engineer",
@@ -150,7 +188,7 @@ const CompletedRequests = () => {
             return (
               <div
                 key={index}
-                className="bg-white/30 backdrop-blur-md border border-button rounded-xl shadow-md overflow-hidden p-6 space-y-4"
+                className="bg-white backdrop-blur-md border border-button rounded-xl shadow-md overflow-hidden p-6 space-y-4"
               >
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">

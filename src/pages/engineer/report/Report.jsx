@@ -215,11 +215,11 @@
 
 //       {/* Foreground */}
 //       <div className="relative z-10 w-full flex flex-col items-center px-4 sm:px-6 md:px-12 py-8 sm:py-12">
-//         {isAdm && 
-//             (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) &&  
+//         {isAdm &&
+//             (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) &&
 //          (
 //           <div className="flex justify-end gap-2 w-full max-w-4xl mb-4 ml-auto">
 //         `<button
@@ -298,9 +298,9 @@
 //             <div />
 //           )}
 
-//           {step < steps.length - 1 ?  (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
+//           {step < steps.length - 1 ?  (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value ||
 //         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) ? (
 //             <button
 //               onClick={handleNextWithSaveConfirm}
@@ -310,13 +310,13 @@
 //               {saving ? "Saving..." : "Next"}
 //             </button>
 //            ) : '' : (
-//             (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
-//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) 
-//         ? 
+//             (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value ||
+//         formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value )
+//         ?
 //             <button
-//               onClick={() => 
+//               onClick={() =>
 //                 handleSave( isAdm ? null: APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value, true)}
 //               disabled={saving}
 //               className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-body shadow-lg transform hover:scale-105 transition-all"
@@ -344,7 +344,6 @@
 //     </div>
 //   );
 // }
-
 
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -386,7 +385,6 @@ export default function Report() {
   const [imageUrl, setImageUrl] = useState(car);
   const [showPhoto, setShowPhoto] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState(null);
-
 
   const steps = [
     "Information",
@@ -446,7 +444,7 @@ export default function Report() {
     setSaving(true);
     try {
       const payload = { id: formData._id, ...formData };
-      if ((status || isAdm)) {
+      if (status || isAdm) {
         payload["status"] = status ? status : formData.status; // set status if provided
       }
       await new ApiService().apiput(
@@ -466,17 +464,16 @@ export default function Report() {
   };
 
   const handleNextWithSaveConfirm = async () => {
-  setConfirmConfig({
-    message: "Are you sure you want to save before going next?",
-    onConfirm: async () => {
-      const saved = await handleSave();
-      if (saved && step < steps.length - 1) {
-        setStep((prev) => prev + 1);
-      }
-    },
-  });
-};
-
+    setConfirmConfig({
+      message: "Are you sure you want to save before going next?",
+      onConfirm: async () => {
+        const saved = await handleSave();
+        if (saved && step < steps.length - 1) {
+          setStep((prev) => prev + 1);
+        }
+      },
+    });
+  };
 
   const goBack = () => {
     if (step > 0) setStep(step - 1);
@@ -549,14 +546,16 @@ export default function Report() {
 
       {/* Foreground */}
       <div className="relative z-10 w-full flex flex-col items-center px-4 sm:px-6 md:px-12 py-8 sm:py-12">
-        {isAdm && 
-            (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) &&  
-         (
-          <div className="flex justify-end gap-2 w-full max-w-4xl mb-4 ml-auto">
-        {/* `<button
+        {isAdm &&
+          (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value) && (
+            <div className="flex justify-end gap-2 w-full max-w-4xl mb-4 ml-auto">
+              {/* `<button
           onClick={() => {
             if (window.confirm("Are you sure you want to approve this inspection?")) {
               handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value)
@@ -573,44 +572,50 @@ export default function Report() {
           
         </button> */}
 
-        <button
-  onClick={() =>
-    setConfirmConfig({
-      message: "Are you sure you want to approve this inspection?",
-      onConfirm: async () => {
-        await handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value);
-        const adminRoles = ["admin", "superadmin"];
-        if (adminRoles.includes(user.role)) {
-          navigate(`/${user.role}/dashboard/inspection-report`);
-        }
-      },
-    })
-  }
-  className="bg-button hover:bg-green-700 text-white px-4 py-2 rounded-2xl"
->
-  Approve
-</button>
+              <button
+                onClick={() =>
+                  setConfirmConfig({
+                    message:
+                      "Are you sure you want to approve this inspection?",
+                    onConfirm: async () => {
+                      await handleSave(
+                        APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED
+                          .value
+                      );
+                      const adminRoles = ["admin", "superadmin"];
+                      if (adminRoles.includes(user.role)) {
+                        navigate(`/${user.role}/dashboard/inspection-report`);
+                      }
+                    },
+                  })
+                }
+                className="bg-button hover:bg-green-700 text-white px-4 py-2 rounded-2xl"
+              >
+                Approve
+              </button>
 
-<button
-  onClick={() =>
-    setConfirmConfig({
-      message: "Are you sure you want to reject this inspection?",
-      onConfirm: async () => {
-        await handleSave(APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value);
-        const adminRoles = ["admin", "superadmin"];
-        if (adminRoles.includes(user.role)) {
-          navigate(`/${user.role}/dashboard/inspection-report`);
-        }
-      },
-    })
-  }
-  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-2xl"
->
-  Reject
-</button>
-
-          </div>
-        )}
+              <button
+                onClick={() =>
+                  setConfirmConfig({
+                    message: "Are you sure you want to reject this inspection?",
+                    onConfirm: async () => {
+                      await handleSave(
+                        APPLICATION_CONSTANTS.REQUEST_STATUS
+                          .WAITING_FOR_APPROVAL.value
+                      );
+                      const adminRoles = ["admin", "superadmin"];
+                      if (adminRoles.includes(user.role)) {
+                        navigate(`/${user.role}/dashboard/inspection-report`);
+                      }
+                    },
+                  })
+                }
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-2xl"
+              >
+                Reject
+              </button>
+            </div>
+          )}
 
         <div className="text-center mb-6 sm:mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
@@ -652,64 +657,78 @@ export default function Report() {
             <div />
           )}
 
-          {step < steps.length - 1 ?  (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) ? (
+          {step < steps.length - 1 ? (
+            formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ? (
+              <button
+                onClick={handleNextWithSaveConfirm}
+                disabled={saving}
+                className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-lime-400 to-green-500 hover:from-lime-500 hover:to-green-600 text-white font-body shadow-lg transform hover:scale-105 transition-all"
+              >
+                {saving ? "Saving..." : "Next"}
+              </button>
+            ) : (
+              ""
+            )
+          ) : formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value ||
+            formData.status ==
+              APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ? (
             <button
-              onClick={handleNextWithSaveConfirm}
-              disabled={saving}
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-gradient-to-r from-lime-400 to-green-500 hover:from-lime-500 hover:to-green-600 text-white font-body shadow-lg transform hover:scale-105 transition-all"
-            >
-              {saving ? "Saving..." : "Next"}
-            </button>
-           ) : '' : (
-            (formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.ASSIGNED_ENGINEER.value || 
-        formData.status == APPLICATION_CONSTANTS.REQUEST_STATUS.IN_PROGRESS.value ) 
-        ? 
-            <button
-              onClick={() => 
-                handleSave( isAdm ? null: APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL.value, true)}
+              onClick={() =>
+                handleSave(
+                  isAdm
+                    ? null
+                    : APPLICATION_CONSTANTS.REQUEST_STATUS.WAITING_FOR_APPROVAL
+                        .value,
+                  true
+                )
+              }
               disabled={saving}
               className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-body shadow-lg transform hover:scale-105 transition-all"
             >
               {saving ? "Submitting..." : "Submit"}
             </button>
-            : ''
+          ) : (
+            ""
           )}
         </div>
       </div>
       {confirmConfig && (
-  <div className="fixed inset-0 z-50 flex items-start justify-center bg-opacity-50">
-  <div className="bg-emerald-50 rounded-lg shadow-lg p-3 w-80 mt-10">
-    <h2 className="text-lg font-semibold mb-4">Confirmation</h2>
-    <p className="text-gray-700 mb-6">{confirmConfig.message}</p>
-    <div className="flex justify-end gap-3">
-      <button
-  onClick={() => setConfirmConfig(null)}
-  className="px-2 py-1 text-sm rounded-md border"
->
-  Cancel
-</button>
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-opacity-50">
+          <div className="bg-emerald-50 rounded-lg shadow-lg p-3 w-80 mt-10">
+            <h2 className="text-lg font-semibold mb-4">Confirmation</h2>
+            <p className="text-gray-700 mb-6">{confirmConfig.message}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmConfig(null)}
+                className="px-2 py-1 text-sm rounded-md border"
+              >
+                Cancel
+              </button>
 
-      <button
-  onClick={async () => {
-    await confirmConfig.onConfirm();
-    setConfirmConfig(null);
-  }}
-  className="px-2 py-1 text-sm rounded-md bg-green-600 text-white"
->
-  Confirm
-</button>
-
-    </div>
-  </div>
-</div>
-
-)}
-
+              <button
+                onClick={async () => {
+                  await confirmConfig.onConfirm();
+                  setConfirmConfig(null);
+                }}
+                className="px-2 py-1 text-sm rounded-md bg-green-600 text-white"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Photo Viewer */}
       {showPhoto && (
