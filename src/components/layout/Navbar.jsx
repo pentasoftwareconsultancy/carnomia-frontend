@@ -16,6 +16,7 @@ export default function Navbar({ onToggleSidebar }) {
   const [editableUser, setEditableUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const isLandingPage = location.pathname === "/";
 
   // ✅ State for fetched city list
   const [cityList, setCityList] = useState([]);
@@ -196,8 +197,7 @@ export default function Navbar({ onToggleSidebar }) {
 
     // Navigate based on role
     if (currentUser.role === "admin") navigate("/admin/dashboard");
-    else if (currentUser.role === "superadmin")
-      navigate("/superadmin/dashboard");
+    else if (currentUser.role === "superadmin") navigate("/superadmin/dashboard");
     else if (currentUser.role === "engineer") navigate("/engineer/dashboard");
     else if (currentUser.role === "customer") navigate("/customer/dashboard");
     else navigate("/");
@@ -212,6 +212,7 @@ export default function Navbar({ onToggleSidebar }) {
       (user.role === "admin" && currentPath.startsWith("/admin")) ||
       (user.role === "superadmin" && currentPath.startsWith("/superadmin")) ||
       (user.role === "engineer" && currentPath.startsWith("/engineer")) ||
+      (user.role === "customer" && currentPath.startsWith("/customer")) ||
       (!user.role && currentPath === "/dashboard")
     );
   };
@@ -223,6 +224,8 @@ export default function Navbar({ onToggleSidebar }) {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 gap-3">
         {/* Left: Hamburger on mobile */}
         <div className="flex items-center w-full justify-between">
+
+          {!isLandingPage && (
           <button
             onClick={onToggleSidebar}
             className="text-[#7ED957] lg:hidden p-2"
@@ -242,6 +245,7 @@ export default function Navbar({ onToggleSidebar }) {
               />
             </svg>
           </button>
+           )}
 
           {/* Logo */}
           <Link
