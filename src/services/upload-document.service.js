@@ -82,8 +82,22 @@ class FileUploaderService {
   async handleCameraClick(label, setStreamStates, setIsCameraActive, takePhoto) {
     if (!this.isCameraActive[label]) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setStreamStates(prev => ({ ...prev, [label]: stream }));
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === "videoinput");
+
+      if (videoDevices.length < 2) {
+        alert("This device does not have a second camera.");
+        return;
+      }
+
+      // Pick the 2nd camera (index 1)
+      const constraints = {
+        video: { deviceId: { exact: videoDevices[1].deviceId } }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStreamStates(prev => ({ ...prev, [label]: stream }));
+
         if (this.videoRefs[label]) {
           this.videoRefs[label].srcObject = stream;
         }

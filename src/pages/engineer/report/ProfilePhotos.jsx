@@ -85,7 +85,21 @@ const handleCameraClick = async (field) => {
   if (!isCameraActive[field]) {
     // 👉 First click: open camera
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === "videoinput");
+
+      if (videoDevices.length < 2) {
+        alert("This device does not have a second camera.");
+        return;
+      }
+
+      // Pick the 2nd camera (index 1)
+      const constraints = {
+        video: { deviceId: { exact: videoDevices[1].deviceId } }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
       if (videoRefs.current[field]) {
         videoRefs.current[field].srcObject = stream;
       }
