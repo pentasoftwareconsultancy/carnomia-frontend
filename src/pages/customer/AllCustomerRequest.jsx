@@ -11,21 +11,16 @@ import {
 import ApiService from "../../core/services/api.service";
 import ServerUrl from "../../core/constants/serverUrl.constant";
 import { APPLICATION_CONSTANTS } from "../../core/constants/app.constant";
-import { useLocation } from "react-router-dom";
-import { useAuth } from "../../core/contexts/AuthContext";
+import generateInspectionPDF from "../admin/InspectionReportPdf";
 
 const AllCustomerRequests = () => {
-  const location = useLocation();
-  const { user } = useAuth();
 
-  const userName = location.state?.name || user?.name || "Guest";
-
-  const [completedOrders, setCompletedOrders] = useState([]);
+  const [allRequests, setAllRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCompleted = async () => {
+    const fetchRequests = async () => {
       try {
         setLoading(true);
         const payload = [
@@ -36,6 +31,7 @@ const AllCustomerRequests = () => {
           APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_APPROVED.value,
           APPLICATION_CONSTANTS.REQUEST_STATUS.ADMIN_REJECTED.value,
           APPLICATION_CONSTANTS.REQUEST_STATUS.CUSTOMER_PAID.value,
+          APPLICATION_CONSTANTS.REQUEST_STATUS.COMPLETED.value,
         ];
 
         const response = await new ApiService().apipost(
@@ -43,21 +39,10 @@ const AllCustomerRequests = () => {
           payload
         );
 
-        const normalizedOrders = (response.data?.data || []).map((order) => {
-          // Customer
-          let customerName =
-            order.customerName ||
-            order.name ||
-            userName;
-
-          let customerMobile =
-            order.customerMobile ||
-            order.customer?.mobile ||
-            "";
-
-          if (customerMobile) {
-            customerName = `${customerName} (${customerMobile})`;
-          }
+                const normalizedOrders = (response.data?.data || []).map((order) => {
+          // ✅ Customer comes directly from backend
+          const customerName = order.customerName || "N/A";
+          const customerMobile = order.customerMobile || "";
 
           // Engineer
           const engineerName = order.engineer_name || order.engineer?.name || null;
@@ -70,12 +55,14 @@ const AllCustomerRequests = () => {
 
           return {
             ...order,
-            customerName,
+            customerName: customerMobile
+              ? `${customerName} (${customerMobile})`
+              : customerName,
             engineerName: engineerDisplay,
           };
         });
 
-        setCompletedOrders(normalizedOrders);
+        setAllRequests(normalizedOrders);
       } catch (err) {
         console.error("Fetch error:", err);
         setError("Failed to fetch completed inspections.");
@@ -84,59 +71,22 @@ const AllCustomerRequests = () => {
       }
     };
 
-    fetchCompleted();
-  }, [userName]);
-
-  const downloadReport = (order) => {
-    const vehicle = order.vehicleDetails || {};
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head><title>Report - ${order.bookingId}</title></head>
-      <body>
-        <h1>Inspection Report</h1>
-        <p><strong>Booking ID:</strong> ${order.bookingId}</p>
-        <p><strong>Brand:</strong> ${order.brand}</p>
-        <p><strong>Model:</strong> ${order.model}</p>
-        <p><strong>Variant:</strong> ${vehicle.variant || order.variant}</p>
-        <p><strong>Customer:</strong> ${order.customerName}</p>
-        <p><strong>Engineer:</strong> ${order.engineerName}</p>
-        <p><strong>Engineer Location:</strong> ${order.engineer_location}</p>
-        <p><strong>Inspection Date & Time:</strong> ${order.date}</p>
-        <p><strong>Amount:</strong> ${order.amount}</p>
-        <p><strong>Payment Mode:</strong> ${order.paymentMode}</p>
-        <p><strong>Payment Status:</strong> ${order.paymentStatus}</p>
-        <p><strong>Payment Date:</strong> ${order.paymentDate}</p>
-        <p><strong>Payment Time:</strong> ${order.payment_time}</p>
-      </body>
-      </html>
-    `;
-    const blob = new Blob([htmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `Drivesta_Report_${order.bookingId}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Tailwind-safe color mapping
-  const colorMap = {
-    blue: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-700" },
-    purple: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-700" },
-  };
+    fetchRequests();
+  }, []);
 
   return (
     <div className="min-h-screen bg-primary py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-3xl font-heading-bold text-button">All Inspections</h1>
+        <h1 className="text-3xl font-heading-bold text-button">
+          All Inspections
+        </h1>
 
         {loading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-button"></div>
-            <p className="ml-4 text-lg text-gray-600">Loading completed inspections...</p>
+            <p className="ml-4 text-lg text-gray-600">
+              Loading all inspections...
+            </p>
           </div>
         )}
 
@@ -146,17 +96,21 @@ const AllCustomerRequests = () => {
           </div>
         )}
 
-        {!loading && !error && completedOrders.length === 0 && (
+        {!loading && !error && allRequests.length === 0 && (
           <div className="bg-white border border-gray-200 p-6 rounded-lg text-center">
-            <p className="text-lg text-gray-600">No completed inspections found.</p>
+            <p className="text-lg text-gray-600">No inspections found.</p>
           </div>
         )}
 
         {!loading &&
           !error &&
-          completedOrders.length > 0 &&
-          completedOrders.map((order, index) => {
+          allRequests.length > 0 &&
+          allRequests.map((order, index) => {
             const vehicle = order.vehicleDetails || {};
+            const isCompleted =
+              order.status ===
+              APPLICATION_CONSTANTS.REQUEST_STATUS.COMPLETED.value;
+
             return (
               <div
                 key={index}
@@ -170,40 +124,79 @@ const AllCustomerRequests = () => {
                     <div className="flex items-center mt-2 gap-2">
                       <span className="px-3 py-1 text-sm font-medium bg-green-50 text-button rounded-full flex items-center gap-2">
                         <FiCheckCircle size={16} />{" "}
-                        {APPLICATION_CONSTANTS.REQUEST_STATUS[order.status]?.label || "N/A"}
+                        {APPLICATION_CONSTANTS.REQUEST_STATUS[order.status]
+                          ?.label || "N/A"}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">Booking ID: {order.bookingId}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Booking ID: {order.bookingId}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => downloadReport(order)}
-                    className="mt-2 sm:mt-0 px-4 py-2 bg-button text-white rounded hover:bg-green-500 flex items-center gap-2"
-                  >
-                    <FiDownload /> Download Report
-                  </button>
+
+                  {/* ✅ Show download button only if COMPLETED */}
+                  {isCompleted && (
+                    <button
+                      onClick={() => generateInspectionPDF(order)}
+                      className="mt-2 sm:mt-0 px-4 py-2 bg-button text-white rounded hover:bg-green-500 flex items-center gap-2"
+                    >
+                      <FiDownload /> Download Report
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                  <InfoCard icon={<FiUser size={18} />} title="Customer" value={order.customerName} />
-                  <InfoCard icon={<FiUser size={18} />} title="Engineer" value={order.engineerName} />
-                  <InfoCard icon={<FiMapPin size={18} />} title="Location" value={order.address} />
-                  <InfoCard icon={<FiCalendar size={18} />} title="Inspection" value={order.date} />
-                  <InfoCard icon={<FiDollarSign size={18} />} title="Amount" value={`₹${order.amount}`} />
-                  <InfoCard icon={<FiCreditCard size={18} />} title="Payment Mode" value={order.paymentMode} />
+                  <InfoCard
+                    icon={<FiUser size={18} />}
+                    title="Customer"
+                    value={order.customerName}
+                  />
+                  <InfoCard
+                    icon={<FiUser size={18} />}
+                    title="Engineer"
+                    value={order.engineerName}
+                  />
+                  <InfoCard
+                    icon={<FiMapPin size={18} />}
+                    title="Location"
+                    value={order.address}
+                  />
+                  <InfoCard
+                    icon={<FiCalendar size={18} />}
+                    title="Inspection"
+                    value={order.date}
+                  />
+                  <InfoCard
+                    icon={<FiDollarSign size={18} />}
+                    title="Amount"
+                    value={`₹${order.amount}`}
+                  />
+                  <InfoCard
+                    icon={<FiCreditCard size={18} />}
+                    title="Payment Mode"
+                    value={order.paymentMode}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  <BottomCard title="Vehicle Details" value={`Variant: ${vehicle.variant || order.variant}`} color="blue" />
+                  <BottomCard
+                    title="Vehicle Details"
+                    value={`Variant: ${vehicle.variant || order.variant}`}
+                    color="blue"
+                  />
                   <BottomCard
                     title="Payment Details"
                     value={`Status: ${
-                      APPLICATION_CONSTANTS.PAYMENT_STATUS[order.paymentStatus?.toUpperCase() || "PENDING"]?.label
+                      APPLICATION_CONSTANTS.PAYMENT_STATUS[
+                        order.paymentStatus?.toUpperCase() || "PENDING"
+                      ]?.label
                     } | Date: ${
-                      order.paymentStatus === APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value
-                        ? new Date(order.paymentDate).toLocaleDateString()
+                      order.paymentStatus ===
+                      APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value
+                        ? new Date(order.date).toLocaleDateString()
                         : "N/A"
                     } | Time: ${
-                      order.paymentStatus === APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value
+                      order.paymentStatus ===
+                      APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value
                         ? order.payment_time
                         : "N/A"
                     }`}
@@ -230,8 +223,16 @@ const InfoCard = ({ icon, title, value }) => (
 
 const BottomCard = ({ title, value, color }) => {
   const colorMap = {
-    blue: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-700" },
-    purple: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-700" },
+    blue: {
+      bg: "bg-blue-50",
+      border: "border-blue-100",
+      text: "text-blue-700",
+    },
+    purple: {
+      bg: "bg-purple-50",
+      border: "border-purple-100",
+      text: "text-purple-700",
+    },
   };
   const c = colorMap[color] || colorMap.blue;
   return (

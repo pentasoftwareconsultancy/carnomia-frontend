@@ -107,6 +107,7 @@ const AssignedJobs = () => {
                 {job.brand || 'N/A'} {job.model || ''}
               </h2>
               <div className="space-y-1 text-sm text-gray-700">
+                <p><strong>Boking ID:</strong> {job.bookingId || 'N/A'}</p>
                 <p><strong>Customer:</strong> {job.customerName || 'N/A'}</p>
                 <p><strong>Location:</strong> {job.address || 'N/A'}</p>
                 <p><strong>Date:</strong> {job.date || 'N/A'}</p>
@@ -130,6 +131,7 @@ const AssignedJobs = () => {
           {selectedJob && (
             <div className="space-y-2 text-sm">
               <p><strong>Vehicle:</strong> {selectedJob.brand || 'N/A'} {selectedJob.model || ''}</p>
+              <p><strong>Booking ID:</strong> {selectedJob.bookingId || 'N/A'}</p>
               <p><strong>Customer:</strong> {selectedJob.customerName || 'N/A'}</p>
               <p><strong>Phone:</strong> {selectedJob.customerMobile || 'N/A'}</p>
               <p><strong>Location:</strong> {selectedJob.address || 'N/A'}</p>

@@ -16,7 +16,7 @@ const JobsManagement = () => {
         const response = await new ApiService().apiget(
           `${ServerUrl.API_GET_ALL_USERS_BY_ROLES}/engineer`
         );
-        const engineerList = response?.data?.data || [];
+        const engineerList = response?.data || [];
         setEngineers(
           engineerList.map((e) => ({
             label: e.name,

@@ -49,6 +49,10 @@ export const APPLICATION_CONSTANTS = {
       label: "Pending",
       value: "PENDING",
     },
+    UNPAID: {
+      label: "Unpaid",
+      value: "UNPAID",
+    },
     PAID: {
       label: "Paid",
       value: "PAID",

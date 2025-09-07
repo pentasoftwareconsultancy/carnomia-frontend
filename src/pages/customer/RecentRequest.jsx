@@ -1,10 +1,9 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import jsPDF from "jspdf";
 import QRCode from "../../assets/Car.png";
-import airbagImg from "../../assets/airbagImg.png";
-
+import airbagImg from "../../assets/airbag.png";
 import {
   FaCar,
   FaWhatsapp,
@@ -30,6 +29,9 @@ const Recent = () => {
   const navigate = useNavigate();
   const [state, setState] = useState(null);
   const [keyMetrics, setKeyMetrics] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -73,7 +75,7 @@ const Recent = () => {
             <img
               src={airbagImg}
               alt="Airbags"
-              className="w-6 h-6 object-contain"
+              className="w-8 h-9 object-contain"
             />
           ),
           value: `${state.Airbags || "4"} Airbags`,
@@ -104,6 +106,42 @@ const Recent = () => {
       ]);
     }
   }, [state]);
+
+  const handleUpdateInspection = async () => {
+  try {
+    setIsSaving(true);
+
+    const payload = {
+      brand: state.brand,
+      model: state.model,
+      variant: state.variant,
+      transmissionType: state.transmissionType,
+      fuelType: state.fuelType,
+      address: state.address,
+      date: state.date,
+      notes: state.notes,
+    };
+
+    const response = await new ApiService().apiput(
+      `${ServerUrl.API_GET_INSPECTION_UPDATE}/${state._id}`,
+      payload
+    );
+
+    if (response?.data?.success) {
+      setState(prev => ({ ...prev, ...payload })); // update state
+      setShowEditModal(false);                     // close modal immediately
+      setShowToast(true);                          // show toast
+      setTimeout(() => setShowToast(false), 3000);
+    } else {
+      toast.error("Failed to update inspection");  // optional
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Something went wrong!");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const handleAssistanceClick = (i) => {
     if (i === 0) navigate("/customer/dashboard/contact-support");
@@ -153,9 +191,10 @@ const Recent = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8"
+            className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8 gap-4"
           >
-            <div className="mb-4 md:mb-0">
+            {/* Left Side - Booking Info */}
+            <div>
               <h1 className="text-xl sm:text-2xl md:text-2xl font-semibold text-gray-900">
                 Booking ID:{" "}
                 <span className="text-button">{state.bookingId}</span>
@@ -165,39 +204,34 @@ const Recent = () => {
                 <p className="text-gray-600 mt-1 sm:mt-2">
                   You don't have any recent requests yet.
                 </p>
-              ) : (
-                ""
-              )}
+              ) : null}
 
               {state && state != null ? (
                 <p className="text-gray-600 mt-1 sm:mt-2 flex items-center text-sm sm:text-base">
                   Your vehicle booking details
                   <span className="ml-2 w-2 h-2 bg-button rounded-full animate-pulse"></span>
                 </p>
-              ) : (
-                ""
-              )}
+              ) : null}
             </div>
-            <div
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs md:text-sm font-medium shadow-sm inline-flex items-center gap-1 sm:gap-2 border border-gray-200"
-            >
-              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-button rounded-full flex-shrink-0"></span>
+
+            {/* Right Side - Status Badge */}
+            <div className="bg-white/90 backdrop-blur-sm px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium shadow-sm flex items-center gap-1 sm:gap-2 border border-gray-200 min-w-fit">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-button rounded-full"></span>
               <span className="truncate">
-                {APPLICATION_CONSTANTS.REQUEST_STATUS[state["status"]].label}
+                {APPLICATION_CONSTANTS.REQUEST_STATUS[state?.status]?.label}
               </span>
             </div>
           </motion.div>
 
-          {/* { state && state != null ? ( */}
-          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Vehicle Image - Full width on mobile, 2/3 on desktop */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="lg:col-span-2 bg-primary rounded-xl shadow-xl overflow-hidden border border-gray-100"
+              className="lg:col-span-2 bg-primary rounded-xl shadow-xl overflow-hidden border border-gray-100 relative"
             >
+              {/* Vehicle Image */}
               <div className="relative w-full flex justify-center bg-white items-center">
                 <img
                   src={
@@ -205,8 +239,18 @@ const Recent = () => {
                     "https://via.placeholder.com/800x400?text=No+Image"
                   }
                   alt="Vehicle"
-                  className="max-h-80 w-auto object-contain"
+                  className="w-full max-h-80 sm:max-h-96 md:max-h-[28rem] object-contain"
                 />
+              </div>
+
+              {/* Gradient Overlay with Vehicle Info */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/90 via-white/50 to-transparent p-3 sm:p-4 md:p-5">
+                <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-heading font-bold text-gray-900 truncate">
+                  {state.brand} {state.model}
+                </h3>
+                <p className="text-xs sm:text-sm md:text-base text-gray-700 font-semibold">
+                  {state.variant}
+                </p>
               </div>
             </motion.div>
 
@@ -215,19 +259,24 @@ const Recent = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 sm:gap-4"
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 gap-3 sm:gap-4"
             >
               {keyMetrics.map((item, i) => (
                 <motion.div
                   key={i}
                   whileHover={{ scale: 1.03 }}
-                  className="bg-gradient-to-br from-white to-green-50 rounded-xl p-3 sm:p-4 shadow-xl border border-gray-100 hover:shadow-md"
+                  className="flex flex-col items-start sm:items-center bg-gradient-to-br from-white to-green-50 rounded-xl p-3 sm:p-4 shadow-xl border border-gray-100 hover:shadow-md"
                 >
-                  {item.icon}
-                  <div className="text-base sm:text-lg md:text-xl font-heading text-gray-900 mt-1 sm:mt-2">
+                  {/* Icon wrapper ensures consistent sizing */}
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+                    {item.icon}
+                  </div>
+                  <div className="text-sm sm:text-base md:text-lg font-heading text-gray-900 mt-1 sm:mt-2 text-left sm:text-center">
                     {item.value}
                   </div>
-                  <div className="text-xs text-gray-500">{item.label}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 text-left sm:text-center">
+                    {item.label}
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
@@ -247,13 +296,18 @@ const Recent = () => {
                   Details
                 </h3>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleState("showEditModal", true)}
-                  className="px-3 py-1.5 sm:px-4 sm:py-2 bg-button text-white rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center"
-                >
-                  <BsPencil className="mr-1 sm:mr-2" /> Edit Details
-                </motion.button>
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.98 }}
+  onClick={() => setShowEditModal(true)}
+  disabled={state.status !== APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value} // ✅ Only enable if NEW
+  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-sm text-xs sm:text-sm font-medium flex items-center ${
+    state.status === APPLICATION_CONSTANTS.REQUEST_STATUS.NEW.value
+      ? "bg-button text-white hover:bg-green-700"
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+  }`}
+>
+  <BsPencil className="mr-1 sm:mr-2" /> Edit Details
+</motion.button>
               </div>
 
               <div className="space-y-3">
@@ -262,8 +316,8 @@ const Recent = () => {
                   ["Brand", state.brand],
                   ["Model", state.model],
                   ["Variant", state.variant],
-                  ["Fuel Type", state.fuelType], // ✅ backend match
-                  ["Transmission", state.transmissionType], // ✅ backend match
+                  ["Fuel Type", state.fuelType],
+                  ["Transmission", state.transmissionType],
                   [
                     "PDI Date",
                     state.date
@@ -326,7 +380,7 @@ const Recent = () => {
                           state["paymentStatus"]
                             ? state["paymentStatus"]
                             : APPLICATION_CONSTANTS.PAYMENT_STATUS.PENDING.value
-                        ]
+                        ]?.label
                       }
                     </span>
                   </div>
@@ -336,14 +390,6 @@ const Recent = () => {
                 APPLICATION_CONSTANTS.PAYMENT_STATUS.PAID.value ? (
                   <span>Payment not done yet</span>
                 ) : (
-                  // <motion.button
-                  //   whileHover={{ scale: 1.02 }}
-                  //   whileTap={{ scale: 0.98 }}
-                  //   onClick={() => handleState("showPayment", true)}
-                  //   className="w-full bg-white text-green-800 font-heading py-2 sm:py-3 rounded-lg shadow-md hover:bg-gray-100 text-sm sm:text-base"
-                  // >
-                  //   Complete Payment
-                  // </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -400,43 +446,61 @@ const Recent = () => {
 
           {/* Edit Modal */}
           {renderModal(
-            state.showEditModal,
+            showEditModal,
             { icon: BsPencil, text: "Edit Booking Details" },
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 max-h-[60vh] overflow-y-auto p-1">
               {[
-                "bookingId",
-                "brand",
-                "model",
-                "variant",
-                "transmission",
-                "fuel",
-                "address",
-                "pdiDate",
-                "notes",
+                { name: "bookingId", label: "Booking ID", disabled: true },
+                { name: "brand", label: "Brand", disabled: true },
+                { name: "model", label: "Model", disabled: true },
+                { name: "variant", label: "Variant" },
+                { name: "transmissionType", label: "Transmission Type" },
+                { name: "fuelType", label: "Fuel Type" },
+                { name: "date", label: "PDI Date", type: "date" },
+                { name: "address", label: "Address" },
+                { name: "notes", label: "Notes", textarea: true },
               ].map((field) => (
-                <div key={field} className="space-y-1">
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 capitalize">
-                    {field.replace(/([A-Z])/g, " $1")}
+                <div key={field.name} className="space-y-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                    {field.label}
                   </label>
-                  {field === "notes" ? (
+
+                  {field.textarea ? (
                     <textarea
-                      name={field}
-                      value={state[field]}
-                      onChange={(e) => handleFormData(field, e.target.value)}
+                      name={field.name}
+                      value={state[field.name] || ""}
+                      onChange={(e) =>
+                        setState((prev) => ({
+                          ...prev,
+                          [field.name]: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 text-xs sm:text-sm transition focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white"
                       rows={3}
                     />
                   ) : (
                     <input
-                      type={field.includes("Date") ? "date" : "text"}
-                      name={field}
-                      value={state[field]}
-                      onChange={(e) => handleFormData(field, e.target.value)}
-                      disabled={["brand", "model", "bookingId"].includes(field)}
+                      type={field.type || "text"}
+                      name={field.name}
+                      value={
+                        field.name === "date"
+                          ? state.date
+                            ? new Date(state.date).toISOString().slice(0, 10)
+                            : ""
+                          : state[field.name] || ""
+                      }
+                      onChange={(e) =>
+                        setState((prev) => ({
+                          ...prev,
+                          [field.name]:
+                            field.name === "date"
+                              ? e.target.value
+                              : e.target.value,
+                        }))
+                      }
+                      disabled={field.disabled}
                       className={`w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 text-xs sm:text-sm transition focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent ${
-                        ["brand", "model", "bookingId"].includes(field)
-                          ? "bg-gray-100"
-                          : "bg-white"
+                        field.disabled ? "bg-gray-100" : "bg-white"
                       }`}
                     />
                   )}
@@ -447,21 +511,24 @@ const Recent = () => {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleState("showEditModal", false)}
+                onClick={() => setShowEditModal(false)}
                 className="px-4 sm:px-6 py-1.5 sm:py-2 text-gray-700 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 text-xs sm:text-sm"
               >
                 Cancel
               </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  localStorage.setItem("recentBooking", JSON.stringify(state));
-                  handleState("showEditModal", false);
-                }}
-                className="px-4 sm:px-6 py-1.5 sm:py-2 text-white bg-button rounded-lg font-medium hover:bg-green-700 shadow-md text-xs sm:text-sm"
+                disabled={isSaving}
+                onClick={handleUpdateInspection}
+                className={`px-4 sm:px-6 py-1.5 sm:py-2 text-white rounded-lg font-medium shadow-md text-xs sm:text-sm ${
+                  isSaving
+                    ? "bg-green-300 cursor-not-allowed"
+                    : "bg-button hover:bg-green-700"
+                }`}
               >
-                Save Changes
+                {isSaving ? "Saving..." : "Save Changes"}
               </motion.button>
             </>
           )}
@@ -530,6 +597,32 @@ const Recent = () => {
             </>,
             null
           )}
+          <AnimatePresence>
+  {showToast && (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 
+                 bg-white rounded-lg sm:rounded-xl shadow-lg 
+                 border border-green-200 overflow-hidden max-w-xs sm:max-w-sm"
+    >
+      <div className="flex items-center p-3 sm:p-4">
+        <div className="bg-green-100 p-2 sm:p-3 rounded-full mr-2 sm:mr-3">
+          <BsCheck className="text-button text-lg sm:text-xl" />
+        </div>
+        <div>
+          <h4 className="font-heading text-gray-900 text-sm sm:text-base">
+            Updated Successfully!
+          </h4>
+          <p className="text-gray-600 text-xs sm:text-sm">
+            Your booking details were saved.
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
           {/* Toast Notification */}
           <AnimatePresence>
