@@ -10,7 +10,7 @@ const PageLoader = () => {
         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
       />
     </div>
-  );
+  ); 
 };
 
 export default PageLoader;

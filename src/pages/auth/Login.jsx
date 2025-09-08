@@ -364,9 +364,12 @@ export default function Login() {
       payload.password = password;
 
       const response = await new ApiService().apipost(ServerUrl.API_LOGIN, payload);
+      console.log("Login API Response:", response);
 
       const { user, token } = response.data;
       login({ user, token });
+
+      console.log("Logged in user:", user);
 
       toast.success(`Welcome back, ${user?.name || "User"}!`);
       const redirectTo = roleRedirectMap[user?.role] || "/";
