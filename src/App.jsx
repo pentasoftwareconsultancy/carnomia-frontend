@@ -8,7 +8,7 @@ function App() {
     <>
       <div className="min-h-screen">
         <AppRoutes />
-        <ToastContainer position="top-right" autoClose={3000} pauseOnHover closeOnClick draggable theme="colored" />
+        <ToastContainer position="top-right" autoClose={2000} pauseOnHover closeOnClick draggable theme="colored" />
       </div>
     </>
   );

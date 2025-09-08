@@ -148,7 +148,7 @@ const AddLocations = () => {
         />
         <Button
           variant="contained"
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, backgroundColor: "#81da5b", color: "#FFFFFF", "&:hover": { backgroundColor: "#6fc23d" } }}
           onClick={handleAddOrUpdateCity}
         >
           {editIndex !== null ? "Update City" : "Add City"}
@@ -183,7 +183,7 @@ const AddLocations = () => {
                     <TableCell>{name}</TableCell>
                     <TableCell align="center">
                       <IconButton onClick={() => handleEdit(index)}>
-                        <EditIcon color="primary" />
+                        <EditIcon sx={{ color: "#81da5b"}} />
                       </IconButton>
                       <IconButton
                         onClick={() => handleDelete(name)}

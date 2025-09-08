@@ -133,13 +133,21 @@ export default function Manage() {
     <div className="p-6">
       <div className="flex gap-4 mb-6">
         <Button
-          variant={activeTab === ROLES.ADMIN ? "contained" : "outlined"}
+          variant={activeTab === ROLES.ADMIN ? "contained" : "outlined" }
+          sx={{ backgroundColor: activeTab === ROLES.ADMIN ? "#81da5b" : "transparent",
+                color: activeTab === ROLES.ADMIN ? "#FFFF" : "inherit", 
+                "&:hover": { backgroundColor: activeTab === ROLES.ADMIN ? "#6fc23d" : "#f0f0f0",},
+              }}
           onClick={() => setActiveTab(ROLES.ADMIN)}
         >
           Manage Admins
         </Button>
         <Button
           variant={activeTab === ROLES.ENGINEER ? "contained" : "outlined"}
+          sx={{ backgroundColor: activeTab === ROLES.ENGINEER ? "#81da5b" : "transparent",
+                color: activeTab === ROLES.ENGINEER ? "#FFFF" : "inherit", 
+                "&:hover": { backgroundColor: activeTab === ROLES.ENGINEER ? "#6fc23d" : "#f0f0f0",},
+              }}
           onClick={() => setActiveTab(ROLES.ENGINEER)}
         >
           Manage Engineers

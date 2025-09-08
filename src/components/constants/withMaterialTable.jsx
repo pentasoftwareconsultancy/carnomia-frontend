@@ -276,6 +276,7 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
             <Tooltip title="Add New">
               <Button
                 variant="contained"
+                sx={{ backgroundColor: "#81da5b", color: "", "&:hover": { backgroundColor: "#6fc23d" } }}
                 startIcon={<AddIcon />}
                 onClick={openAddDialog}
               >
@@ -312,8 +313,12 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           <DialogTitle>Add New</DialogTitle>
           <DialogContent>{renderFormFields()}</DialogContent>
           <DialogActions>
-            <Button onClick={closeDialogs}>Cancel</Button>
-            <Button onClick={handleAddSubmit}>Add</Button>
+            <Button onClick={closeDialogs} sx={{ backgroundColor: "#81da5b", color: "#FFFFFF", "&:hover": { backgroundColor: "#6fc23d" } }}>
+            Cancel
+            </Button>
+            <Button onClick={handleAddSubmit} sx={{ backgroundColor: "#81da5b", color: "#FFFFFF", "&:hover": { backgroundColor: "#6fc23d" } }}>
+              Add
+              </Button>
           </DialogActions>
         </Dialog>
 
@@ -322,8 +327,12 @@ const withMaterialTable = (WrappedComponent, tableConfig) => {
           <DialogTitle>Edit</DialogTitle>
           <DialogContent>{renderFormFields()}</DialogContent>
           <DialogActions>
-            <Button onClick={closeDialogs}>Cancel</Button>
-            <Button onClick={handleEditSubmit}>Update</Button>
+          <Button onClick={closeDialogs} sx={{ backgroundColor: "#81da5b", color: "#FFFFFF", "&:hover": { backgroundColor: "#6fc23d" } }}>
+            Cancel
+          </Button>
+            <Button onClick={handleEditSubmit} sx={{ backgroundColor: "#81da5b", color: "#FFFFFF", "&:hover": { backgroundColor: "#6fc23d" } }}>
+              Update
+            </Button>
           </DialogActions>
         </Dialog>
 
