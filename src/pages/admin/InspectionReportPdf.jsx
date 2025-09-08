@@ -212,7 +212,7 @@ async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap 
   const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
   for (let url of validUrls) {
     try {
-      const finalUrl = url.startsWith("https") ? url : `https://api.carnomia.com${url}`;
+          const finalUrl = url.startsWith("http") ? url.replace("http://", "https://") : `https://api.carnomia.com${url}`;
       
       // const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
       const dataURL = await urlToDataURL(finalUrl);
