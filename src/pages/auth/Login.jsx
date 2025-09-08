@@ -365,11 +365,11 @@ export default function Login() {
 
       const response = await new ApiService().apipost(ServerUrl.API_LOGIN, payload);
 
-      console.log("Login API Response:", response); // ✅ Log full response
-
-
       const { user, token } = response.data;
       login({ user, token });
+
+      console.log("Logged in user:", user);        // ✅ Log user details
+      console.log("Auth token:", token);           // ✅ Log token
 
       toast.success(`Welcome back, ${user?.name || "User"}!`);
       const redirectTo = roleRedirectMap[user?.role] || "/";
