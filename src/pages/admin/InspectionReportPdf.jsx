@@ -206,35 +206,75 @@ function labeledPhotoBox(doc, label, x, y, w = 50, h = 50) {
   roundedRect(doc, x, y, w, h, 4, undefined, THEME.boxStroke);
 }
 
-async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap = 4) {
-  let i = 0;
-  // Filter out invalid URLs
-  const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
-  for (let url of validUrls) {
-    try {
-      // const finalUrl = url.startsWith("https") ? url : `https://api.carnomia.com${url}`;
+// async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap = 4) {
+//   let i = 0;
+//   // Filter out invalid URLs
+//   const validUrls = (urls || []).filter((url) => typeof url === "string" && url.trim() !== "");
+//   for (let url of validUrls) {
+//     try {
+//       // const finalUrl = url.startsWith("https") ? url : `https://api.carnomia.com${url}`;
 
-      // const finalUrl = url.startsWith("http") ? url.replace("http://", "https://") : `https://api.carnomia.com${url}`;
-      
-     // const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
-      const finalUrl = url.startsWith("http") ? url : `https://carnomia-backend.onrender.com${url}`;
-      const dataURL = await urlToDataURL(finalUrl);
-      if (dataURL) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const posX = x + col * (w + gap);
-        const posY = y - row * (h + gap);
-        const format = dataURL.match(/^data:image\/(\w+);base64,/)?.[1]?.toUpperCase() || "JPEG";
-        doc.addImage(dataURL, format, posX, posY, w, h, undefined, "FAST");
-        i++;
-      } else {
+//       // const finalUrl = url.startsWith("http") ? url.replace("http://", "https://") : `https://api.carnomia.com${url}`;
+
+//       // const finalUrl = url.startsWith("http") ? url : `http://localhost:3000${url}`;
+//       const finalUrl = url.startsWith("http") ? url : `https://carnomia-backend.onrender.com${url}`;
+//       const dataURL = await urlToDataURL(finalUrl);
+//       if (dataURL) {
+//         const col = i % cols;
+//         const row = Math.floor(i / cols);
+//         const posX = x + col * (w + gap);
+//         const posY = y - row * (h + gap);
+//         const format = dataURL.match(/^data:image\/(\w+);base64,/)?.[1]?.toUpperCase() || "JPEG";
+//         doc.addImage(dataURL, format, posX, posY, w, h, undefined, "FAST");
+//         i++;
+//       } else {
+//         console.warn(`Image not loaded: ${url}`);
+//       }
+//     } catch (err) {
+//       console.error(`Error loading image: ${url}`, err);
+//     }
+//   }
+// }
+
+async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap = 4) {
+  if (!Array.isArray(urls) || urls.length === 0) return;
+
+  // Helper to normalize URL
+  const normalizeUrl = (url) => {
+    if (!url || typeof url !== "string") return null;
+    url = url.trim();
+    if (url.startsWith("http://")) return url.replace("http://", "https://");
+    if (url.startsWith("https://")) return url;
+    // Relative URL from backend
+    return `https://carnomia-backend.onrender.com${url}`;
+  };
+
+  let i = 0;
+  for (let url of urls) {
+    const finalUrl = normalizeUrl(url);
+    if (!finalUrl) continue;
+
+    try {
+      const dataURL = await urlToDataURL(finalUrl); // Convert URL to base64
+      if (!dataURL) {
         console.warn(`Image not loaded: ${url}`);
+        continue;
       }
+
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const posX = x + col * (w + gap);
+      const posY = y - row * (h + gap);
+
+      const format = dataURL.match(/^data:image\/(\w+);base64,/)?.[1]?.toUpperCase() || "JPEG";
+      doc.addImage(dataURL, format, posX, posY, w, h, undefined, "FAST");
+      i++;
     } catch (err) {
       console.error(`Error loading image: ${url}`, err);
     }
   }
 }
+
 
 function checkmark(doc, x, y, checked) {
   roundedRect(doc, x, y - 3.5, 3.5, 3.5, 0.8, "#fff", THEME.boxStroke);
@@ -473,7 +513,7 @@ async function addCoverPage(doc, r) {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // Top Band
-await drawTopBand(doc);
+  await drawTopBand(doc);
 
   // Booking Header (centered)
   // setText(doc, THEME.subtext, 8.5);
@@ -587,16 +627,16 @@ await drawTopBand(doc);
   const gapAfterValue = 6; // gap after value before next label
 
   const fields = [
-  ["Booking ID", String(r.bookingId ?? "—")],
-  ["Name", r.customerName],
-  ["Location", r.address],
-  ["Engineer Name", r.engineer_name],
-  [
-    "PDI Date & Time",
-    `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`
-  ],
-  ["Address", r.address],
-];
+    ["Booking ID", String(r.bookingId ?? "—")],
+    ["Name", r.customerName],
+    ["Location", r.address],
+    ["Engineer Name", r.engineer_name],
+    [
+      "PDI Date & Time",
+      `${r.date ? new Date(r.date).toLocaleDateString() : "—"} ${r.engineer_assignedSlot ?? ""}`
+    ],
+    ["Address", r.address],
+  ];
 
 
   fields.forEach(([label, value]) => {
@@ -784,7 +824,7 @@ async function addBodyPanelsPage(doc, r) {
 
   const PAGE_TOP_SPACING = mm(36); // more space from top for first page and others
   doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+  await drawTopBand(doc);
 
   let { colX } = renderHeaders(PAGE_TOP_SPACING);
   let y = PAGE_TOP_SPACING + mm(22); // start below headers
@@ -871,7 +911,7 @@ await drawTopBand(doc);
     if (y > mm(250)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+      await drawTopBand(doc);
       ({ colX } = renderHeaders(PAGE_TOP_SPACING, "Body Panels"));
       y = PAGE_TOP_SPACING + mm(22);
     }
@@ -903,7 +943,7 @@ async function addGlassesPage(doc, r) {
 
   const PAGE_TOP_SPACING = mm(36); // space from top for header
   doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+  await drawTopBand(doc);
 
   let { colX } = renderHeaders(PAGE_TOP_SPACING);
   let y = PAGE_TOP_SPACING + mm(22); // start below headers
@@ -1552,7 +1592,7 @@ async function addPlasticsPage(doc, r) {
  * ========================================================================= */
 async function addFeaturesPage(doc, r) {
   doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+  await drawTopBand(doc);
   sectionHeader(doc, "Parts", mm(28),);
 
   const items = [
@@ -1590,7 +1630,7 @@ await drawTopBand(doc);
     if (y > mm(275)) {
       drawFooter(doc);
       doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+      await drawTopBand(doc);
       sectionHeader(doc, "Features (contd.)", mm(24));
       setText(doc, THEME.subtext, 9);
       doc.text("Feature", PAGE_PAD_X, mm(34));
@@ -1610,7 +1650,7 @@ await drawTopBand(doc);
  * ========================================================================= */
 async function addLiveFluidsDiagnosticsPage(doc, r) {
   doc.addPage("a4", "portrait");
-await drawTopBand(doc);
+  await drawTopBand(doc);
 
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -1915,7 +1955,7 @@ async function addTyresPaymentPage(doc, r) {
           if (imgData) {
             doc.addImage(imgData, "JPEG", imgX + 2, imgY + 2, thumbSize - 4, thumbSize - 4, undefined, "FAST");
           }
-        } catch {}
+        } catch { }
         imgX += thumbSize + thumbGap;
       }
       y += thumbSize + 6;
@@ -1943,7 +1983,7 @@ async function addOtherObservationsPage(doc) {
   doc.addPage("a4", "portrait");
 
   // Header
-await drawTopBand(doc);
+  await drawTopBand(doc);
   sectionHeader(doc, "Other Observations", mm(28));
 
   const leftX = PAGE_PAD_X;

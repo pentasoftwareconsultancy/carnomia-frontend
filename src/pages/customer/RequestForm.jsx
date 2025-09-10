@@ -59,7 +59,17 @@ const Request = () => {
         const response = await new ApiService().apiget(
           ServerUrl.API_GET_VEHICLES
         );
-        const data = response?.data?.data || [];
+        let data = response?.data?.data || [];
+
+        // Convert all image URLs to HTTPS
+        data = data.map((v) => ({
+          ...v,
+          imageUrl: v.imageUrl
+            ? v.imageUrl.startsWith("http://")
+              ? v.imageUrl.replace("http://", "https://")
+              : v.imageUrl
+            : jeepImage,
+        }));
 
         // Unique brands
         const uniqueBrands = Object.values(
@@ -120,7 +130,8 @@ const Request = () => {
 
     setVariants(uniqueVariantsForModel);
 
-    const img = vehicles.find((x) => x.model === model)?.imageUrl || jeepImage;
+    const img =
+      vehicles.find((x) => x.model === model)?.imageUrl || jeepImage;
     setSelectedImage(img);
   };
 
