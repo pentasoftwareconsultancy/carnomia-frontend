@@ -247,6 +247,7 @@ async function drawThumbRow(doc, urls = [], x, y, w = 14, h = 14, cols = 3, gap 
     if (url.startsWith("https://")) return url;
     // Relative URL from backend
     return `https://carnomia-backend.onrender.com${url}`;
+    // return `http://localhost:3000${url}`
   };
 
   let i = 0;
